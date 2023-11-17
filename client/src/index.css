@@ -12,7 +12,7 @@
   text-align: center;
 }
 
-a {
+.nav-links {
   cursor: pointer;
   font-family: Andika, sans-serif;
   font-size: 1.3rem;
@@ -20,4 +20,33 @@ a {
 
 .mg-left {
   margin-left: 70%;
+}
+
+.hidden {
+  display: hidden;
+}
+
+@media screen and (width <=768px) {
+  .mobile {
+    display: none;
+    font-size: 0.6rem;
+    flex-direction: column;
+  }
+
+  .mobile-logo {
+    width: 5rem;
+  }
+
+  .mobile-home {
+    height: 35rem;
+  }
+
+  .mobile-icons {
+    font-size: 1.3rem;
+  }
+
+  .menu-btn {
+    display: flex;
+    font-size: 1.8rem;
+  }
 }
