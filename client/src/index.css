@@ -2,14 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+#root {
+  font-family: Andika, sans-serif;
+}
+
 .nav-bg {
   background-color: #cad5ca;
 }
 
-.monoton {
-  font-family: Monoton, sans-serif;
-  font-size: 1.8rem;
-  text-align: center;
+.logo-text {
+  font-family: 'Vina Sans', sans-serif;
+  font-size: 4rem;
+  line-height: 4rem;
 }
 
 .nav-links {
@@ -26,6 +30,26 @@
   display: hidden;
 }
 
+.login-bg {
+  margin-top: 0.8rem;
+  background-color: rgba(176, 175, 175, 0.601);
+  background-image: url('/log-in.jpg');
+  background-repeat: no-repeat;
+  background-size: 150rem 100rem;
+  background-blend-mode: lighten;
+}
+
+.test2 {
+  border: solid red;
+  background-color: white;
+}
+
+/* .login-img {
+  height:12rem;
+  background-image: url('../public/log-in.jpg');
+
+} */
+
 @media screen and (width <=768px) {
   .mobile {
     display: none;
@@ -34,7 +58,12 @@
   }
 
   .mobile-logo {
-    width: 5rem;
+    width: 8rem;
+  }
+
+  .mobile-font-size {
+    font-size: 2.3rem;
+    line-height: 2.5rem;
   }
 
   .mobile-home {
