@@ -32,6 +32,7 @@
 
 .login-bg {
   margin-top: 0.8rem;
+  padding-bottom: 5%;
   background-color: rgba(176, 175, 175, 0.601);
   background-image: url('/log-in.jpg');
   background-repeat: no-repeat;

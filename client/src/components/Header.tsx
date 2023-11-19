@@ -32,9 +32,11 @@ export function Header() {
           <a className="text-black hover:text-slate-500 hover:underline duration-200">
             Shop by Genre
           </a>
-          <a className="text-black hover:text-slate-500 hover:underline duration-200">
+          <Link
+            className="text-black hover:text-slate-500 hover:underline duration-200"
+            to="/CreateListing">
             Create Listing
-          </a>
+          </Link>
         </div>
         <div className="menu-btn hidden">
           <IoMdMenu />
