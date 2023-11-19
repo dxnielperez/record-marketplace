@@ -9,6 +9,7 @@ export function errorMiddleware(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- next must be declared for error middleware
   next: NextFunction
 ) {
+  console.log('error midd');
   if (err instanceof ClientError) {
     res.status(err.status).json({ error: err.message });
   } else if (err instanceof jwt.JsonWebTokenError) {

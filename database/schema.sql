@@ -8,9 +8,9 @@ create schema "public";
 
 CREATE TABLE "Users" (
   "userId" serial PRIMARY KEY,
-  "email" text,
-  "password" text,
-  "createdAt" timestamptz
+  "username" text unique,
+  "hashedPassword" text,
+  "createdAt" timestamptz default now()
 );
 
 CREATE TABLE "Records" (
