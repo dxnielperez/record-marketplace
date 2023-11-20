@@ -1,4 +1,21 @@
+import { FormEvent } from 'react';
+
 export function CreateNewListing() {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    try {
+      const formData = new FormData(event.currentTarget);
+      console.log(formData);
+      event.preventDefault();
+      const response = await fetch('/api/create-listing', {
+        method: 'POST',
+        body: formData,
+      });
+      const result = await response.json();
+      console.log('Success:', result);
+    } catch (error) {
+      console.error(error);
+    }
+  }
   return (
     <div className="flex min-h-full items-center justify-center">
       <div className="w-full max-w-lg">
@@ -6,13 +23,13 @@ export function CreateNewListing() {
         <h2 className="text-center text-4xl font-bold leading-9 tracking-tight text-gray-900">
           Create new listing
         </h2>
-        <form>
+        <form onSubmit={handleSubmit}>
           <div className="space-y-12">
             <div className="border-b border-gray-900/10 pb-12">
               <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                 <div className="col-span-full">
                   <label className="block font-medium leading-6 text-gray-900">
-                    Record images
+                    Add images
                   </label>
                   <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
                     <div className="text-center">
@@ -21,7 +38,7 @@ export function CreateNewListing() {
                           <span>Upload a file</span>
                           <input
                             id="file-upload"
-                            name="file-upload"
+                            name="image"
                             type="file"
                             className="sr-only"
                           />
@@ -137,7 +154,7 @@ export function CreateNewListing() {
 
           <div className="mt-6 flex items-center justify-center gap-x-6">
             <button
-              type="button"
+              type="reset"
               className="text-sm font-semibold leading-6 hover:underline text-gray-900">
               Cancel
             </button>

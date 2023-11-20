@@ -1,6 +1,8 @@
 import { type FormEvent, useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 
 export function CreateAccountForm() {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -21,6 +23,7 @@ export function CreateAccountForm() {
       }
       const user = await res.json();
       console.log(`Registered user: ${user}`);
+      navigate('/login');
     } catch (error) {
       alert(`Error creating account: ${error}`);
     } finally {
@@ -86,6 +89,11 @@ export function CreateAccountForm() {
               </button>
             </div>
           </form>
+          <Link
+            className="mt-6 flex justify-center hover:underline cursor-pointer"
+            to="/login">
+            Sign in
+          </Link>
         </div>
       </div>
     </>

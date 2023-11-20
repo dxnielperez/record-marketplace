@@ -1,7 +1,9 @@
 import { type FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export function LoginForm() {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -20,6 +22,7 @@ export function LoginForm() {
       localStorage.setItem('token', token);
       console.log('Signed in:', user, 'Recieved token:', token);
       alert(`Signed in as ${user.username}`);
+      navigate('/');
     } catch (error) {
       console.error('error loging in ', error);
       alert(`Error signing in: ${error}`);
@@ -93,7 +96,7 @@ export function LoginForm() {
               </div>
             </form>
             <Link
-              className="mt-6 flex justify-center underline cursor-pointer"
+              className="mt-6 flex justify-center hover:underline cursor-pointer"
               to="/createAccount">
               Create Account
             </Link>

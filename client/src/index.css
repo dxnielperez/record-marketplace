@@ -11,9 +11,9 @@
 }
 
 .logo-text {
-  font-family: 'Vina Sans', sans-serif;
-  font-size: 4rem;
-  line-height: 4rem;
+  font-family: Lexend, sans-serif;
+  font-size: 3.5rem;
+  line-height: 5rem;
 }
 
 .nav-links {
@@ -31,12 +31,13 @@
 }
 
 .login-bg {
+  height: 75vh;
   margin-top: 0.8rem;
   padding-bottom: 5%;
   background-color: rgba(176, 175, 175, 0.601);
   background-image: url('/log-in.jpg');
   background-repeat: no-repeat;
-  background-size: 150rem 100rem;
+  background-size: 150rem 0;
   background-blend-mode: lighten;
 }
 
@@ -44,12 +45,6 @@
   border: solid red;
   background-color: white;
 }
-
-/* .login-img {
-  height:12rem;
-  background-image: url('../public/log-in.jpg');
-
-} */
 
 @media screen and (width <=768px) {
   .mobile {
@@ -59,12 +54,15 @@
   }
 
   .mobile-logo {
-    width: 8rem;
+    display: none;
   }
 
   .mobile-font-size {
     font-size: 2.3rem;
     line-height: 2.5rem;
+    width: 100%;
+    align-items: center;
+    text-align: center;
   }
 
   .mobile-home {
@@ -77,6 +75,7 @@
 
   .menu-btn {
     display: flex;
+    align-self: flex-end;
     font-size: 1.8rem;
   }
 }

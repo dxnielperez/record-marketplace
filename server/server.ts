@@ -2,7 +2,11 @@
 import 'dotenv/config';
 import express from 'express';
 import pg from 'pg';
-import { ClientError, errorMiddleware } from './lib/index.js';
+import {
+  ClientError,
+  errorMiddleware,
+  uploadsMiddleware,
+} from './lib/index.js';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 
@@ -76,6 +80,29 @@ app.post('/api/sign-in', async (req, res, next) => {
     next(error);
   }
 });
+
+app.post(
+  '/api/create-listing',
+  uploadsMiddleware.single('image'),
+  async (req, res, next) => {
+    try {
+      const { artist, album, genre, condition, price, additionalInfo } =
+        req.body;
+
+      const sql = `
+      insert into "records" ("artist", "album", "genre", "condition", "price", "info", "sellerId")
+      values($1, $2, $3, $4, $5, $6, $7)
+      returning *;
+      `;
+      const params = [artist, album, genre, condition, price, additionalInfo];
+      const result = await db.query(sql, params);
+      const listing = result.rows[0];
+      res.status(201).json(listing);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 /**
  * Serves React's index.html if no api route matches.
  *
