@@ -4,6 +4,7 @@ import express from 'express';
 import pg from 'pg';
 import {
   ClientError,
+  authMiddleware,
   errorMiddleware,
   uploadsMiddleware,
 } from './lib/index.js';
@@ -83,6 +84,7 @@ app.post('/api/sign-in', async (req, res, next) => {
 
 app.post(
   '/api/create-listing',
+  authMiddleware,
   uploadsMiddleware.single('image'),
   async (req, res, next) => {
     try {
@@ -90,11 +92,19 @@ app.post(
         req.body;
 
       const sql = `
-      insert into "records" ("artist", "album", "genre", "condition", "price", "info", "sellerId")
+      insert into "Records" ("artist", "albumName", "genreId", "condition", "price", "info", "sellerId")
       values($1, $2, $3, $4, $5, $6, $7)
       returning *;
       `;
-      const params = [artist, album, genre, condition, price, additionalInfo];
+      const params = [
+        artist,
+        album,
+        genre,
+        condition,
+        price,
+        additionalInfo,
+        req.user?.userId,
+      ];
       const result = await db.query(sql, params);
       const listing = result.rows[0];
       res.status(201).json(listing);
@@ -103,6 +113,18 @@ app.post(
     }
   }
 );
+
+app.get('/api/get-genres', async (req, res, next) => {
+  try {
+    const sql = `
+    select * from "Genres"
+    `;
+    const result = await db.query(sql);
+    res.json(result.rows);
+  } catch (error) {
+    next(error);
+  }
+});
 /**
  * Serves React's index.html if no api route matches.
  *

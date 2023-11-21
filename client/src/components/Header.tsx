@@ -1,6 +1,6 @@
 import { BsCart3 } from 'react-icons/bs';
 import { FaRegUser } from 'react-icons/fa';
-import { IoSearchSharp } from 'react-icons/io5';
+// import { IoSearchSharp } from 'react-icons/io5';
 import { IoMdMenu } from 'react-icons/io';
 import { Link } from 'react-router-dom';
 import { handleSignOut } from './handleSignOut';
@@ -34,21 +34,21 @@ export function Header() {
     setIsOpen(false);
   }
   return (
-    <div className="mt-2.5 mobile-container">
-      <div className="text-2xl w-full flex justify-end gap-x-3.5 nav-bg p-2 mobile-icons">
+    <div className="mobile-container">
+      <div className="text-3xl w-full flex justify-end gap-x-3.5 absolute top-6 p-2 px-9 mobile-icons ">
         {isUserSignedIn && (
           <a
             onClick={handleSignOutClick}
-            className="text-base hover:text-slate-500 hover:underline cursor-pointer ">
+            className="text-xl hover:text-slate-500 hover:underline cursor-pointer mobile-sign-out">
             Sign out
           </a>
         )}
-        <IoSearchSharp className="text-black hover:text-slate-500 duration-200" />
+        {/* <IoSearchSharp className="text-black hover:text-slate-500 duration-200" /> */}
 
         <Link to="/login">
           <FaRegUser
             onClick={handleUserIconClick}
-            className="text-black hover:text-slate-500 duration-200"
+            className="ml-6 text-black hover:text-slate-500 duration-200"
           />
         </Link>
 

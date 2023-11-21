@@ -32,25 +32,14 @@ export function LoginForm() {
   }
   return (
     <>
-      <div className="login-img"></div>
-      <div className="flex justify-center">
-        {/* <img
-          className="mx-auto w-1/5 w-auto"
-          src="/log-in.jpg"
-          alt="Your Company"
-        /> */}
-        <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8 login-bg">
-          <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-            {/* <img
-            className="mx-auto h-24 w-auto"
-            src="/records.jpg"
-            alt="Your Company"
-          /> */}
+      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8 login-bg">
+        <div className="bg-white rounded-2xl max-w-xl mx-auto w-full pl-9 pr-9 pt-9">
+          <div>
             <h2 className="mt-10 text-center text-4xl font-bold leading-9 tracking-tight text-gray-900 ">
               Sign in to your account
             </h2>
           </div>
-          <div className="mt-10 mb-36 sm:mx-auto sm:w-full sm:max-w-sm">
+          <div className="mt-10 mb-16 sm:mx-auto sm:w-full sm:max-w-sm">
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
                 <label className="block font-medium leading-6 text-gray-900">
