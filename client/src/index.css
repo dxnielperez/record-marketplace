@@ -11,9 +11,9 @@
 }
 
 .logo-text {
-  font-family: 'Vina Sans', sans-serif;
-  font-size: 4rem;
-  line-height: 4rem;
+  font-family: Lexend, sans-serif;
+  font-size: 3.5rem;
+  line-height: 5rem;
 }
 
 .nav-links {
@@ -31,24 +31,26 @@
 }
 
 .login-bg {
+  height: 75vh;
   margin-top: 0.8rem;
+  padding-bottom: 5%;
   background-color: rgba(176, 175, 175, 0.601);
   background-image: url('/log-in.jpg');
   background-repeat: no-repeat;
   background-size: 150rem 100rem;
-  background-blend-mode: lighten;
+  background-blend-mode: hard-light;
 }
 
-.test2 {
-  border: solid red;
-  background-color: white;
+.create-listing-bg {
+  height: 75vh;
+  margin-top: 0.8rem;
+  padding-bottom: 5%;
+  background-color: rgba(84, 82, 82, 0.601);
+  background-image: url('/createListing.jpg');
+  background-repeat: no-repeat;
+  background-size: 150rem 58rem;
+  background-blend-mode: hard-light;
 }
-
-/* .login-img {
-  height:12rem;
-  background-image: url('../public/log-in.jpg');
-
-} */
 
 @media screen and (width <=768px) {
   .mobile {
@@ -58,11 +60,11 @@
   }
 
   .mobile-logo {
-    width: 8rem;
+    display: none;
   }
 
   .mobile-font-size {
-    font-size: 2.3rem;
+    font-size: 1.7rem;
     line-height: 2.5rem;
   }
 
@@ -72,10 +74,36 @@
 
   .mobile-icons {
     font-size: 1.3rem;
+    padding: 0;
+    position: absolute;
+    top: 0.3rem;
+    right: 0.5rem;
   }
 
   .menu-btn {
     display: flex;
+    align-self: flex-end;
     font-size: 1.8rem;
+  }
+
+  .mobile-friendly {
+    padding-top: 2rem;
+  }
+
+  .mobile-form {
+    padding-top: 0;
+    font-size: 0.8rem;
+  }
+
+  .mobile-create {
+    font-size: 1.65rem;
+  }
+
+  .mobile-create-listing-bg {
+    height: auto;
+  }
+
+  .mobile-sign-out {
+    font-size: 1rem;
   }
 }

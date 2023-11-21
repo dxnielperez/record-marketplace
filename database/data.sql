@@ -9,3 +9,5 @@
 --      ('Learn to code', false),
 --      ('Build projects', false),
 --      ('Get a job', false);
+insert into "Genres" ("name")
+values('Reggae'),('Alternative'),('Rap'),('Jazz'),('Electronic');

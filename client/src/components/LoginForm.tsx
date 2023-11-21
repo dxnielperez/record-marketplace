@@ -1,7 +1,9 @@
 import { type FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export function LoginForm() {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -20,6 +22,7 @@ export function LoginForm() {
       localStorage.setItem('token', token);
       console.log('Signed in:', user, 'Recieved token:', token);
       alert(`Signed in as ${user.username}`);
+      navigate('/');
     } catch (error) {
       console.error('error loging in ', error);
       alert(`Error signing in: ${error}`);
@@ -29,25 +32,14 @@ export function LoginForm() {
   }
   return (
     <>
-      <div className="login-img"></div>
-      <div className="flex justify-center">
-        {/* <img
-          className="mx-auto w-1/5 w-auto"
-          src="/log-in.jpg"
-          alt="Your Company"
-        /> */}
-        <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8 login-bg">
-          <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-            {/* <img
-            className="mx-auto h-24 w-auto"
-            src="/records.jpg"
-            alt="Your Company"
-          /> */}
+      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8 login-bg">
+        <div className="bg-white rounded-2xl max-w-xl mx-auto w-full pl-9 pr-9 pt-9">
+          <div>
             <h2 className="mt-10 text-center text-4xl font-bold leading-9 tracking-tight text-gray-900 ">
               Sign in to your account
             </h2>
           </div>
-          <div className="mt-10 mb-36 sm:mx-auto sm:w-full sm:max-w-sm">
+          <div className="mt-10 mb-16 sm:mx-auto sm:w-full sm:max-w-sm">
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
                 <label className="block font-medium leading-6 text-gray-900">
@@ -60,7 +52,7 @@ export function LoginForm() {
                     type="username"
                     autoComplete="username"
                     required
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    className="p-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   />
                 </div>
               </div>
@@ -78,7 +70,7 @@ export function LoginForm() {
                     type="password"
                     autoComplete="current-password"
                     required
-                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    className="p-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                   />
                 </div>
               </div>
@@ -93,7 +85,7 @@ export function LoginForm() {
               </div>
             </form>
             <Link
-              className="mt-6 flex justify-center underline cursor-pointer"
+              className="mt-6 flex justify-center hover:underline cursor-pointer"
               to="/createAccount">
               Create Account
             </Link>

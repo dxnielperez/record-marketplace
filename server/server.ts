@@ -2,7 +2,12 @@
 import 'dotenv/config';
 import express from 'express';
 import pg from 'pg';
-import { ClientError, errorMiddleware } from './lib/index.js';
+import {
+  ClientError,
+  authMiddleware,
+  errorMiddleware,
+  uploadsMiddleware,
+} from './lib/index.js';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 
@@ -72,6 +77,50 @@ app.post('/api/sign-in', async (req, res, next) => {
     const payload = { userId, username };
     const token = jwt.sign(payload, hashKey);
     res.json({ token, user: payload });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post(
+  '/api/create-listing',
+  authMiddleware,
+  uploadsMiddleware.single('image'),
+  async (req, res, next) => {
+    try {
+      const { artist, album, genre, condition, price, additionalInfo } =
+        req.body;
+
+      const sql = `
+      insert into "Records" ("artist", "albumName", "genreId", "condition", "price", "info", "sellerId")
+      values($1, $2, $3, $4, $5, $6, $7)
+      returning *;
+      `;
+      const params = [
+        artist,
+        album,
+        genre,
+        condition,
+        price,
+        additionalInfo,
+        req.user?.userId,
+      ];
+      const result = await db.query(sql, params);
+      const listing = result.rows[0];
+      res.status(201).json(listing);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+app.get('/api/get-genres', async (req, res, next) => {
+  try {
+    const sql = `
+    select * from "Genres"
+    `;
+    const result = await db.query(sql);
+    res.json(result.rows);
   } catch (error) {
     next(error);
   }
