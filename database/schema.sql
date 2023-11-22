@@ -15,6 +15,7 @@ CREATE TABLE "Users" (
 
 CREATE TABLE "Records" (
   "recordId" serial PRIMARY KEY,
+  "imageSrc" text,
   "artist" text,
   "albumName" text,
   "genreId" integer,

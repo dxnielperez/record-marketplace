@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 type Genre = {
   genreId: number;
   name: string;
@@ -8,6 +9,7 @@ export function CreateNewListing() {
   const [selectedFile, setSelectedFile] = useState<File>();
   const [preview, setPreview] = useState<string>();
 
+  const navigate = useNavigate();
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     try {
       const formData = new FormData(event.currentTarget);
@@ -20,8 +22,10 @@ export function CreateNewListing() {
         },
         body: formData,
       });
+      if (!response.ok) throw new Error(`Error: ${response.status}`);
       const result = await response.json();
       console.log('Success:', result);
+      navigate('/ProductPage');
     } catch (error) {
       console.error(error);
     }
@@ -65,7 +69,7 @@ export function CreateNewListing() {
   return (
     <div className="sm:font-[10px]">
       <div className="flex min-h-full items-center justify-center create-listing-bg mobile-friendly">
-        <div className="w-full max-w-lg">
+        <div className="w-full max-w-lg mobile-listing">
           <div className="bg-white rounded-2xl max-w-3xl mx-auto w-full pl-9 pr-9 pt-9 pb-9 mt-8 mobile-friendly">
             <h2 className="text-center text-4xl font-bold leading-9 tracking-tight text-gray-900 mobile-create">
               Create new listing
@@ -98,7 +102,7 @@ export function CreateNewListing() {
                           </div>
                           {!selectedFile && (
                             <p className="text-xs leading-5 text-gray-600">
-                              PNG, JPG, GIF up to 10MB
+                              PNG, JPG, GIF up to 2MB
                             </p>
                           )}
                         </div>
@@ -215,6 +219,7 @@ export function CreateNewListing() {
                   className="text-sm font-semibold leading-6 hover:underline text-gray-900">
                   Cancel
                 </button>
+
                 <button
                   type="submit"
                   className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
