@@ -10,6 +10,7 @@ import {
 } from './lib/index.js';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
+import { nextTick } from 'node:process';
 
 const connectionString =
   process.env.DATABASE_URL ||
@@ -90,13 +91,14 @@ app.post(
     try {
       const { artist, album, genre, condition, price, additionalInfo } =
         req.body;
-
+      console.log('running');
       const sql = `
-      insert into "Records" ("artist", "albumName", "genreId", "condition", "price", "info", "sellerId")
-      values($1, $2, $3, $4, $5, $6, $7)
+      insert into "Records" ("imageSrc", "artist", "albumName", "genreId", "condition", "price", "info", "sellerId")
+      values($1, $2, $3, $4, $5, $6, $7, $8)
       returning *;
       `;
       const params = [
+        `/images/${req.file?.filename}`,
         artist,
         album,
         genre,
@@ -105,6 +107,7 @@ app.post(
         additionalInfo,
         req.user?.userId,
       ];
+      console.log('params:', params);
       const result = await db.query(sql, params);
       const listing = result.rows[0];
       res.status(201).json(listing);
@@ -125,6 +128,31 @@ app.get('/api/get-genres', async (req, res, next) => {
     next(error);
   }
 });
+
+app.get('/api/all-products', async (req, res, next) => {
+  try {
+    const sql = `
+    select * from "Records"
+    `;
+    const result = await db.query(sql);
+    res.json(result.rows);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// app.get('/api/products/:recordId', async (req, res, next) => {
+//   try {
+//     const recordId = Number(req.params.recordId);
+//     if(!recordId) throw new ClientError(400, 'recordId must be a positive integer');
+//     const sql = `
+//     select "recordId",
+//            "
+//     `
+//   } catch (error) {
+//     next(error)
+//   }
+// })
 /**
  * Serves React's index.html if no api route matches.
  *

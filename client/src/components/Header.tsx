@@ -70,9 +70,11 @@ export function Header() {
             to="/">
             Home
           </Link>
-          <a className="text-black hover:text-slate-500 hover:underline duration-200">
+          <Link
+            to="/ProductPage"
+            className="text-black hover:text-slate-500 hover:underline duration-200">
             Shop All
-          </a>
+          </Link>
           <a className="text-black hover:text-slate-500 hover:underline duration-200">
             Shop by Genre
           </a>
@@ -108,7 +110,9 @@ function MenuModal({ isOpen, onClose }) {
           <Link to="/" className="underline text-xl">
             Home
           </Link>
-          <p className="underline text-xl">Shop All</p>
+          <Link to="/ProductPage" className="underline text-xl">
+            Shop All
+          </Link>
           <p className="underline text-xl">Shop by Genre</p>
           <Link to="/CreateListing" className="underline text-xl">
             Create Listing
