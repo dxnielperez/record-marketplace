@@ -168,9 +168,9 @@ export function NewListingForm() {
             <label className="block mb-2 font-bold">Description:</label>
             <textarea
               id="info"
-              name="about"
+              name="info"
               defaultValue={''}
-              rows={4}
+              rows={3}
               className="w-full p-2 border rounded"
             />
           </div>

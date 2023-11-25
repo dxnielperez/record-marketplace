@@ -78,8 +78,8 @@
   }
 
   .mobile-name {
-    justify-content: center;
-    left: 0;
+    justify-content: left;
+    left: 3rem;
   }
 
   .mobile-font-size {
@@ -95,7 +95,7 @@
     font-size: 1.3rem;
     padding: 0;
     position: absolute;
-    top: 0.3rem;
+    top: 2rem;
     right: 0.5rem;
   }
 
@@ -145,5 +145,10 @@
   .mobile-category {
     text-align: center;
     margin-left: 0;
+  }
+
+  .mobile-home-page {
+    font-size: 0.8rem;
+    height: 1.7rem;
   }
 }
