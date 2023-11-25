@@ -1,15 +1,22 @@
 import { Outlet } from 'react-router-dom';
 import { Footer } from '../components/Footer';
 import { Header } from '../components/Header';
+import { SideScrollCarousel } from '../components/Carousel';
 
 export function HomePage() {
+  const isMobile = window.innerWidth <= 768;
   return (
     <>
-      <Header />
-      <h3 className="bg-[grey] text-white flex justify-center  items-center h-[2.5rem]">
-        Your new favorite place to buy and sell vinyl records !
+      <h3 className="bg-[#DCADA8] text-white flex justify-center items-center h-[2rem] mobile-home-page">
+        FREE shipping on orders over $90* 🔥
       </h3>
-      <img className="mobile-home max-w-screen" src="/HomePageImg.jpg" />
+      <Header />
+      {!isMobile ? (
+        <img src="/landing4.png" className="w-full" />
+      ) : (
+        <img src="/mobilelanding.png" className="w-full" />
+      )}
+      <SideScrollCarousel />
       <Footer />
       <Outlet />
     </>

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 type Products = {
   recordId: number;
   imageSrc: string;
@@ -11,6 +12,7 @@ type Products = {
   info: string;
   sellerId: number;
 };
+
 export default function ProductCatalog() {
   const [products, setProducts] = useState<Products[]>([]);
   const [sortBy, setSortBy] = useState<string>('');
@@ -31,29 +33,28 @@ export default function ProductCatalog() {
     getProducts();
   }, []);
 
-  const handleSort = useCallback(
-    (option) => {
-      const sortedProducts = [...products];
+  const handleSort = useCallback((option) => {
+    setSortBy(option);
+    setProducts((prevProducts) => {
+      const sortedProductsCopy = [...prevProducts];
       if (option === 'price') {
-        sortedProducts.sort((a, b) => a.price - b.price);
+        sortedProductsCopy.sort((a, b) => a.price - b.price);
       } else if (option === 'name') {
-        sortedProducts.sort((a, b) =>
+        sortedProductsCopy.sort((a, b) =>
           `${a.albumName} - ${a.artist}`.localeCompare(
             `${b.albumName} - ${b.artist}`
           )
         );
       }
-      setSortBy(option);
-      setProducts(sortedProducts);
-    },
-    [products]
-  );
+      return sortedProductsCopy;
+    });
+  }, []);
 
   useEffect(() => {
     if (sortBy) {
       handleSort(sortBy);
     }
-  }, [products, sortBy, handleSort]);
+  }, [sortBy, handleSort]);
   return (
     <div className="bg-[#E9EBED] min-h-screen ">
       <div className="flex justify-end pt-[1rem] px-[17%]">

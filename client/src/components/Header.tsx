@@ -35,7 +35,7 @@ export function Header() {
   }
   return (
     <div className="mobile-container">
-      <div className="text-3xl w-full flex justify-end gap-x-3.5 absolute top-6 p-2 px-9 mobile-icons ">
+      <div className="text-3xl w-full flex justify-end gap-x-3.5 absolute top-8 p-2 px-9 mobile-icons ">
         {isUserSignedIn && (
           <a
             onClick={handleSignOutClick}
@@ -56,7 +56,7 @@ export function Header() {
       </div>
       <nav className="nav-bg flex w-full gap-x-3.5 items-end p-3  mobile-nav">
         <div className="flex w-full">
-          <div className="menu-btn hidden">
+          <div className="menu-btn hidden cursor-pointer">
             <IoMdMenu onClick={handleMenuClick} />
           </div>
 

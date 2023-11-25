@@ -31,7 +31,7 @@ export function LoginForm() {
     }
   }
   return (
-    <div className="bg-[#E9EBED] min-h-screen flex items-center justify-center p-4 text-lg">
+    <div className="bg-[#E9EBED] min-h-screen flex items-start pt-[4rem] justify-center p-4 text-lg">
       <div className="bg-white rounded-2xl max-w-xl mx-auto w-full p-8">
         <h2 className="text-center text-4xl font-bold text-gray-900 mb-6">
           Sign in to your account
