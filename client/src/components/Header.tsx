@@ -48,20 +48,32 @@ export function Header() {
         <Link to="/login">
           <FaRegUser
             onClick={handleUserIconClick}
-            className="ml-6 text-black hover:text-slate-500 duration-200"
+            className="text-black hover:text-slate-500 duration-200"
           />
         </Link>
 
         <BsCart3 className="text-black hover:text-slate-500 duration-200" />
       </div>
-      <nav className="nav-bg flex w-full gap-x-3.5 items-end p-3">
+      <nav className="nav-bg flex w-full gap-x-3.5 items-end p-3  mobile-nav">
         <div className="flex w-full">
           <div className="menu-btn hidden">
             <IoMdMenu onClick={handleMenuClick} />
           </div>
-          <img className="w-1/5 mobile-logo" src="/logo.png" />
-          <div className="flex-col flex justify-center ml-5 text-4xl logo-text sm:nav-bg mobile-font-size">
-            Roots <br></br>Marketplace
+
+          <Link to="/">
+            <div className="relative group">
+              <img
+                className="mobile-logo relative object-cover max-w-[11rem] z-20"
+                src="/SpinTrade7.png"
+              />
+              <img
+                className="vinyl object-cover max-w-[10.8rem] absolute bottom-[-0.1rem] left-0 transition-transform duration-300 ease-in-out group-hover:translate-x-[7rem] z-0 opacity-0 group-hover:opacity-100"
+                src="/vinyl.webp"
+              />
+            </div>
+          </Link>
+          <div className="w-full flex justify-end items-center text-4xl logo-text sm:nav-bg mobile-font-size mobile-name relative left-[18%]">
+            Spin - Trade
           </div>
         </div>
         <div className=" nav-links flex w-full gap-x-8 justify-end mobile">
@@ -78,6 +90,7 @@ export function Header() {
           <a className="text-black hover:text-slate-500 hover:underline duration-200">
             Shop by Genre
           </a>
+
           {isUserSignedIn && (
             <Link
               className="text-black hover:text-slate-500 hover:underline duration-200"
@@ -101,7 +114,7 @@ function MenuModal({ isOpen, onClose }) {
       <div
         className="absolute inset-0 bg-black opacity-50"
         onClick={onClose}></div>
-      <div className="bg-white p-4 w-2/4 h-full fixed left-0">
+      <div className="bg-[white]/[0.85] p-4 w-2/4 h-full fixed left-0">
         <IoMdClose
           className="text-3xl mb-14 justify-center"
           onClick={onClose}

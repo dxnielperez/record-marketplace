@@ -7,11 +7,12 @@
 }
 
 .nav-bg {
-  background-color: #cad5ca;
+  /* background-color: #cad5ca; */
+  background-color: #dcdcf9;
 }
 
 .logo-text {
-  font-family: Lexend, sans-serif;
+  font-family: 'Potta One', sans-serif;
   font-size: 3.5rem;
   line-height: 5rem;
 }
@@ -43,7 +44,6 @@
 
 .create-listing-bg {
   height: 75vh;
-  margin-top: 0.8rem;
   padding-bottom: 5%;
   background-color: rgba(84, 82, 82, 0.601);
   background-image: url('/createListing.jpg');
@@ -53,9 +53,9 @@
 }
 
 .parent {
-  border: 1px solid;
   overflow: hidden;
   display: flex;
+  border-radius: 0;
 }
 
 .img-shop {
@@ -75,6 +75,11 @@
 
   .mobile-logo {
     display: none;
+  }
+
+  .mobile-name {
+    justify-content: center;
+    left: 0;
   }
 
   .mobile-font-size {
@@ -98,6 +103,12 @@
     display: flex;
     align-self: flex-end;
     font-size: 1.8rem;
+  }
+
+  .mobile-nav {
+    padding-top: 2rem;
+    padding-left: 0;
+    padding-right: 0;
   }
 
   .mobile-friendly {
@@ -126,10 +137,13 @@
     margin-top: 22rem;
   }
 
-  .mobile-format {
-    /* display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-size: ; */
+  .mobile-back {
+    font-size: 1rem;
+    text-decoration: underline;
+  }
+
+  .mobile-category {
+    text-align: center;
+    margin-left: 0;
   }
 }
