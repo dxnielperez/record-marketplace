@@ -6,6 +6,7 @@ import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { Route, Routes } from 'react-router-dom';
 import { ProductPage } from './pages/ProductPage';
+import { ProductDetailsPage } from './pages/ProductDetailsPage';
 
 export default function App() {
   return (
@@ -16,6 +17,10 @@ export default function App() {
         <Route path="CreateAccount" element={<CreateAccountPage />} />
         <Route path="CreateListing" element={<CreateListingPage />} />
         <Route path="ProductPage" element={<ProductPage />} />
+        <Route
+          path="ProductDetailsPage/:recordId"
+          element={<ProductDetailsPage />}
+        />
       </Routes>
     </div>
   );

@@ -31,67 +31,59 @@ export function LoginForm() {
     }
   }
   return (
-    <>
-      <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8 login-bg">
-        <div className="bg-white rounded-2xl max-w-xl mx-auto w-full pl-9 pr-9 pt-9">
+    <div className="bg-[#E9EBED] min-h-screen flex items-center justify-center p-4 text-lg">
+      <div className="bg-white rounded-2xl max-w-xl mx-auto w-full p-8">
+        <h2 className="text-center text-4xl font-bold text-gray-900 mb-6">
+          Sign in to your account
+        </h2>
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
-            <h2 className="mt-10 text-center text-4xl font-bold leading-9 tracking-tight text-gray-900 ">
-              Sign in to your account
-            </h2>
+            <label
+              htmlFor="username"
+              className="block text-sm font-medium text-gray-700">
+              Username:
+            </label>
+            <input
+              id="username"
+              name="username"
+              type="username"
+              autoComplete="username"
+              required
+              className="w-full mt-1 p-2 border rounded-md text-gray-900 focus:ring focus:ring-indigo-300 focus:outline-none"
+            />
           </div>
-          <div className="mt-10 mb-16 sm:mx-auto sm:w-full sm:max-w-sm">
-            <form className="space-y-6" onSubmit={handleSubmit}>
-              <div>
-                <label className="block font-medium leading-6 text-gray-900">
-                  Username
-                </label>
-                <div className="mt-2">
-                  <input
-                    id="username"
-                    name="username"
-                    type="username"
-                    autoComplete="username"
-                    required
-                    className="p-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  />
-                </div>
-              </div>
 
-              <div>
-                <div className="flex items-center justify-between">
-                  <label className="block font-medium leading-6 text-gray-900">
-                    Password
-                  </label>
-                </div>
-                <div className="mt-2">
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="current-password"
-                    required
-                    className="p-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <button
-                  disabled={isLoading}
-                  type="submit"
-                  className="flex w-full justify-center rounded-md bg-[#8075ff] px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                  Sign in
-                </button>
-              </div>
-            </form>
-            <Link
-              className="mt-6 flex justify-center hover:underline cursor-pointer"
-              to="/createAccount">
-              Create Account
-            </Link>
+          <div>
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700">
+              Password:
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              required
+              className="w-full mt-1 p-2 border rounded-md text-gray-900 focus:ring focus:ring-indigo-300 focus:outline-none"
+            />
           </div>
-        </div>
+
+          <div>
+            <button
+              disabled={isLoading}
+              type="submit"
+              className="w-full py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring focus:ring-indigo-300">
+              Sign in
+            </button>
+          </div>
+        </form>
+        <Link
+          className="mt-6 text-center text-sm text-indigo-600 hover:underline cursor-pointer"
+          to="/createAccount">
+          Create Account
+        </Link>
       </div>
-    </>
+    </div>
   );
 }

@@ -6,7 +6,10 @@ export function HomePage() {
   return (
     <>
       <Header />
-      <img className="mt-3 mobile-home" src="/HomePageImg.jpg" />
+      <h3 className="bg-[grey] text-white flex justify-center  items-center h-[2.5rem]">
+        Your new favorite place to buy and sell vinyl records !
+      </h3>
+      <img className="mobile-home max-w-screen" src="/HomePageImg.jpg" />
       <Footer />
       <Outlet />
     </>

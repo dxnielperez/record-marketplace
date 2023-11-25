@@ -89,9 +89,7 @@ app.post(
   uploadsMiddleware.single('image'),
   async (req, res, next) => {
     try {
-      const { artist, album, genre, condition, price, additionalInfo } =
-        req.body;
-      console.log('running');
+      const { artist, album, genre, condition, price, info } = req.body;
       const sql = `
       insert into "Records" ("imageSrc", "artist", "albumName", "genreId", "condition", "price", "info", "sellerId")
       values($1, $2, $3, $4, $5, $6, $7, $8)
@@ -104,7 +102,7 @@ app.post(
         genre,
         condition,
         price,
-        additionalInfo,
+        info,
         req.user?.userId,
       ];
       console.log('params:', params);
@@ -141,18 +139,60 @@ app.get('/api/all-products', async (req, res, next) => {
   }
 });
 
-// app.get('/api/products/:recordId', async (req, res, next) => {
-//   try {
-//     const recordId = Number(req.params.recordId);
-//     if(!recordId) throw new ClientError(400, 'recordId must be a positive integer');
-//     const sql = `
-//     select "recordId",
-//            "
-//     `
-//   } catch (error) {
-//     next(error)
-//   }
-// })
+app.get('/api/products/:recordId', async (req, res, next) => {
+  try {
+    const recordId = Number(req.params.recordId);
+    if (!recordId)
+      throw new ClientError(400, 'recordId must be a positive integer');
+    const sql = `
+    select "recordId",
+           "imageSrc",
+           "artist",
+           "albumName",
+           "genreId",
+           "condition",
+           "price",
+           "info",
+           "sellerId",
+           "Genres"."name" as "genre"
+    from "Records"
+    join "Genres" using ("genreId")
+    where "recordId" = $1
+    `;
+    const params = [recordId];
+    const result = await db.query(sql, params);
+    if (!result.rows[0]) {
+      throw new ClientError(
+        404,
+        `Cannot find record with recordId: ${recordId}`
+      );
+    }
+    res.json(result.rows[0]);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/genre/:genreId', async (req, res, next) => {
+  try {
+    const genreId = Number(req.params.genreId);
+    if (!genreId)
+      throw new ClientError(400, 'genreId must be a positive integer');
+    const sql = `
+    select "name"
+    from "Genres"
+    where "genreId" = $1
+    `;
+    const params = [genreId];
+    const result = await db.query(sql, params);
+    if (!result.rows[0]) {
+      throw new ClientError(404, `Cannot find genre with genreId: ${genreId}`);
+    }
+    res.json(result.rows[0]);
+  } catch (error) {
+    next(error);
+  }
+});
 /**
  * Serves React's index.html if no api route matches.
  *
