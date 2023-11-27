@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 
 type Product = {
   recordId: number;
@@ -15,7 +15,9 @@ type Product = {
 };
 export function ProductDetails() {
   const [product, setProduct] = useState<Product>();
+
   const { recordId } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function loadProduct() {
@@ -33,6 +35,31 @@ export function ProductDetails() {
   }, [recordId]);
 
   if (!product) return null;
+
+  async function handleAddToCart() {
+    try {
+      const token = localStorage.getItem('token');
+
+      const response = await fetch('/api/cart/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          recordId: product?.recordId,
+        }),
+      });
+
+      if (!response.ok) throw new Error(`Error: ${response.status}`);
+      const result = await response.json();
+      console.log('Product added to cart:', result);
+      navigate('/ShoppingCart');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    }
+  }
+
   return (
     <div className="bg-[#E9EBED] min-h-screen">
       <div className="pt-6 mx-auto max-w-7xl px-4 py-10 lg:py-9 lg:px-8">
@@ -64,7 +91,7 @@ export function ProductDetails() {
             </p>
             {/* </div> */}
 
-            <form className="mt-10">
+            <div className="mt-10">
               {/* Genre */}
               <div>
                 <h3 className="text-sm font-medium text-gray-900">Genre</h3>
@@ -77,12 +104,14 @@ export function ProductDetails() {
                 <h3>{product.condition}</h3>
               </div>
 
+              {/* <Link to="/ShoppingCart"> */}
               <button
-                type="submit"
+                onClick={handleAddToCart}
+                type="button"
                 className="mt-6 flex items-center justify-center rounded-md border border-transparent bg-[#3C82F6]  hover:bg-blue-700 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:shadow-outline-blue active:bg-blue-800 focus:ring-offset-2">
                 Add to cart
               </button>
-
+              {/* </Link> */}
               <div className="mt-10"></div>
               {/* Description*/}
               <div>
@@ -93,7 +122,7 @@ export function ProductDetails() {
                   <p className="text-base text-gray-900">{product.info}</p>
                 </div>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       </div>

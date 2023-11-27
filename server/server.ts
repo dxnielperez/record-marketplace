@@ -9,7 +9,7 @@ import {
   uploadsMiddleware,
 } from './lib/index.js';
 import argon2 from 'argon2';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import { nextTick } from 'node:process';
 
 const connectionString =
@@ -193,6 +193,58 @@ app.get('/api/genre/:genreId', async (req, res, next) => {
     next(error);
   }
 });
+
+app.post('/api/cart/add', authMiddleware, async (req, res, next) => {
+  try {
+    const { recordId } = req.body;
+    const userId = req.user?.userId;
+    if (!userId) {
+      console.error('User ID not available in request');
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+    const checkCartSql = `
+      select * from "Cart" where "userId" = $1
+      `;
+    const checkCartParams = [userId];
+    const checkCartResult = await db.query(checkCartSql, checkCartParams);
+    if (checkCartResult.rowCount === 0) {
+      const createCartSql = `
+        insert into "Cart" ("userId") values ($1) returning *;
+      `;
+      const createCartParams = [userId];
+      const createCartResult = await db.query(createCartSql, createCartParams);
+
+      if (createCartResult.rowCount === 0) {
+        console.error('Error creating cart for user:', userId);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+    }
+    console.log('userId:', userId);
+    const sql = `
+    insert into "CartItems" ("cartId", "recordId","quantity")
+    select "cartId", $2, 1
+    from "Cart"
+    where "userId" = $1
+    returning *;
+    `;
+    const params = [userId, recordId];
+    console.log('params', params);
+
+    const result = await db.query(sql, params);
+
+    const cart = result.rows[0];
+    console.log('cart:', cart);
+    if (!cart) {
+      console.log('No cart data found');
+      return res.status(404).json({ error: 'Cart not found' });
+    }
+    res.status(201).json(cart);
+  } catch (error) {
+    next(error);
+  }
+});
+
 /**
  * Serves React's index.html if no api route matches.
  *

@@ -7,6 +7,7 @@ import { LoginPage } from './pages/LoginPage';
 import { Route, Routes } from 'react-router-dom';
 import { ProductPage } from './pages/ProductPage';
 import { ProductDetailsPage } from './pages/ProductDetailsPage';
+import { ShoppingCartPage } from './pages/ShoppingCartPage';
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
           path="ProductDetailsPage/:recordId"
           element={<ProductDetailsPage />}
         />
+        <Route path="ShoppingCart" element={<ShoppingCartPage />} />
       </Routes>
     </div>
   );

@@ -33,8 +33,12 @@ export function Header() {
   function handleCloseMenu() {
     setIsOpen(false);
   }
+  const isMobile = window.innerWidth <= 768;
   return (
     <div className="mobile-container">
+      <h3 className="bg-[#DCADA8] text-white flex justify-center items-center h-[2rem] mobile-home-page">
+        FREE shipping on orders over $90* 🔥
+      </h3>
       <div className="text-3xl w-full flex justify-end gap-x-3.5 absolute top-8 p-2 px-9 mobile-icons ">
         {isUserSignedIn && (
           <a
@@ -52,12 +56,23 @@ export function Header() {
           />
         </Link>
 
-        <BsCart3 className="text-black hover:text-slate-500 duration-200" />
+        <Link to="/ShoppingCart">
+          <BsCart3 className="text-black hover:text-slate-500 duration-200" />
+        </Link>
       </div>
       <nav className="nav-bg flex w-full gap-x-3.5 items-end p-3  mobile-nav">
         <div className="flex w-full">
           <div className="menu-btn hidden cursor-pointer">
-            <IoMdMenu onClick={handleMenuClick} />
+            {isMobile && (
+              <>
+                <IoMdMenu onClick={handleMenuClick} />
+                <Link
+                  to="/"
+                  className="w-full flex justify-end items-center text-4xl logo-text sm:nav-bg mobile-font-size mobile-name relative left-[18%] cursor-pointer">
+                  Spin - Trade
+                </Link>
+              </>
+            )}
           </div>
 
           <Link to="/">
@@ -72,9 +87,13 @@ export function Header() {
               />
             </div>
           </Link>
-          <div className="w-full flex justify-end items-center text-4xl logo-text sm:nav-bg mobile-font-size mobile-name relative left-[18%]">
-            Spin - Trade
-          </div>
+          {!isMobile && (
+            <Link
+              to="/"
+              className="w-full flex justify-end items-center text-4xl logo-text sm:nav-bg mobile-font-size mobile-name relative left-[18%]">
+              Spin - Trade
+            </Link>
+          )}
         </div>
         <div className=" nav-links flex w-full gap-x-8 justify-end mobile">
           <Link
@@ -87,9 +106,19 @@ export function Header() {
             className="text-black hover:text-slate-500 hover:underline duration-200">
             Shop All
           </Link>
-          <a className="text-black hover:text-slate-500 hover:underline duration-200">
-            Shop by Genre
-          </a>
+
+          <div className="dropdown">
+            <a className="text-black hover:text-slate-500 hover:underline duration-200">
+              Shop by Genre
+            </a>
+            <div className="dropdown-content">
+              <Link to="/">Reggae</Link>
+              <a>Rap</a>
+              <a>Alternative</a>
+              <a>Jazz</a>
+              <a>Electronic</a>
+            </div>
+          </div>
 
           {isUserSignedIn && (
             <Link
