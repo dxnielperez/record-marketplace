@@ -42,16 +42,6 @@
   background-blend-mode: hard-light;
 }
 
-.create-listing-bg {
-  height: 75vh;
-  padding-bottom: 5%;
-  background-color: rgba(84, 82, 82, 0.601);
-  background-image: url('/createListing.jpg');
-  background-repeat: no-repeat;
-  background-size: 150rem 58rem;
-  background-blend-mode: hard-light;
-}
-
 .parent {
   overflow: hidden;
   display: flex;
@@ -110,6 +100,11 @@
     display: none;
   }
 
+  .mobile-name {
+    justify-content: left;
+    left: 3rem;
+  }
+
   .mobile-font-size {
     font-size: 1.7rem;
     line-height: 2.5rem;
@@ -130,11 +125,11 @@
   .menu-btn {
     display: flex;
     align-self: flex-end;
-    font-size: 2.5rem;
+    font-size: 1.8rem;
   }
 
   .mobile-nav {
-    padding-top: 2.9rem;
+    padding-top: 2rem;
     padding-left: 0;
     padding-right: 0;
   }
@@ -178,14 +173,5 @@
   .mobile-home-page {
     font-size: 0.8rem;
     height: 1.7rem;
-  }
-
-  .mobile-continue {
-    font-size: 0.9rem;
-    padding-top: 0.5rem;
-  }
-
-  .mobile-cart {
-    font-size: 2rem;
   }
 }

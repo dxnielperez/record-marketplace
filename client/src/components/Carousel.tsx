@@ -51,7 +51,7 @@ export function SideScrollCarousel() {
 
   const isMobile = window.innerWidth <= 768;
   return (
-    <div className="relative bg-[#E9EBED] pt-[3.9rem] pb-[3.9rem]">
+    <div className="relative bg-[ghostwhite] pt-[3.9rem] pb-[3.9rem]">
       <div
         ref={scrollContainerRef}
         className="flex overflow-x-auto max-w-screen-lg mx-auto p-4">
@@ -67,7 +67,7 @@ export function SideScrollCarousel() {
               src={product.imageSrc}
               alt={`Product ${product.recordId}`}
             />
-            <div className="bg-[#E9EBED] p-4">
+            <div className="bg-[ghostwhite] p-4">
               <div className="text-lg font-bold mb-2">{product.artist}</div>
               <div className="text-xl font-bold mb-2">{product.albumName}</div>
               <div className="text-gray-700">{`Price: $${product.price}`}</div>

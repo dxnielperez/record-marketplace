@@ -6,7 +6,7 @@ import { useContext } from 'react';
 
 export function ShoppingCart() {
   const [showAllItems, setShowAllItems] = useState(false);
-  const { cartItems } = useContext(AppContext);
+  const { cartItems, removeFromCart } = useContext(AppContext);
 
   const visibleItems = showAllItems ? cartItems : cartItems.slice(0, 3);
 
@@ -19,8 +19,22 @@ export function ShoppingCart() {
   const totalPrice = salesTax + subtotal;
 
   const items = cartItems.length > 1 ? 'items' : 'item';
+
+  // async function removeFromCart(itemId: number) {
+  //   try {
+  //     await fetch(`/api/cart/remove/${itemId}`, {
+  //       method: 'DELETE',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // }
   return (
-    <div className="pl-[4rem] pr-[4rem] pb-[4rem] bg-[#E9EBED] min-h-screen">
+    <div className="pl-[4rem] pr-[4rem] pb-[4rem] bg-[ghostwhite] min-h-screen">
       <div className="text-4xl mb-[2rem] pt-[2rem] flex justify-between ">
         <h1 className="mobile-cart">Your Cart</h1>
         <Link
@@ -46,7 +60,10 @@ export function ShoppingCart() {
               <div className="flex flex-col justify-around">
                 <h3>{`${item.artist} - ${item.albumName}`}</h3>
                 <h3>{`$${item.price}`}</h3>
-                <FaRegTrashAlt className="cursor-pointer hover:text-[red] hover:translate-y-px	transition ease-in-out delay-100" />
+                <FaRegTrashAlt
+                  onClick={() => removeFromCart(item.itemsId)}
+                  className="cursor-pointer hover:text-[red] hover:translate-y-px	transition ease-in-out delay-100"
+                />
               </div>
             </div>
           ))}

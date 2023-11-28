@@ -69,7 +69,7 @@ export function NewListingForm() {
   }
 
   return (
-    <div className="bg-[#E9EBED] min-h-screen p-4 text-lg">
+    <div className="bg-[ghostwhite] min-h-screen p-4 text-lg">
       <h3 className="flex justify-center text-4xl underline">
         Create New Lisitng
       </h3>

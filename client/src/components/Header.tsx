@@ -38,7 +38,7 @@ export function Header() {
   const isMobile = window.innerWidth <= 768;
   return (
     <div className="mobile-container">
-      <h3 className="bg-[#DCADA8] text-white flex justify-center items-center h-[2rem] mobile-home-page">
+      <h3 className="bg-[#5C6770] text-white flex justify-center items-center h-[2rem] mobile-home-page">
         FREE shipping on orders over $90* 🔥
       </h3>
       <div className="text-3xl w-full flex justify-end gap-x-3.5 absolute top-8 p-2 px-9 mobile-icons ">
@@ -84,7 +84,7 @@ export function Header() {
                 src="/SpinTrade7.png"
               />
               <img
-                className="vinyl object-cover max-w-[10.8rem] absolute bottom-[-0.1rem] left-0 transition-transform duration-300 ease-in-out group-hover:translate-x-[7rem] z-0 opacity-0 group-hover:opacity-100"
+                className="mobile-logo vinyl object-cover max-w-[10.8rem] absolute bottom-[-0.1rem] left-0 transition-transform duration-300 ease-in-out group-hover:translate-x-[7rem] z-0 opacity-0 group-hover:opacity-100"
                 src="/vinyl.webp"
               />
             </div>

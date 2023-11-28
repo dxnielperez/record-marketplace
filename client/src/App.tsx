@@ -83,8 +83,24 @@ export default function App() {
     console.log('user:', user, 'token:', token);
   }
 
-  async function removeFromCart() {}
+  async function removeFromCart(itemId: number) {
+    try {
+      const response = await fetch(`/api/cart/remove/${itemId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const result = await response.json();
+      const newCart = cartItems.filter(() => result.itemId);
 
+      setCartItems(newCart);
+      console.log('cartItems:', cartItems);
+    } catch (error) {
+      console.error(error);
+    }
+  }
   const contextValue = {
     cartItems,
     addToCart,
