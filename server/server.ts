@@ -9,7 +9,7 @@ import {
   uploadsMiddleware,
 } from './lib/index.js';
 import argon2 from 'argon2';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import { nextTick } from 'node:process';
 
 const connectionString =
@@ -189,6 +189,101 @@ app.get('/api/genre/:genreId', async (req, res, next) => {
       throw new ClientError(404, `Cannot find genre with genreId: ${genreId}`);
     }
     res.json(result.rows[0]);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post('/api/cart/add', authMiddleware, async (req, res, next) => {
+  try {
+    const { recordId } = req.body;
+    const userId = req.user?.userId;
+    if (!userId) {
+      console.error('User ID not available in request');
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+    const checkCartSql = `
+      select * from "Cart" where "userId" = $1
+      `;
+    const checkCartParams = [userId];
+    const checkCartResult = await db.query(checkCartSql, checkCartParams);
+    if (checkCartResult.rowCount === 0) {
+      const createCartSql = `
+        insert into "Cart" ("userId") values ($1) returning *;
+      `;
+      const createCartParams = [userId];
+      const createCartResult = await db.query(createCartSql, createCartParams);
+
+      if (createCartResult.rowCount === 0) {
+        console.error('Error creating cart for user:', userId);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+    }
+    console.log('userId:', userId);
+    const sql = `
+    insert into "CartItems" ("cartId", "recordId","quantity")
+    select "cartId", $2, 1
+    from "Cart"
+    where "userId" = $1
+    returning *;
+    `;
+    const params = [userId, recordId];
+    console.log('params', params);
+
+    const result = await db.query(sql, params);
+
+    const cart = result.rows[0];
+    console.log('cart:', cart);
+    const readProduct = `select "recordId",
+           "imageSrc",
+           "artist",
+           "albumName",
+           "genreId",
+           "condition",
+           "price",
+           "info",
+           "sellerId",
+           "Genres"."name" as "genre"
+    from "Records"
+    join "Genres" using ("genreId")
+    where "recordId" = $1
+    `;
+    const productParams = [recordId];
+    const productResult = await db.query(readProduct, productParams);
+    res.status(201).json({ ...productResult.rows[0], itemsId: cart.itemsId });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/cart', authMiddleware, async (req, res, next) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) throw new Error('User ID not available in request');
+    const sql = `
+    select * from "Cart"
+    join "CartItems" using ("cartId")
+    join "Records" using ("recordId")
+    where "userId" = $1
+    `;
+    const params = [userId];
+    const result = await db.query(sql, params);
+    res.json(result.rows);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.delete('/api/remove-from-cart', authMiddleware, async (req, res, next) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) throw new Error('User ID not available in request');
+    const sql = `
+    delete * from "CartItems"
+    where  "cartId", "recordId" = $1, $2
+
+    `;
   } catch (error) {
     next(error);
   }

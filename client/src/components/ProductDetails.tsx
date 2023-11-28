@@ -1,21 +1,13 @@
-import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useContext, useEffect, useState } from 'react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import { AppContext } from './AppContext';
+import { Product } from '../types/types';
 
-type Product = {
-  recordId: number;
-  imageSrc: string;
-  artist: string;
-  albumName: string;
-  genreId: number;
-  condition: string;
-  price: number;
-  info: string;
-  sellerId: number;
-  genre: string;
-};
 export function ProductDetails() {
   const [product, setProduct] = useState<Product>();
+  const { addToCart, cartItems } = useContext(AppContext);
   const { recordId } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function loadProduct() {
@@ -28,11 +20,24 @@ export function ProductDetails() {
         console.error(error);
       }
     }
-
     loadProduct();
   }, [recordId]);
 
   if (!product) return null;
+
+  async function handleAddToCart() {
+    try {
+      if (!product) return;
+      await addToCart(product);
+      navigate('/ShoppingCart');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    }
+  }
+  const isItemInCart = cartItems.some(
+    (item) => item.recordId === product.recordId
+  );
+
   return (
     <div className="bg-[#E9EBED] min-h-screen">
       <div className="pt-6 mx-auto max-w-7xl px-4 py-10 lg:py-9 lg:px-8">
@@ -64,7 +69,7 @@ export function ProductDetails() {
             </p>
             {/* </div> */}
 
-            <form className="mt-10">
+            <div className="mt-10">
               {/* Genre */}
               <div>
                 <h3 className="text-sm font-medium text-gray-900">Genre</h3>
@@ -77,12 +82,21 @@ export function ProductDetails() {
                 <h3>{product.condition}</h3>
               </div>
 
-              <button
-                type="submit"
-                className="mt-6 flex items-center justify-center rounded-md border border-transparent bg-[#3C82F6]  hover:bg-blue-700 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:shadow-outline-blue active:bg-blue-800 focus:ring-offset-2">
-                Add to cart
-              </button>
+              {/* <Link to="/ShoppingCart"> */}
 
+              {isItemInCart ? (
+                <div className="mt-6 flex items-center justify-center rounded-md border border-transparent bg-[#CAC9CF]  px-[0.5rem] py-3 text-base font-medium text-white cursor-default w-[11rem]">
+                  Item already in cart
+                </div>
+              ) : (
+                <button
+                  onClick={handleAddToCart}
+                  type="button"
+                  className="mt-6 flex items-center justify-center rounded-md border border-transparent bg-[#3C82F6]  hover:bg-blue-700 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:shadow-outline-blue active:bg-blue-800 focus:ring-offset-2">
+                  Add to cart
+                </button>
+              )}
+              {/* </Link> */}
               <div className="mt-10"></div>
               {/* Description*/}
               <div>
@@ -93,7 +107,7 @@ export function ProductDetails() {
                   <p className="text-base text-gray-900">{product.info}</p>
                 </div>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       </div>
