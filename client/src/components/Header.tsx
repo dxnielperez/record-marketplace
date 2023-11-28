@@ -1,38 +1,40 @@
 import { BsCart3 } from 'react-icons/bs';
 import { FaRegUser } from 'react-icons/fa';
-// import { IoSearchSharp } from 'react-icons/io5';
 import { IoMdMenu } from 'react-icons/io';
 import { Link } from 'react-router-dom';
-import { handleSignOut } from './handleSignOut';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IoMdClose } from 'react-icons/io';
+import { AppContext } from './AppContext';
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isUserSignedIn, setIsUserSignedIn] = useState(
-    !!localStorage.getItem('token')
-  );
+  const { signOut, token } = useContext(AppContext);
 
   const navigate = useNavigate();
-  function handleSignOutClick() {
-    handleSignOut(navigate);
-    setIsUserSignedIn(false);
+
+  function signOutClick() {
+    signOut();
+    navigate('/');
   }
+
   function handleUserIconClick(event) {
     event.preventDefault();
-    if (isUserSignedIn) {
+    if (token) {
       alert('You are already signed in');
     } else {
       navigate('/login');
     }
   }
+
   function handleMenuClick() {
     setIsOpen(!isOpen);
   }
+
   function handleCloseMenu() {
     setIsOpen(false);
   }
+
   const isMobile = window.innerWidth <= 768;
   return (
     <div className="mobile-container">
@@ -40,9 +42,9 @@ export function Header() {
         FREE shipping on orders over $90* 🔥
       </h3>
       <div className="text-3xl w-full flex justify-end gap-x-3.5 absolute top-8 p-2 px-9 mobile-icons ">
-        {isUserSignedIn && (
+        {token && (
           <a
-            onClick={handleSignOutClick}
+            onClick={signOutClick}
             className="text-xl hover:text-slate-500 hover:underline cursor-pointer mobile-sign-out">
             Sign out
           </a>
@@ -56,7 +58,7 @@ export function Header() {
           />
         </Link>
 
-        <Link to="/ShoppingCart">
+        <Link to={token ? '/ShoppingCart' : '/login'}>
           <BsCart3 className="text-black hover:text-slate-500 duration-200" />
         </Link>
       </div>
@@ -120,7 +122,7 @@ export function Header() {
             </div>
           </div>
 
-          {isUserSignedIn && (
+          {token && (
             <Link
               className="text-black hover:text-slate-500 hover:underline duration-200"
               to="/CreateListing">
@@ -135,6 +137,7 @@ export function Header() {
 }
 
 function MenuModal({ isOpen, onClose }) {
+  const token = localStorage.getItem('token');
   return (
     <div
       className={`fixed inset-0 z-50 flex items-center justify-start transition-opacity ${
@@ -156,9 +159,11 @@ function MenuModal({ isOpen, onClose }) {
             Shop All
           </Link>
           <p className="underline text-xl">Shop by Genre</p>
-          <Link to="/CreateListing" className="underline text-xl">
-            Create Listing
-          </Link>
+          {token && (
+            <Link to="/CreateListing" className="underline text-xl">
+              Create Listing
+            </Link>
+          )}
         </div>
       </div>
     </div>

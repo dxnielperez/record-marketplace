@@ -245,6 +245,37 @@ app.post('/api/cart/add', authMiddleware, async (req, res, next) => {
   }
 });
 
+app.get('/api/cart', authMiddleware, async (req, res, next) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) throw new Error('User ID not available in request');
+    const sql = `
+    select * from "Cart"
+    join "CartItems" using ("cartId")
+    join "Records" using ("recordId")
+    where "userId" = $1
+    `;
+    const params = [userId];
+    const result = await db.query(sql, params);
+    res.json(result.rows);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.delete('/api/remove-from-cart', authMiddleware, async (req, res, next) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) throw new Error('User ID not available in request');
+    const sql = `
+    delete * from "CartItems"
+    where  "cartId", "recordId" = $1, $2
+
+    `;
+  } catch (error) {
+    next(error);
+  }
+});
 /**
  * Serves React's index.html if no api route matches.
  *

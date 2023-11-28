@@ -1,21 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
+import { AppContext } from './AppContext';
+import { Product } from '../types/types';
 
-type Product = {
-  recordId: number;
-  imageSrc: string;
-  artist: string;
-  albumName: string;
-  genreId: number;
-  condition: string;
-  price: number;
-  info: string;
-  sellerId: number;
-  genre: string;
-};
 export function ProductDetails() {
   const [product, setProduct] = useState<Product>();
-
+  const { addToCart, cartItems } = useContext(AppContext);
   const { recordId } = useParams();
   const navigate = useNavigate();
 
@@ -30,7 +20,6 @@ export function ProductDetails() {
         console.error(error);
       }
     }
-
     loadProduct();
   }, [recordId]);
 
@@ -38,27 +27,16 @@ export function ProductDetails() {
 
   async function handleAddToCart() {
     try {
-      const token = localStorage.getItem('token');
-
-      const response = await fetch('/api/cart/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          recordId: product?.recordId,
-        }),
-      });
-
-      if (!response.ok) throw new Error(`Error: ${response.status}`);
-      const result = await response.json();
-      console.log('Product added to cart:', result);
+      if (!product) return;
+      await addToCart(product);
       navigate('/ShoppingCart');
     } catch (error) {
       console.error('Error adding to cart:', error);
     }
   }
+  const isItemInCart = cartItems.some(
+    (item) => item.recordId === product.recordId
+  );
 
   return (
     <div className="bg-[#E9EBED] min-h-screen">
@@ -105,12 +83,19 @@ export function ProductDetails() {
               </div>
 
               {/* <Link to="/ShoppingCart"> */}
-              <button
-                onClick={handleAddToCart}
-                type="button"
-                className="mt-6 flex items-center justify-center rounded-md border border-transparent bg-[#3C82F6]  hover:bg-blue-700 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:shadow-outline-blue active:bg-blue-800 focus:ring-offset-2">
-                Add to cart
-              </button>
+
+              {isItemInCart ? (
+                <div className="mt-6 flex items-center justify-center rounded-md border border-transparent bg-[#CAC9CF]  px-[0.5rem] py-3 text-base font-medium text-white cursor-default w-[11rem]">
+                  Item already in cart
+                </div>
+              ) : (
+                <button
+                  onClick={handleAddToCart}
+                  type="button"
+                  className="mt-6 flex items-center justify-center rounded-md border border-transparent bg-[#3C82F6]  hover:bg-blue-700 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:shadow-outline-blue active:bg-blue-800 focus:ring-offset-2">
+                  Add to cart
+                </button>
+              )}
               {/* </Link> */}
               <div className="mt-10"></div>
               {/* Description*/}
