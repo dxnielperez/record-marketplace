@@ -275,19 +275,34 @@ app.get('/api/cart', authMiddleware, async (req, res, next) => {
   }
 });
 
-app.delete('/api/remove-from-cart', authMiddleware, async (req, res, next) => {
-  try {
-    const userId = req.user?.userId;
-    if (!userId) throw new Error('User ID not available in request');
-    const sql = `
-    delete * from "CartItems"
-    where  "cartId", "recordId" = $1, $2
+app.delete(
+  '/api/cart/remove/:itemsId',
+  authMiddleware,
+  async (req, res, next) => {
+    try {
+      const { itemsId } = req.params;
 
+      const id = Number(itemsId);
+      if (typeof id !== 'number') {
+        throw new ClientError(400, 'RecordId must be a number');
+      }
+
+      const userId = req.user?.userId;
+      if (!userId) throw new Error('User ID not available in request');
+
+      const sql = `
+    delete from "CartItems"
+    where "itemsId" = $1
+    returning *;
     `;
-  } catch (error) {
-    next(error);
+      const params = [id];
+      const result = await db.query(sql, params);
+      res.json(result.rows[0]);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 /**
  * Serves React's index.html if no api route matches.
  *

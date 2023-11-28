@@ -73,18 +73,32 @@ export default function App() {
     localStorage.setItem('user', JSON.stringify(user));
     setUser(user);
     setToken(token);
-    console.log('user:', user, 'token:', token);
   }
   async function signOut() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(undefined);
     setToken(undefined);
-    console.log('user:', user, 'token:', token);
   }
 
-  async function removeFromCart() {}
-
+  async function removeFromCart(itemId: number) {
+    try {
+      const response = await fetch(`/api/cart/remove/${itemId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const result = await response.json();
+      const newCart = cartItems.filter(
+        (item) => item.itemsId !== result.itemsId
+      );
+      setCartItems(newCart);
+    } catch (error) {
+      console.error(error);
+    }
+  }
   const contextValue = {
     cartItems,
     addToCart,

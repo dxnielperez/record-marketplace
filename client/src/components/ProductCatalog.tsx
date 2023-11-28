@@ -56,7 +56,7 @@ export default function ProductCatalog() {
     }
   }, [sortBy, handleSort]);
   return (
-    <div className="bg-[#E9EBED] min-h-screen ">
+    <div className="bg-[ghostwhite] min-h-screen ">
       <div className="flex justify-end pt-[1rem] px-[17%]">
         <label className="mr-2">Sort By</label>
         <select
