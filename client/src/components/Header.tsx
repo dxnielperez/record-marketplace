@@ -9,7 +9,7 @@ import { AppContext } from './AppContext';
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const { signOut, token } = useContext(AppContext);
+  const { signOut, token, cartItems } = useContext(AppContext);
 
   const navigate = useNavigate();
 
@@ -34,6 +34,7 @@ export function Header() {
   function handleCloseMenu() {
     setIsOpen(false);
   }
+  const itemsAmount = cartItems.length === 0 ? '' : cartItems.length;
 
   const isMobile = window.innerWidth <= 768;
   return (
@@ -59,6 +60,7 @@ export function Header() {
         </Link>
 
         <Link to={token ? '/ShoppingCart' : '/login'}>
+          <p className={itemsAmount ? 'item-bubble' : ''}>{itemsAmount}</p>
           <BsCart3 className="text-black hover:text-slate-500 duration-200" />
         </Link>
       </div>
