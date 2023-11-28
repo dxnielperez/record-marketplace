@@ -18,10 +18,12 @@ export function CreateNewListing() {
       const response = await fetch('/api/create-listing', {
         method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
-        body: formData,
+        body: JSON.stringify(formData),
       });
+      console.log('formdata2', formData);
       if (!response.ok) throw new Error(`Error: ${response.status}`);
       const result = await response.json();
       console.log('Success:', result);

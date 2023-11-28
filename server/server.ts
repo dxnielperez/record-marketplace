@@ -235,11 +235,23 @@ app.post('/api/cart/add', authMiddleware, async (req, res, next) => {
 
     const cart = result.rows[0];
     console.log('cart:', cart);
-    if (!cart) {
-      console.log('No cart data found');
-      return res.status(404).json({ error: 'Cart not found' });
-    }
-    res.status(201).json(cart);
+    const readProduct = `select "recordId",
+           "imageSrc",
+           "artist",
+           "albumName",
+           "genreId",
+           "condition",
+           "price",
+           "info",
+           "sellerId",
+           "Genres"."name" as "genre"
+    from "Records"
+    join "Genres" using ("genreId")
+    where "recordId" = $1
+    `;
+    const productParams = [recordId];
+    const productResult = await db.query(readProduct, productParams);
+    res.status(201).json({ ...productResult.rows[0], itemsId: cart.itemsId });
   } catch (error) {
     next(error);
   }

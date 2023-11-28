@@ -61,6 +61,7 @@ export default function App() {
 
       if (!response.ok) throw new Error(`Error: ${response.status}`);
       const result = await response.json();
+      setCartItems([...cartItems, result]);
       console.log('Product added to cart:', result);
     } catch (error) {
       console.error('Error adding to cart:', error);
