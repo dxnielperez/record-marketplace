@@ -17,6 +17,7 @@ export default function App() {
   const [cartItems, setCartItems] = useState<CartItemsProps[]>([]);
   const [token, setToken] = useState<string>();
   const [user, setUser] = useState<User>();
+  // const navigate = useNavigate();
 
   useEffect(() => {
     async function loadCart() {
@@ -101,6 +102,23 @@ export default function App() {
       console.error(error);
     }
   }
+
+  async function deleteListing(recordId: number) {
+    const response = await fetch(`/api/delete-listing/${recordId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) {
+      if (response.status === 421) {
+        throw new Error('421');
+      } else {
+        throw new Error('An error occurred');
+      }
+    }
+  }
+
   const contextValue = {
     cartItems,
     addToCart,
@@ -109,7 +127,9 @@ export default function App() {
     signOut,
     user,
     token,
+    deleteListing,
   };
+
   return (
     <div>
       <AppContext.Provider value={contextValue}>

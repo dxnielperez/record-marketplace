@@ -1,14 +1,18 @@
-import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useContext, useEffect, useState } from 'react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Product } from '../types/types';
 import { MdEdit } from 'react-icons/md';
 import { MdDeleteForever } from 'react-icons/md';
+import { AppContext } from './AppContext';
 
 export function ActiveListingDetails() {
   const [product, setProduct] = useState<Product>();
   const [showModal, setShowModal] = useState(false);
 
   const { recordId } = useParams();
+  const { deleteListing } = useContext(AppContext);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function loadProduct() {
@@ -29,14 +33,35 @@ export function ActiveListingDetails() {
   function handleDelete() {
     setShowModal(true);
   }
+
+  function handleCancel() {
+    setShowModal(false);
+  }
+
+  async function handleDeleteClick() {
+    try {
+      setShowModal(false);
+      const id = Number(recordId);
+      await deleteListing(id);
+      navigate('/SellerDashboard');
+    } catch (error) {
+      if (error instanceof Error && error.message === '421') {
+        alert('Cant remove item in someones cart');
+      } else {
+        console.error(error);
+      }
+    }
+  }
   return (
     <div className="bg-[ghostwhite] min-h-screen">
       <div className="pt-6 mx-auto max-w-7xl px-4 py-10 lg:py-9 lg:px-8">
-        <Link to="/SellerDashboard">
-          <nav className="text-xl pb-4 flex gap-[0.5rem] cursor-pointer hover:underline hover:text-slate-500 mobile-back">
-            Back to listings
-          </nav>
-        </Link>
+        <div className="max-w-fit">
+          <Link to="/SellerDashboard">
+            <nav className="text-xl pb-4 flex gap-[0.5rem] cursor-pointer hover:underline hover:text-slate-500 mobile-back">
+              Back to listings
+            </nav>
+          </Link>
+        </div>
         {/* Image gallery */}
         <div className="flex flex-col lg:flex-row lg:space-x-8">
           <div className="lg:w-1/2 lg:pr-8">
@@ -97,11 +122,33 @@ export function ActiveListingDetails() {
           </div>
         </div>
       </div>
-      {showModal && <DeleteModal />}
+      {showModal && (
+        <DeleteModal onCancel={handleCancel} onDelete={handleDeleteClick} />
+      )}
     </div>
   );
 }
 
-function DeleteModal() {
-  return <div>Test</div>;
+function DeleteModal({ onCancel, onDelete }) {
+  return (
+    <div className="delete-modal flex justify-center ">
+      <div className="bg-[#BCBEC8] border-[#BCBEC8] p-[5rem] flex flex-col justify-between absolute top-[31rem] border rounded-2xl">
+        <h3 className="pb-[4rem] text-2xl">
+          Are you sure you want to delete ?
+        </h3>
+        <div className="flex justify-between text-xl ">
+          <button
+            onClick={onCancel}
+            className="border-none bg-[white] px-[1rem] py-[0.5rem] rounded-md hover:bg-[#E9E9ED]">
+            Cancel
+          </button>
+          <button
+            onClick={onDelete}
+            className="bg-[#FBB2B1] px-[1.8rem] py-[0.5rem] rounded-md hover:bg-[#FAA09E]">
+            Yes
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }

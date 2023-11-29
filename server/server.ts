@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars -- Remove when used */
 import 'dotenv/config';
-import express from 'express';
+import express, { application } from 'express';
 import pg from 'pg';
 import {
   ClientError,
@@ -11,6 +11,8 @@ import {
 import argon2 from 'argon2';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { nextTick } from 'node:process';
+import { useParams } from 'react-router-dom';
+import { DatabaseError } from 'pg-protocol';
 
 const connectionString =
   process.env.DATABASE_URL ||
@@ -323,6 +325,26 @@ app.get(
     }
   }
 );
+
+app.delete('/api/delete-listing/:recordId', async (req, res, next) => {
+  try {
+    const { recordId } = req.params;
+    const id = Number(recordId);
+    const sql = `
+    delete from "Records"
+    where "recordId" = $1
+    `;
+    const params = [id];
+    const result = await db.query(sql, params);
+    res.json(result.rows[0]);
+  } catch (error) {
+    if (error instanceof DatabaseError && error.code === '23503') {
+      next(new ClientError(421, 'Cant delete item in someones cart'));
+    } else {
+      next(error);
+    }
+  }
+});
 
 // app.get('/api/get-genres', async (req, res, next) => {
 //   try {

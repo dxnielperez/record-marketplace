@@ -115,7 +115,7 @@ export function DashboardHeader() {
           </div>
         </nav>
         <MenuModal isOpen={isOpen} onClose={handleCloseMenu} />
-        <h3 className="text-4xl flex justify-center underline pb-[2rem] pt-[1rem] bg-[ghostwhite]">
+        <h3 className="text-4xl flex justify-center pb-[2rem] pt-[1rem] bg-[ghostwhite]">
           Seller Dashboard
         </h3>
       </div>
