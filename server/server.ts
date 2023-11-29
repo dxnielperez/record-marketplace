@@ -303,6 +303,38 @@ app.delete(
     }
   }
 );
+
+app.get(
+  '/api/active-listings/:userId',
+  authMiddleware,
+  async (req, res, next) => {
+    try {
+      const userId = Number(req.params.userId);
+      const sql = `
+    select * from "Records"
+    join "Users" on "Records"."sellerId" = "Users"."userId"
+    where "Users"."userId" = $1
+    `;
+      const params = [userId];
+      const result = await db.query(sql, params);
+      res.json(result.rows);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// app.get('/api/get-genres', async (req, res, next) => {
+//   try {
+//     const sql = `
+//     select * from "Genres"
+//     `;
+//     const result = await db.query(sql);
+//     res.json(result.rows);
+//   } catch (error) {
+//     next(error);
+//   }
+// });
 /**
  * Serves React's index.html if no api route matches.
  *

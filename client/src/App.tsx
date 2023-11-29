@@ -10,6 +10,8 @@ import { ShoppingCartPage } from './pages/ShoppingCartPage';
 import { useEffect, useState } from 'react';
 import { AppContext } from './components/AppContext';
 import { CartItemsProps, Product, User } from './types/types';
+import { SellerDashboard } from './pages/SellerDashboard';
+import { ListingDetailsPage } from './pages/ListingDetailsPage';
 
 export default function App() {
   const [cartItems, setCartItems] = useState<CartItemsProps[]>([]);
@@ -122,6 +124,11 @@ export default function App() {
             element={<ProductDetailsPage />}
           />
           <Route path="ShoppingCart" element={<ShoppingCartPage />} />
+          <Route path="SellerDashboard" element={<SellerDashboard />} />
+          <Route
+            path="ListingDetailsPage/:recordId"
+            element={<ListingDetailsPage />}
+          />
         </Routes>
       </AppContext.Provider>
     </div>

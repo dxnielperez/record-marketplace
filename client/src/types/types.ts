@@ -31,3 +31,15 @@ export type User = {
   userId: number;
   username: string;
 };
+
+export type Products = {
+  recordId: number;
+  imageSrc: string;
+  artist: string;
+  albumName: string;
+  genreId: number;
+  condition: string;
+  price: number;
+  info: string;
+  sellerId: number;
+};
