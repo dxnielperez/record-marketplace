@@ -1,17 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-type Products = {
-  recordId: number;
-  imageSrc: string;
-  artist: string;
-  albumName: string;
-  genreId: number;
-  condition: string;
-  price: number;
-  info: string;
-  sellerId: number;
-};
+import { Products } from '../types/types';
 
 export default function ProductCatalog() {
   const [products, setProducts] = useState<Products[]>([]);

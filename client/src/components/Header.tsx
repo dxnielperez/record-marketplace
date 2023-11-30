@@ -21,7 +21,7 @@ export function Header() {
   function handleUserIconClick(event) {
     event.preventDefault();
     if (token) {
-      alert('You are already signed in');
+      navigate('/SellerDashboard');
     } else {
       navigate('/login');
     }

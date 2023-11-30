@@ -9,6 +9,7 @@ type AppContextValues = {
   signIn: (user: User, token: string) => void;
   signOut: () => void;
   token: string | undefined;
+  deleteListing: (recordId: number) => Promise<void>;
 };
 
 export const AppContext = createContext<AppContextValues>({
@@ -19,4 +20,5 @@ export const AppContext = createContext<AppContextValues>({
   signIn: () => undefined,
   signOut: () => undefined,
   token: undefined,
+  deleteListing: async () => undefined,
 });

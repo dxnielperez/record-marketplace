@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars -- Remove when used */
 import 'dotenv/config';
-import express from 'express';
+import express, { application } from 'express';
 import pg from 'pg';
 import {
   ClientError,
@@ -11,6 +11,8 @@ import {
 import argon2 from 'argon2';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { nextTick } from 'node:process';
+import { useParams } from 'react-router-dom';
+import { DatabaseError } from 'pg-protocol';
 
 const connectionString =
   process.env.DATABASE_URL ||
@@ -303,6 +305,97 @@ app.delete(
     }
   }
 );
+
+app.get(
+  '/api/active-listings/:userId',
+  authMiddleware,
+  async (req, res, next) => {
+    try {
+      const userId = Number(req.params.userId);
+      const sql = `
+    select * from "Records"
+    join "Users" on "Records"."sellerId" = "Users"."userId"
+    where "Users"."userId" = $1
+    `;
+      const params = [userId];
+      const result = await db.query(sql, params);
+      res.json(result.rows);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+app.delete('/api/delete-listing/:recordId', async (req, res, next) => {
+  try {
+    const { recordId } = req.params;
+    const id = Number(recordId);
+    const sql = `
+    delete from "Records"
+    where "recordId" = $1
+    `;
+    const params = [id];
+    const result = await db.query(sql, params);
+    res.json(result.rows[0]);
+  } catch (error) {
+    if (error instanceof DatabaseError && error.code === '23503') {
+      next(new ClientError(421, 'Cant delete item in someones cart'));
+    } else {
+      next(error);
+    }
+  }
+});
+
+app.put(
+  '/api/update-listing/:recordId',
+  authMiddleware,
+  uploadsMiddleware.single('image'),
+  async (req, res, next) => {
+    try {
+      const { recordId } = req.params;
+      const id = Number(recordId);
+      const sql = `
+    update "Records"
+    set "artist" = $1,
+    ${
+      req.file?.filename ? `"imageSrc" = '/images/${req.file?.filename}', ` : ''
+    }
+    "albumName" = $2,
+    "genreId" = $3,
+    "condition" = $4,
+    "price" = $5,
+    "info" = $6
+    where "recordId" = $7
+    returning *;
+    `;
+      const params = [
+        req.body.artist,
+        req.body.album,
+        req.body.genre,
+        req.body.condition,
+        req.body.price,
+        req.body.info,
+        id,
+      ];
+      const result = await db.query(sql, params);
+      const listing = result.rows[0];
+      res.status(200).json(listing);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+// app.get('/api/get-genres', async (req, res, next) => {
+//   try {
+//     const sql = `
+//     select * from "Genres"
+//     `;
+//     const result = await db.query(sql);
+//     res.json(result.rows);
+//   } catch (error) {
+//     next(error);
+//   }
+// });
 /**
  * Serves React's index.html if no api route matches.
  *

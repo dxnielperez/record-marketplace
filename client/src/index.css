@@ -103,6 +103,16 @@
   font-size: 1rem;
 }
 
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.75);
+  z-index: 1;
+}
+
 @media screen and (width <=1086px) {
   .mobile {
     display: none;
@@ -182,6 +192,7 @@
   .mobile-category {
     text-align: center;
     margin-left: 0;
+    font-size: 2rem;
   }
 
   .mobile-home-page {
@@ -228,5 +239,30 @@
     bottom: 1rem;
     right: -0.4rem;
     font-size: 0.65rem;
+  }
+
+  .mobile-seller-signout {
+    font-size: 1.3rem;
+    padding: 0;
+    position: absolute;
+    bottom: 1.2rem;
+    right: 0.5rem;
+  }
+
+  .seller-logo {
+    width: 80vw;
+    display: flex;
+    position: relative;
+    left: 8rem;
+  }
+
+  .dashboard-menu {
+    position: absolute;
+    top: 5rem;
+  }
+
+  .mobile-modal {
+    text-align: center;
+    top: 15rem;
   }
 }

@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 type Genre = {
   genreId: number;
@@ -9,24 +9,38 @@ type Genre = {
 export function NewListingForm() {
   const [genres, setGenres] = useState<Genre[]>([]);
   const [selectedFile, setSelectedFile] = useState<File>();
+  const product = useLocation().state;
   const [preview, setPreview] = useState<string>();
 
   const navigate = useNavigate();
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     try {
       const formData = new FormData(event.currentTarget);
-      console.log(formData);
+
       event.preventDefault();
-      const response = await fetch('/api/create-listing', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: formData,
-      });
-      if (!response.ok) throw new Error(`Error: ${response.status}`);
-      const result = await response.json();
-      console.log('Success:', result);
+
+      if (!product) {
+        const response = await fetch('/api/create-listing', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: formData,
+        });
+
+        if (!response.ok) throw new Error(`Error: ${response.status}`);
+        const result = await response.json();
+        console.log('Success:', result);
+      } else {
+        await fetch(`/api/update-listing/${product.recordId}`, {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: formData,
+        });
+      }
       navigate('/ProductPage');
     } catch (error) {
       console.error(error);
@@ -35,14 +49,13 @@ export function NewListingForm() {
 
   useEffect(() => {
     if (!selectedFile) {
-      setPreview(undefined);
+      setPreview(product?.imageSrc);
       return;
     }
-    console.log(selectedFile);
     const url = URL.createObjectURL(selectedFile);
     setPreview(url);
     return () => URL.revokeObjectURL(url);
-  }, [selectedFile]);
+  }, [selectedFile, product?.imageSrc]);
 
   function handleImageUpload(event) {
     if (!event) throw new Error('No image file');
@@ -67,11 +80,10 @@ export function NewListingForm() {
     setPreview('');
     setSelectedFile(undefined);
   }
-
   return (
     <div className="bg-[ghostwhite] min-h-screen p-4 text-lg">
       <h3 className="flex justify-center text-4xl underline">
-        Create New Lisitng
+        Create New Listing
       </h3>
       <form onSubmit={handleSubmit} className="max-w-screen-md mx-auto mt-8">
         <div className="flex flex-col ">
@@ -86,7 +98,7 @@ export function NewListingForm() {
               accept="image/*"
               className="mb-2 cursor-pointer"
             />
-            {selectedFile && (
+            {preview && (
               <img src={preview} alt="Uploaded" className="max-w-xs" />
             )}
           </div>
@@ -97,6 +109,7 @@ export function NewListingForm() {
               <label className="block mb-2 font-bold ">Artist:</label>
               <input
                 type="text"
+                defaultValue={product?.artist}
                 id="artist"
                 name="artist"
                 className="w-full mb-4 p-2 border rounded"
@@ -109,6 +122,7 @@ export function NewListingForm() {
               </label>
               <input
                 type="text"
+                defaultValue={product?.albumName}
                 id="album"
                 name="album"
                 className="w-full mb-4 p-2 border rounded"
@@ -124,6 +138,7 @@ export function NewListingForm() {
               <select
                 id="genre"
                 name="genre"
+                defaultValue={product?.genreId}
                 className="w-full p-2 border rounded"
                 required>
                 {genres.map((genre) => (
@@ -138,6 +153,7 @@ export function NewListingForm() {
               <label className="block mb-2 font-bold">Condition:</label>
               <select
                 id="condition"
+                defaultValue={product?.condition}
                 name="condition"
                 className="w-full p-2 border rounded"
                 required>
@@ -155,6 +171,7 @@ export function NewListingForm() {
 
               <input
                 type="text"
+                defaultValue={product?.price}
                 id="price"
                 name="price"
                 className="w-full p-2 border rounded"
@@ -169,7 +186,7 @@ export function NewListingForm() {
             <textarea
               id="info"
               name="info"
-              defaultValue={''}
+              defaultValue={product?.info}
               rows={3}
               className="w-full p-2 border rounded"
             />
