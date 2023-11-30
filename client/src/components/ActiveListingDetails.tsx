@@ -54,7 +54,7 @@ export function ActiveListingDetails() {
   }
   return (
     <div className="bg-[ghostwhite] min-h-screen">
-      {showModal && <div className="overlay" />}
+      {showModal && <div onClick={handleCancel} className="overlay" />}
 
       <div className="pt-6 mx-auto max-w-7xl px-4 py-10 lg:py-9 lg:px-8 relative z-1">
         <div className="max-w-fit">
@@ -137,7 +137,7 @@ export function ActiveListingDetails() {
 function DeleteModal({ onCancel, onDelete }) {
   return (
     <div className="delete-modal flex justify-center ">
-      <div className="bg-[#BCBEC8] border-[#BCBEC8] p-[5rem] flex flex-col justify-between absolute top-[20rem] border rounded-2xl z-30">
+      <div className="bg-[#BCBEC8] border-[#BCBEC8] p-[5rem] flex flex-col justify-between absolute top-[25rem] border rounded-2xl z-30 mobile-modal">
         <h3 className="pb-[4rem] text-2xl">
           Are you sure you want to delete ?
         </h3>

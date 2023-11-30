@@ -192,6 +192,7 @@
   .mobile-category {
     text-align: center;
     margin-left: 0;
+    font-size: 2rem;
   }
 
   .mobile-home-page {
@@ -258,5 +259,10 @@
   .dashboard-menu {
     position: absolute;
     top: 5rem;
+  }
+
+  .mobile-modal {
+    text-align: center;
+    top: 15rem;
   }
 }
