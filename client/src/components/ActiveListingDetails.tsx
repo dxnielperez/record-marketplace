@@ -54,7 +54,9 @@ export function ActiveListingDetails() {
   }
   return (
     <div className="bg-[ghostwhite] min-h-screen">
-      <div className="pt-6 mx-auto max-w-7xl px-4 py-10 lg:py-9 lg:px-8">
+      {showModal && <div className="overlay" />}
+
+      <div className="pt-6 mx-auto max-w-7xl px-4 py-10 lg:py-9 lg:px-8 relative z-1">
         <div className="max-w-fit">
           <Link to="/SellerDashboard">
             <nav className="text-xl pb-4 flex gap-[0.5rem] cursor-pointer hover:underline hover:text-slate-500 mobile-back">
@@ -78,7 +80,10 @@ export function ActiveListingDetails() {
             <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl mt-4 lg:mt-0 flex gap-[4rem]">
               {`${product.artist} - ${product.albumName}`}
               <div className="flex pt-[0.5rem] text-2xl gap-[2rem] cursor-pointer">
-                <MdEdit className="hover:text-[#626CF8] transition ease-in-out delay-550" />
+                <MdEdit
+                  onClick={() => navigate('/CreateListing', { state: product })}
+                  className="hover:text-[#626CF8] transition ease-in-out delay-550"
+                />
                 <MdDeleteForever
                   onClick={handleDelete}
                   className="hover:text-[#C34667] transition ease-in-out delay-550"
@@ -132,7 +137,7 @@ export function ActiveListingDetails() {
 function DeleteModal({ onCancel, onDelete }) {
   return (
     <div className="delete-modal flex justify-center ">
-      <div className="bg-[#BCBEC8] border-[#BCBEC8] p-[5rem] flex flex-col justify-between absolute top-[31rem] border rounded-2xl">
+      <div className="bg-[#BCBEC8] border-[#BCBEC8] p-[5rem] flex flex-col justify-between absolute top-[20rem] border rounded-2xl z-30">
         <h3 className="pb-[4rem] text-2xl">
           Are you sure you want to delete ?
         </h3>

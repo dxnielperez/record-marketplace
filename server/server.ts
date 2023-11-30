@@ -346,6 +346,45 @@ app.delete('/api/delete-listing/:recordId', async (req, res, next) => {
   }
 });
 
+app.put(
+  '/api/update-listing/:recordId',
+  authMiddleware,
+  uploadsMiddleware.single('image'),
+  async (req, res, next) => {
+    try {
+      const { recordId } = req.params;
+      const id = Number(recordId);
+      const sql = `
+    update "Records"
+    set "artist" = $1,
+    ${
+      req.file?.filename ? `"imageSrc" = '/images/${req.file?.filename}', ` : ''
+    }
+    "albumName" = $2,
+    "genreId" = $3,
+    "condition" = $4,
+    "price" = $5,
+    "info" = $6
+    where "recordId" = $7
+    returning *;
+    `;
+      const params = [
+        req.body.artist,
+        req.body.album,
+        req.body.genre,
+        req.body.condition,
+        req.body.price,
+        req.body.info,
+        id,
+      ];
+      const result = await db.query(sql, params);
+      const listing = result.rows[0];
+      res.status(200).json(listing);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 // app.get('/api/get-genres', async (req, res, next) => {
 //   try {
 //     const sql = `

@@ -75,11 +75,11 @@ export function DashboardHeader() {
             <Link to="/">
               <div className="relative group">
                 <img
-                  className="mobile-logo relative object-cover max-w-[11rem] z-20"
+                  className="mobile-logo relative object-cover max-w-[11rem] z-1"
                   src="/SpinTrade7.png"
                 />
                 <img
-                  className="mobile-logo vinyl object-cover max-w-[10.8rem] absolute bottom-[-0.1rem] left-0 transition-transform duration-300 ease-in-out group-hover:translate-x-[7rem] z-0 opacity-0 group-hover:opacity-100"
+                  className="mobile-logo vinyl object-cover max-w-[10.8rem] absolute bottom-[-0.1rem] left-0 transition-transform duration-300 ease-in-out group-hover:translate-x-[7rem] z-11 opacity-0 group-hover:opacity-100"
                   src="/vinyl.webp"
                 />
               </div>
