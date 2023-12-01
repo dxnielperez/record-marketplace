@@ -106,7 +106,9 @@ export function ShoppingCart() {
               <h3>{`$${totalPrice}`}</h3>
             </div>
             <div className="flex justify-end text-2xl">
-              <button className="border max-w-fit px-[1rem] py-[0.3rem] bg-[#8F93A3] rounded-md text-white hover:bg-[#787D91] transition ease-in-out delay-50 mobile-checkout-button">
+              <button
+                onClick={() => navigate('/CheckoutPage')}
+                className="border max-w-fit px-[1rem] py-[0.3rem] bg-[#8F93A3] rounded-md text-white hover:bg-[#787D91] transition ease-in-out delay-50 mobile-checkout-button">
                 Checkout
               </button>
             </div>
