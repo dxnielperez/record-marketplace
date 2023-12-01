@@ -114,6 +114,7 @@ export function OrderConfirmation() {
 
                 <p>{`$${salesTax}`}</p>
               </div>
+              <div className="border border-l-[0.1rem] border-black"></div>
               <div className="flex justify-between">
                 <p>Total</p>
                 <p>{`$${totalPrice}`}</p>
