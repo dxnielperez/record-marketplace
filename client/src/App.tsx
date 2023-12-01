@@ -12,12 +12,13 @@ import { AppContext } from './components/AppContext';
 import { CartItemsProps, Product, User } from './types/types';
 import { SellerDashboard } from './pages/SellerDashboard';
 import { ListingDetailsPage } from './pages/ListingDetailsPage';
+import { CheckoutPage } from './pages/CheckoutPage';
+import { OrderConfirmationPage } from './pages/OrderConfirmationPage';
 
 export default function App() {
   const [cartItems, setCartItems] = useState<CartItemsProps[]>([]);
   const [token, setToken] = useState<string>();
   const [user, setUser] = useState<User>();
-  // const navigate = useNavigate();
 
   useEffect(() => {
     async function loadCart() {
@@ -119,6 +120,41 @@ export default function App() {
     }
   }
 
+  // function handlePurchase() {
+  //   console.log('test');
+  //   navigate('/OrderConfirmationPage');
+  // }
+
+  async function handleCheckout() {
+    try {
+      const cartResponse = await fetch(`/api/cart/all/${user?.userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      await cartResponse.json();
+
+      for (const cartItem of cartItems) {
+        const recordResponse = await fetch(
+          `/api/delete-record/${cartItem.recordId}`,
+          {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (!recordResponse.ok)
+          console.error('An error occurred', recordResponse.status);
+      }
+      setCartItems([]);
+    } catch (error) {
+      console.error(error);
+    }
+  }
   const contextValue = {
     cartItems,
     addToCart,
@@ -128,6 +164,7 @@ export default function App() {
     user,
     token,
     deleteListing,
+    handleCheckout,
   };
 
   return (
@@ -148,6 +185,11 @@ export default function App() {
           <Route
             path="ListingDetailsPage/:recordId"
             element={<ListingDetailsPage />}
+          />
+          <Route path="CheckoutPage" element={<CheckoutPage />} />
+          <Route
+            path="OrderConfirmationPage"
+            element={<OrderConfirmationPage />}
           />
         </Routes>
       </AppContext.Provider>

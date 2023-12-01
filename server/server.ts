@@ -385,6 +385,38 @@ app.put(
     }
   }
 );
+
+app.delete('/api/cart/all/:userId', authMiddleware, async (req, res, next) => {
+  try {
+    const sql = `
+    delete from  "CartItems"
+    where "cartId" in (select "cartId" from "Cart" where "userId" = $1)
+    returning *;
+    `;
+    const params = [req.user?.userId];
+    const result = await db.query(sql, params);
+    console.log('test');
+    res.json(result.rows);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.delete(
+  '/api/delete-record/:recordId',
+  authMiddleware,
+  async (req, res, next) => {
+    try {
+      const recordId = Number(req.params.recordId);
+      const sql = 'DELETE FROM "Records" WHERE "recordId" = $1 RETURNING *';
+      const params = [recordId];
+      const result = await db.query(sql, params);
+      res.json(result.rows);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 // app.get('/api/get-genres', async (req, res, next) => {
 //   try {
 //     const sql = `
