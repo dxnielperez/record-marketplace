@@ -417,17 +417,48 @@ app.delete(
     }
   }
 );
-// app.get('/api/get-genres', async (req, res, next) => {
-//   try {
-//     const sql = `
-//     select * from "Genres"
-//     `;
-//     const result = await db.query(sql);
-//     res.json(result.rows);
-//   } catch (error) {
-//     next(error);
-//   }
-// });
+
+app.get('/api/shop-by-genre/:genreId', async (req, res, next) => {
+  try {
+    const genreId = Number(req.params.genreId);
+    const sql = `
+  select *
+  from "Records"
+  where "genreId" = $1
+    `;
+    const params = [genreId];
+    const result = await db.query(sql, params);
+    if (!result.rows) {
+      throw new ClientError(404, `Cannot find genre with genreId: ${genreId}`);
+    }
+    res.json(result.rows);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/get-genre-ids', async (req, res, next) => {
+  try {
+    const sql = `SELECT "genreId", "name" FROM "Genres"`;
+    const result = await db.query(sql);
+    res.json(result.rows);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/get-genre-name/:genreId', async (req, res, next) => {
+  try {
+    const genreId = Number(req.params.genreId);
+    const sql = `SELECT "name" FROM "Genres" WHERE "genreId" = $1`;
+    const params = [genreId];
+    const result = await db.query(sql, params);
+    res.json(result.rows[0]);
+  } catch (error) {
+    next(error);
+  }
+});
+
 /**
  * Serves React's index.html if no api route matches.
  *

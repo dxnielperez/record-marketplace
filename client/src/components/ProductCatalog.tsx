@@ -62,7 +62,7 @@ export default function ProductCatalog() {
           All Records
         </h2>
 
-        {!products && (
+        {products.length === 0 && (
           <h2 className="text-lg mb-[3rem] text-center text-rose-600">
             No records available for sale :(
           </h2>

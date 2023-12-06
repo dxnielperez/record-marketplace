@@ -14,6 +14,7 @@ import { SellerDashboard } from './pages/SellerDashboard';
 import { ListingDetailsPage } from './pages/ListingDetailsPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { OrderConfirmationPage } from './pages/OrderConfirmationPage';
+import { GenreCatalogPage } from './pages/GenreCatalogPage';
 
 export default function App() {
   const [cartItems, setCartItems] = useState<CartItemsProps[]>([]);
@@ -190,6 +191,10 @@ export default function App() {
           <Route
             path="OrderConfirmationPage"
             element={<OrderConfirmationPage />}
+          />
+          <Route
+            path="GenreCatalogPage/:genreId"
+            element={<GenreCatalogPage />}
           />
         </Routes>
       </AppContext.Provider>

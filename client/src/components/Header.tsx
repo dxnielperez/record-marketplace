@@ -2,16 +2,32 @@ import { BsCart3 } from 'react-icons/bs';
 import { FaRegUser } from 'react-icons/fa';
 import { IoMdMenu } from 'react-icons/io';
 import { Link } from 'react-router-dom';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IoMdClose } from 'react-icons/io';
 import { AppContext } from './AppContext';
+import { Genre } from '../types/types';
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const [genres, setGenres] = useState<Genre[]>([]);
   const { signOut, token, cartItems } = useContext(AppContext);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    async function getGenres() {
+      try {
+        const res = await fetch('/api/get-genre-ids');
+        if (!res.ok) throw new Error(`Error: ${res.status}`);
+        const result = await res.json();
+        setGenres(result);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    getGenres();
+  }, []);
 
   function signOutClick() {
     signOut();
@@ -69,10 +85,13 @@ export function Header() {
           <div className="menu-btn hidden cursor-pointer">
             {isMobile && (
               <>
-                <IoMdMenu onClick={handleMenuClick} />
+                <IoMdMenu
+                  onClick={handleMenuClick}
+                  className="absolute top-[5rem]"
+                />
                 <Link
                   to="/"
-                  className="w-full flex justify-end items-center text-4xl logo-text sm:nav-bg mobile-font-size mobile-name relative left-[18%] cursor-pointer">
+                  className="w-full flex justify-end items-center text-4xl logo-text sm:nav-bg mobile-font-size mobile-name relative left-[8rem] cursor-pointer">
                   Spin - Trade
                 </Link>
               </>
@@ -116,11 +135,18 @@ export function Header() {
               Shop by Genre
             </a>
             <div className="dropdown-content">
-              <Link to="/">Reggae</Link>
-              <a>Rap</a>
-              <a>Alternative</a>
-              <a>Jazz</a>
-              <a>Electronic</a>
+              {genres.map((genre) => (
+                <Link
+                  key={genre.genreId}
+                  to={`/GenreCatalogPage/${genre.genreId}`}>
+                  {genre.name}
+                </Link>
+              ))}
+              {/* <Link to="/GenreCatalogPage/1">Reggae</Link>
+              <Link to="/GenreCatalogPage/2">Rap</Link>
+              <Link to="/GenreCatalogPage/3">Alternative</Link>
+              <Link to="/GenreCatalogPage/4">Jazz</Link>
+              <Link to="/GenreCatalogPage/5">Electronic</Link> */}
             </div>
           </div>
 
@@ -140,6 +166,20 @@ export function Header() {
 
 function MenuModal({ isOpen, onClose }) {
   const token = localStorage.getItem('token');
+  const [genres, setGenres] = useState<Genre[]>([]);
+  useEffect(() => {
+    async function getGenres() {
+      try {
+        const res = await fetch('/api/get-genre-ids');
+        if (!res.ok) throw new Error(`Error: ${res.status}`);
+        const result = await res.json();
+        setGenres(result);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    getGenres();
+  }, []);
   return (
     <div
       className={`fixed inset-0 z-50 flex items-center justify-start transition-opacity ${
@@ -160,7 +200,22 @@ function MenuModal({ isOpen, onClose }) {
           <Link to="/ProductPage" className="underline text-xl">
             Shop All
           </Link>
-          <p className="underline text-xl">Shop by Genre</p>
+          <div className="dropdown">
+            <a className="text-black hover:text-slate-500 hover:underline duration-200 underline text-xl">
+              Shop by Genre
+            </a>
+            <div className="dropdown-content">
+              {genres.map((genre) => (
+                <Link
+                  key={genre.genreId}
+                  onClick={onClose}
+                  className="underline text-xl"
+                  to={`/GenreCatalogPage/${genre.genreId}`}>
+                  {genre.name}
+                </Link>
+              ))}
+            </div>
+          </div>
           {token && (
             <Link to="/CreateListing" className="underline text-xl">
               Create Listing

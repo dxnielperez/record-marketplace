@@ -75,11 +75,11 @@ export function DashboardHeader() {
             <Link to="/">
               <div className="relative group">
                 <img
-                  className="mobile-logo relative object-cover max-w-[11rem] z-1"
+                  className="mobile-logo relative object-cover max-w-[11rem] z-20"
                   src="/SpinTrade7.png"
                 />
                 <img
-                  className="mobile-logo vinyl object-cover max-w-[10.8rem] absolute bottom-[-0.1rem] left-0 transition-transform duration-300 ease-in-out group-hover:translate-x-[7rem] z-11 opacity-0 group-hover:opacity-100"
+                  className="mobile-logo vinyl object-cover max-w-[10.8rem] absolute bottom-[-0.1rem] left-0 transition-transform duration-300 ease-in-out group-hover:translate-x-[7rem] z-0 opacity-0 group-hover:opacity-100"
                   src="/vinyl.webp"
                 />
               </div>
@@ -106,7 +106,7 @@ export function DashboardHeader() {
                 Create Listing
               </Link>
             )}
-            <p className="text-black hover:text-slate-500 hover:underline duration-200">
+            <p className="text-black hover:text-slate-500 hover:underline duration-200 ">
               Active Listings
             </p>
             <p className="text-black hover:text-slate-500 hover:underline duration-200">
@@ -115,7 +115,7 @@ export function DashboardHeader() {
           </div>
         </nav>
         <MenuModal isOpen={isOpen} onClose={handleCloseMenu} />
-        <h3 className="text-4xl flex justify-center pb-[2rem] pt-[1rem] bg-[ghostwhite]">
+        <h3 className="text-4xl flex justify-center pb-[2rem] pt-[1rem] bg-[ghostwhite] mobile-dashboard">
           Seller Dashboard
         </h3>
       </div>

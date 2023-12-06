@@ -9,9 +9,9 @@ export function HomePage() {
     <>
       <Header />
       {!isMobile ? (
-        <img src="/landing4.png" className="w-full" />
+        <img src="/landingpage1.png" className="w-full" />
       ) : (
-        <img src="/mobilelanding.png" className="w-full" />
+        <img src="/mobilelanding2.png" className="w-full" />
       )}
       <SideScrollCarousel />
       <Footer />

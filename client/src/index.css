@@ -7,8 +7,9 @@
 }
 
 .nav-bg {
-  /* background-color: #cad5ca; */
-  background-color: #dcdcf9;
+  background-color: #d0cdc8;
+
+  /* background-color: #dcdcf9; */
 }
 
 .logo-text {
@@ -141,8 +142,7 @@
   }
 
   .mobile-name {
-    justify-content: left;
-    left: 3rem;
+    justify-content: center;
   }
 
   .mobile-font-size {
@@ -208,7 +208,7 @@
   .mobile-category {
     text-align: center;
     margin-left: 0;
-    font-size: 2rem;
+    font-size: 1.7rem;
   }
 
   .mobile-home-page {
@@ -266,7 +266,6 @@
   }
 
   .seller-logo {
-    width: 80vw;
     display: flex;
     position: relative;
     left: 8rem;
@@ -350,5 +349,14 @@
 
   .mobile-cancel-place {
     padding-bottom: 1.5rem;
+  }
+
+  .mobile-dashboard {
+    font-size: 2rem;
+    padding-bottom: 0;
+  }
+
+  .mobile-scroll {
+    font-size: 1.2rem;
   }
 }
