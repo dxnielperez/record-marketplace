@@ -43,3 +43,8 @@ export type Products = {
   info: string;
   sellerId: number;
 };
+
+export type Genre = {
+  name: string;
+  genreId: number;
+};
