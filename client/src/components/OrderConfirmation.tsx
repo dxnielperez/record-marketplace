@@ -40,7 +40,7 @@ export function OrderConfirmation() {
   }
 
   const confirmationNumber = getOrCreateConfirmationNumber();
-  console.log(purchasedItems);
+
   return (
     <div className="w-full flex justify-center py-[2rem] mb-[2rem]">
       <div className="border border-black min-w-[100rem] px-[4rem] py-[4rem] mobile-confirmation">

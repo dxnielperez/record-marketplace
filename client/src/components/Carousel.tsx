@@ -49,7 +49,18 @@ export function SideScrollCarousel() {
     }
   };
 
-  const isMobile = window.innerWidth <= 768;
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1086);
+
+  useEffect(() => {
+    function handleResize() {
+      setIsMobile(window.innerWidth <= 1086);
+    }
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
   return (
     <>
       <div className="flex justify-center text-2xl bg-[ghostwhite] pt-[1rem] mobile-scroll">

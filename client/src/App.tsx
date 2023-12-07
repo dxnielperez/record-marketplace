@@ -23,8 +23,11 @@ export default function App() {
 
   useEffect(() => {
     async function loadCart() {
-      const getToken = localStorage.getItem('token');
       try {
+        const getToken = localStorage.getItem('token');
+        if (!getToken) {
+          return;
+        }
         const res = await fetch(`/api/cart`, {
           headers: {
             Authorization: `Bearer ${getToken}`,
@@ -67,7 +70,6 @@ export default function App() {
       if (!response.ok) throw new Error(`Error: ${response.status}`);
       const result = await response.json();
       setCartItems([...cartItems, result]);
-      console.log('Product added to cart:', result);
     } catch (error) {
       console.error('Error adding to cart:', error);
     }
@@ -120,11 +122,6 @@ export default function App() {
       }
     }
   }
-
-  // function handlePurchase() {
-  //   console.log('test');
-  //   navigate('/OrderConfirmationPage');
-  // }
 
   async function handleCheckout() {
     try {
