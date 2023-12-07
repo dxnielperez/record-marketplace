@@ -11,7 +11,7 @@ export function CreateAccountForm() {
       setIsLoading(true);
       const formData = new FormData(event.currentTarget);
       const userData = Object.fromEntries(formData.entries());
-      console.log('userData:', userData);
+
       const req = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -21,8 +21,8 @@ export function CreateAccountForm() {
       if (!res.ok) {
         throw new Error(`Fetch error ${res.status}`);
       }
-      const user = await res.json();
-      console.log(`Registered user: ${user}`);
+      await res.json();
+
       navigate('/login');
     } catch (error) {
       alert(`Error creating account: ${error}`);

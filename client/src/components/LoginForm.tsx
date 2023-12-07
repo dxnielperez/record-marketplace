@@ -24,8 +24,6 @@ export function LoginForm() {
       const { user, token } = await res.json();
 
       signIn(user, token);
-
-      console.log('Signed in:', user, 'Recieved token:', token);
       alert(`Signed in as ${user.username}`);
       navigate('/');
     } catch (error) {
@@ -53,7 +51,6 @@ export function LoginForm() {
 
       signIn(user, token);
 
-      console.log('Signed in as guest:', user, 'Received token:', token);
       alert(`Signed in as guest: ${user.username}`);
       navigate('/');
     } catch (error) {

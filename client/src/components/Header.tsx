@@ -52,7 +52,19 @@ export function Header() {
   }
   const itemsAmount = cartItems.length === 0 ? '' : cartItems.length;
 
-  const isMobile = window.innerWidth <= 768;
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1086);
+
+  useEffect(() => {
+    function handleResize() {
+      setIsMobile(window.innerWidth <= 1086);
+    }
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   return (
     <div className="mobile-container">
       <h3 className="bg-[#5C6770] text-white flex justify-center items-center h-[2rem] mobile-home-page">

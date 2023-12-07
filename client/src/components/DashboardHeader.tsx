@@ -17,11 +17,6 @@ export function DashboardHeader() {
     navigate('/');
   }
 
-  function handleUserIconClick(event) {
-    event.preventDefault();
-    alert('You are already on your seller dashboard');
-  }
-
   function handleMenuClick() {
     setIsOpen(!isOpen);
   }
@@ -47,11 +42,8 @@ export function DashboardHeader() {
           )}
           {/* <IoSearchSharp className="text-black hover:text-slate-500 duration-200" /> */}
 
-          <Link to="/login">
-            <FaRegUser
-              onClick={handleUserIconClick}
-              className="text-black hover:text-slate-500 duration-200"
-            />
+          <Link to="/">
+            <FaRegUser className="text-black hover:text-slate-500 duration-200" />
           </Link>
         </div>
         <nav className="nav-bg flex w-full gap-x-3.5 items-end p-3  mobile-nav">

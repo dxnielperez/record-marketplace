@@ -30,8 +30,7 @@ export function NewListingForm() {
         });
 
         if (!response.ok) throw new Error(`Error: ${response.status}`);
-        const result = await response.json();
-        console.log('Success:', result);
+        await response.json();
       } else {
         await fetch(`/api/update-listing/${product.recordId}`, {
           method: 'PUT',
