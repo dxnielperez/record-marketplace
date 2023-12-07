@@ -79,7 +79,7 @@ export function CreateAccountForm() {
           </div>
         </form>
         <Link
-          className="mt-6 text-center text-sm text-indigo-600 hover:underline cursor-pointer"
+          className="flex justify-between mt-6 text-center text-sm text-indigo-600 cursor-pointer"
           to="/login">
           Sign in
         </Link>
