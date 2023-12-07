@@ -35,6 +35,35 @@ export function LoginForm() {
       setIsLoading(false);
     }
   }
+
+  async function handleGuest() {
+    try {
+      setIsLoading(true);
+
+      const req = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: 'guest', password: 'guest_password' }),
+      };
+      const res = await fetch('/api/sign-in-guest', req);
+
+      if (!res.ok) throw new Error(`fetch error ${res.status}`);
+
+      const { user, token } = await res.json();
+
+      signIn(user, token);
+
+      console.log('Signed in as guest:', user, 'Received token:', token);
+      alert(`Signed in as guest: ${user.username}`);
+      navigate('/');
+    } catch (error) {
+      console.error('Error logging in as guest:', error);
+      alert(`Error signing in as guest: ${error}`);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
     <div className="bg-[ghostwhite] min-h-screen flex items-start pt-[4rem] justify-center p-4 text-lg">
       <div className="bg-white rounded-2xl max-w-xl mx-auto w-full p-8">
@@ -83,11 +112,14 @@ export function LoginForm() {
             </button>
           </div>
         </form>
-        <Link
-          className="mt-6 text-center text-sm text-indigo-600 hover:underline cursor-pointer"
-          to="/createAccount">
-          Create Account
-        </Link>
+        <div className="flex justify-between mt-6 text-center text-sm text-indigo-600 cursor-pointer">
+          <Link to="/createAccount" className="hover:underline">
+            Create Account
+          </Link>
+          <a onClick={handleGuest} className="self-end hover:underline">
+            Sign in as Guest
+          </a>
+        </div>
       </div>
     </div>
   );

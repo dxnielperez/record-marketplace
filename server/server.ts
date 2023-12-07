@@ -459,6 +459,27 @@ app.get('/api/get-genre-name/:genreId', async (req, res, next) => {
   }
 });
 
+app.post('/api/sign-in-guest', async (req, res, next) => {
+  try {
+    const username = 'guest_' + Math.floor(Math.random() * 100000);
+    const password = 'guest_password';
+    const hashedPassword = await argon2.hash(password);
+    const sql = `
+    insert into "Users" ("username", "hashedPassword")
+    values($1, $2)
+    returning *;
+    `;
+    const params = [username, hashedPassword];
+    const result = await db.query(sql, params);
+    const guestUserId = result.rows[0].userId;
+
+    const payload = { userId: guestUserId, username };
+    const token = jwt.sign(payload, hashKey);
+    res.json({ token, user: payload });
+  } catch (error) {
+    next(error);
+  }
+});
 /**
  * Serves React's index.html if no api route matches.
  *
