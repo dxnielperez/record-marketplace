@@ -248,45 +248,6 @@ export function Checkout() {
         </div>
 
         <div className="vl"></div>
-
-        {/* <div className="mb-[2rem] mt-[2rem] lg:mb-0 lg:w-[65%]">
-              {visibleItems.map((item) => (
-                <div className="flex gap-[1rem] mb-[2rem]" key={item.itemsId}>
-                  <div>
-                    <img
-                      src={item.imageSrc}
-                      className="max-w-[150px]"
-                      alt="Product"
-                    />
-                  </div>
-                  <div className="flex flex-col justify-around">
-                    <div className="flex w-[20rem] checkout-width">
-                      <h3>{`${item.artist} - ${item.albumName}`}</h3>
-                    </div>
-                    <h3 className="checkout-width">{`$${item.price}`}</h3>
-
-                    <FaRegTrashAlt
-                      onClick={() => removeFromCart(item.itemsId)}
-                      className="cursor-pointer hover:text-[red] hover:translate-y-px	transition ease-in-out delay-100"
-                    />
-                  </div>
-                </div>
-              ))}
-              {cartItems.length > 3 && !showAllItems && (
-                <button
-                  className="text-lg cursor-pointer hover:underline hover:text-slate-500"
-                  onClick={() => setShowAllItems(true)}>
-                  View More
-                </button>
-              )}
-              {showAllItems && (
-                <button
-                  className="text-lg cursor-pointer hover:underline hover:text-slate-500"
-                  onClick={() => setShowAllItems(false)}>
-                  View Less
-                </button>
-              )}
-            </div> */}
       </div>
     </>
   );
