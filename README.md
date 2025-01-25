@@ -1,4 +1,4 @@
-# [Spin Trade Record Marketplace]
+# Spin Trade Record Marketplace
 
 Welcome to the **Record Marketplace** repository! This repository contains the source code for the Record Marketplace web application – a platform dedicated to buying and selling vinyl records.
 ## Table of Contents
