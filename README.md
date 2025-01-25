@@ -1,4 +1,4 @@
-# [Spin Trade Record Marketplace](http://recordmarketplace-dev.us-west-1.elasticbeanstalk.com/)
+# [Spin Trade Record Marketplace]
 
 Welcome to the **Record Marketplace** repository! This repository contains the source code for the Record Marketplace web application – a platform dedicated to buying and selling vinyl records.
 ## Table of Contents
