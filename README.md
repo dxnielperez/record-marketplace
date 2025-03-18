@@ -6,7 +6,6 @@ Welcome to the **Record Marketplace** repository! This repository contains the s
 - [Description](#description)
 - [Features](#features)
 - [Technologies Used](#technologies-used)
-- [Installation](#installation)
 - [Usage](#usage)
 
 ## Description
