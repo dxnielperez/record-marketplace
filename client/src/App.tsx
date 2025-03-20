@@ -181,8 +181,8 @@ export default function App() {
             path="ProductDetailsPage/:recordId"
             element={<ProductDetailsPage />}
           />
-          <Route path="ShoppingCart" element={<ShoppingCartPage />} />
-          <Route path="SellerDashboard" element={<SellerDashboard />} />
+          <Route path="cart" element={<ShoppingCartPage />} />
+          <Route path="/account" element={<SellerDashboard />} />
           <Route
             path="ListingDetailsPage/:recordId"
             element={<ListingDetailsPage />}
@@ -192,10 +192,7 @@ export default function App() {
             path="OrderConfirmationPage"
             element={<OrderConfirmationPage />}
           />
-          <Route
-            path="GenreCatalogPage/:genreId"
-            element={<GenreCatalogPage />}
-          />
+          <Route path="genre/:genreId" element={<GenreCatalogPage />} />
         </Routes>
         <Footer />
       </AppContext.Provider>

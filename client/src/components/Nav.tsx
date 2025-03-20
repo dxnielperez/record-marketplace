@@ -1,10 +1,30 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AppContext } from './AppContext';
 import { handleSignOut } from './handleSignOut';
+import { Genre } from '../types/types';
+import { RiAccountCircleFill } from 'react-icons/ri';
+import { IoCart } from 'react-icons/io5';
 
 export default function Nav() {
-  const { token } = useContext(AppContext);
+  const { token, user } = useContext(AppContext);
+  const [genres, setGenres] = useState<Genre[]>([]);
+
+  useEffect(() => {
+    async function getGenres() {
+      try {
+        const res = await fetch('/api/get-genre-ids');
+        if (!res.ok) throw new Error(`Error: ${res.status}`);
+        const result = await res.json();
+        setGenres(result);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    getGenres();
+  }, []);
+  console.log('user', user);
+
   return (
     <nav className="bg-[#E1CE7A] p-2">
       <div className="w-full flex justify-between items-start">
@@ -25,6 +45,12 @@ export default function Nav() {
 
         <div className="flex flex-col justify-between h-[120px] items-end">
           <div className="flex gap-5">
+            <Link to="account" className="text-3xl">
+              <RiAccountCircleFill />
+            </Link>
+            <Link to={token ? '/cart' : '/login'} className="text-3xl">
+              <IoCart />
+            </Link>
             <Link
               to="/"
               className="bg-[#C84C09] text-white px-2 py-1 rounded-md">
@@ -35,16 +61,24 @@ export default function Nav() {
               className="bg-[#C84C09] text-white px-2 py-1 rounded-md">
               Sign Up
             </Link>
-            {token ? (
-              <button onClick={handleSignOut}>Sign Out</button>
-            ) : (
-              <Link to="/login">Log In</Link>
-            )}
+            <button onClick={handleSignOut}>Sign Out</button>
+            <Link to="/login">Log In</Link>
           </div>
-          <div className="flex gap-5 text-xl w-full">
+          <div className="flex gap-5 text-xl">
             <Link to="/">Home</Link>
-            <Link to="/shop">Shop All</Link>
-            <Link to="/">Shop Genre</Link>
+            <Link to="/">Shop All</Link>
+            <div className="dropdown">
+              <a className="text-black cursor-pointer hover:underline duration-200">
+                Shop by Genre
+              </a>
+              <div className="dropdown-content">
+                {genres.map((genre) => (
+                  <Link key={genre.genreId} to={`/genre/${genre.genreId}`}>
+                    {genre.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
