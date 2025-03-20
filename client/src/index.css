@@ -84,20 +84,6 @@
   background-color: #3e8e41;
 }
 
-.item-bubble {
-  border-radius: 50%;
-  height: 1.35rem;
-  width: 1.35rem;
-  justify-content: center;
-  display: flex;
-  align-items: center;
-  position: absolute;
-  background-color: #ff999c;
-  bottom: 1.38rem;
-  right: 1.5rem;
-  font-size: 1rem;
-}
-
 .overlay {
   position: fixed;
   top: 0;

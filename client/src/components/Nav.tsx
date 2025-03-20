@@ -1,14 +1,16 @@
+// Nav.tsx
 import { useContext, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AppContext } from './AppContext';
-import { handleSignOut } from './handleSignOut';
 import { Genre } from '../types/types';
 import { RiAccountCircleFill } from 'react-icons/ri';
 import { IoCart } from 'react-icons/io5';
 
 export default function Nav() {
-  const { token, user } = useContext(AppContext);
+  const { token, user, signOut, cartItems } = useContext(AppContext);
+  const navigate = useNavigate();
   const [genres, setGenres] = useState<Genre[]>([]);
+  const itemsAmount = cartItems.length === 0 ? '' : cartItems.length;
 
   useEffect(() => {
     async function getGenres() {
@@ -23,7 +25,12 @@ export default function Nav() {
     }
     getGenres();
   }, []);
-  console.log('user', user);
+
+  const handleSignOutClick = () => {
+    signOut();
+    alert('Signed out!');
+    navigate('/');
+  };
 
   return (
     <nav className="bg-[#E1CE7A] p-2">
@@ -45,32 +52,41 @@ export default function Nav() {
 
         <div className="flex flex-col justify-between h-[120px] items-end">
           <div className="flex gap-5">
-            <Link to="account" className="text-3xl">
-              <RiAccountCircleFill />
-            </Link>
-            <Link to={token ? '/cart' : '/login'} className="text-3xl">
+            {token && (
+              <Link to="account" className="text-3xl">
+                <RiAccountCircleFill />
+              </Link>
+            )}
+            <Link to={token ? '/cart' : '/login'} className="relative text-3xl">
               <IoCart />
+              {itemsAmount && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                  {itemsAmount}
+                </span>
+              )}
             </Link>
             <Link
-              to="/"
+              to={`${token ? '/create' : '/login'}`}
               className="bg-[#C84C09] text-white px-2 py-1 rounded-md">
               Sell Now
             </Link>
-            <Link
-              to="/sign-up"
-              className="bg-[#C84C09] text-white px-2 py-1 rounded-md">
-              Sign Up
-            </Link>
-            <button onClick={handleSignOut}>Sign Out</button>
-            <Link to="/login">Log In</Link>
+            {!token && (
+              <Link
+                to="/sign-up"
+                className="bg-[#C84C09] text-white px-2 py-1 rounded-md">
+                Sign Up
+              </Link>
+            )}
+            {token && <button onClick={handleSignOutClick}>Sign Out</button>}
+            {!token && <Link to="/login">Log In</Link>}
           </div>
           <div className="flex gap-5 text-xl">
             <Link to="/">Home</Link>
-            <Link to="/">Shop All</Link>
+            <Link to="/shop">Shop All</Link>
             <div className="dropdown">
-              <a className="text-black cursor-pointer hover:underline duration-200">
+              <p className="text-black cursor-pointer hover:underline duration-200">
                 Shop by Genre
-              </a>
+              </p>
               <div className="dropdown-content">
                 {genres.map((genre) => (
                   <Link key={genre.genreId} to={`/genre/${genre.genreId}`}>
@@ -79,6 +95,7 @@ export default function Nav() {
                 ))}
               </div>
             </div>
+            <div>{user && <Link to="/create">Create Listing</Link>}</div>
           </div>
         </div>
       </div>

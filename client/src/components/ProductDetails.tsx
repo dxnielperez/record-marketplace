@@ -29,7 +29,7 @@ export function ProductDetails() {
     try {
       if (!product) return;
       await addToCart(product);
-      navigate('/ShoppingCart');
+      navigate('/cart');
     } catch (error) {
       console.error('Error adding to cart:', error);
     }
@@ -41,7 +41,7 @@ export function ProductDetails() {
   return (
     <div className="bg-[ghostwhite] min-h-screen">
       <div className="pt-6 mx-auto max-w-7xl px-4 py-10 lg:py-9 lg:px-8">
-        <Link to="/ProductPage">
+        <Link to="/shop">
           <nav className="text-xl pb-4 flex gap-[0.5rem] cursor-pointer hover:underline hover:text-slate-500 mobile-back">
             Back to products
           </nav>

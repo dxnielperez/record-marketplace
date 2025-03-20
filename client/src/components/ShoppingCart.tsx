@@ -28,7 +28,7 @@ export function ShoppingCart() {
           <>
             <h1 className="mobile-cart">Your Cart</h1>
             <Link
-              to="/ProductPage"
+              to="/shop"
               className="text-lg cursor-pointer hover:underline hover:text-slate-500 mobile-continue">
               Continue shopping
             </Link>
@@ -41,7 +41,7 @@ export function ShoppingCart() {
             </div>
             <div className="flex justify-center">
               <button
-                onClick={() => navigate('/ProductPage')}
+                onClick={() => navigate('/shop')}
                 className="text-xl max-w-fit px-[1.8rem] py-[0.8rem] bg-[#8F93A3] rounded-md text-white hover:bg-[#787D91] transition ease-in-out delay-50 mobile-start-button">
                 Start shopping
               </button>
