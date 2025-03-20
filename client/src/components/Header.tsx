@@ -12,7 +12,7 @@ export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [genres, setGenres] = useState<Genre[]>([]);
   const { signOut, token, cartItems } = useContext(AppContext);
-
+  console.log(token);
   const navigate = useNavigate();
 
   useEffect(() => {

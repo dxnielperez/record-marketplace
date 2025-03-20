@@ -110,7 +110,7 @@ export function LoginForm() {
           </div>
         </form>
         <div className="flex justify-between mt-6 text-center text-sm text-indigo-600 cursor-pointer">
-          <Link to="/createAccount" className="hover:underline">
+          <Link to="/sign-up" className="hover:underline">
             Create Account
           </Link>
           <a onClick={handleGuest} className="self-end hover:underline">

@@ -1,10 +1,9 @@
 import './App.css';
-import { CreateAccountPage } from './pages/CreateAccountPage';
 import { CreateListingPage } from './pages/CreateListingPage';
-import { HomePage } from './pages/HomePage';
+import { Home } from './pages/Home';
 import { LoginPage } from './pages/LoginPage';
 import { Route, Routes } from 'react-router-dom';
-import { ProductPage } from './pages/ProductPage';
+import { Shop } from './pages/Shop';
 import { ProductDetailsPage } from './pages/ProductDetailsPage';
 import { ShoppingCartPage } from './pages/ShoppingCartPage';
 import { useEffect, useState } from 'react';
@@ -15,6 +14,9 @@ import { ListingDetailsPage } from './pages/ListingDetailsPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { OrderConfirmationPage } from './pages/OrderConfirmationPage';
 import { GenreCatalogPage } from './pages/GenreCatalogPage';
+import Nav from './components/Nav';
+import { Footer } from './components/Footer';
+import { SignUp } from './pages/SignUp';
 
 export default function App() {
   const [cartItems, setCartItems] = useState<CartItemsProps[]>([]);
@@ -168,12 +170,13 @@ export default function App() {
   return (
     <div>
       <AppContext.Provider value={contextValue}>
+        <Nav />
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<Home />} />
           <Route path="login" element={<LoginPage />} />
-          <Route path="CreateAccount" element={<CreateAccountPage />} />
+          <Route path="sign-up" element={<SignUp />} />
           <Route path="CreateListing" element={<CreateListingPage />} />
-          <Route path="ProductPage" element={<ProductPage />} />
+          <Route path="shop" element={<Shop />} />
           <Route
             path="ProductDetailsPage/:recordId"
             element={<ProductDetailsPage />}
@@ -194,6 +197,7 @@ export default function App() {
             element={<GenreCatalogPage />}
           />
         </Routes>
+        <Footer />
       </AppContext.Provider>
     </div>
   );
