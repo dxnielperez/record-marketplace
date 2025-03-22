@@ -11,4 +11,4 @@
 --      ('Get a job', false);
 
 insert into "Genres" ("name")
-values('Alternative'),('Country'),('Electronic'),('Jazz'),('Pop'),('Rap'),('Reggae'),('R&B'),('Rock'),('Spanish');
+values('alternative'),('country'),('electronic'),('jazz'),('pop'),('rap'),('reggae'),('r&b'),('rock'),('spanish');

@@ -1,17 +1,31 @@
-import { Outlet } from 'react-router-dom';
 import { SideScrollCarousel } from '../components/Carousel';
+import { SlidingBar } from '../components/SlidingBar';
 
 export function Home() {
-  const isMobile = window.innerWidth <= 768;
   return (
-    <>
-      {!isMobile ? (
-        <img src="/landingpage1.png" className="w-full" alt="" />
-      ) : (
-        <img src="/mobilelanding2.png" className="w-full" alt="" />
-      )}
+    <div>
+      <div className="w-full flex flex-col lg:flex-row">
+        <img
+          src="/bob-3.jpg"
+          alt="bob marley"
+          className="w-full lg:w-2/3 order-1 lg:order-2 aspect-[14/5] lg:aspect-[16/9] object-cover"
+        />
+
+        <div className="w-full flex flex-col mx-auto items-center lg:items-start justify-center gap-4 p-4 order-2 lg:order-1">
+          <h3 className="">Album of the Week</h3>
+          <p className="text-xl font-medium">Exodus - Bob Marley</p>
+          <p>The All Time Classic Album by Bob Marley on Reggae Red Vinyl</p>
+          <a
+            href="/"
+            className="bg-emerald text-snow px-3 py-1 rounded-md h-min drop-shadow-lg">
+            Buy Now
+          </a>
+        </div>
+      </div>
+
+      <SlidingBar />
+
       <SideScrollCarousel />
-      <Outlet />
-    </>
+    </div>
   );
 }

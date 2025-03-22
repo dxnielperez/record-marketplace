@@ -92,16 +92,27 @@ app.post(
   async (req, res, next) => {
     try {
       const { artist, album, genre, condition, price, info } = req.body;
+      const genreSql = `
+      SELECT "genreId" 
+      FROM "Genres" 
+      WHERE "name" = $1
+    `;
+      const genreResult = await db.query(genreSql, [genre]);
+      if (!genreResult.rows[0]) {
+        throw new ClientError(400, `Genre '${genre}' not found`);
+      }
+      const genreId = genreResult.rows[0].genreId;
+
       const sql = `
-      insert into "Records" ("imageSrc", "artist", "albumName", "genreId", "condition", "price", "info", "sellerId")
-      values($1, $2, $3, $4, $5, $6, $7, $8)
-      returning *;
-      `;
+      INSERT INTO "Records" ("imageSrc", "artist", "albumName", "genreId", "condition", "price", "info", "sellerId")
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      RETURNING *;
+    `;
       const params = [
         `/images/${req.file?.filename}`,
         artist,
         album,
-        genre,
+        genreId,
         condition,
         price,
         info,
@@ -141,11 +152,17 @@ app.get('/api/all-products', async (req, res, next) => {
   }
 });
 
-app.get('/api/products/:recordId', async (req, res, next) => {
+app.get('/api/products/:record', async (req, res, next) => {
   try {
-    const recordId = Number(req.params.recordId);
-    if (!recordId)
+    const record = req.params.record;
+    const parts = record.split('+');
+    if (parts.length !== 2) {
+      throw new ClientError(400, 'Invalid format. Expected /products/name+id');
+    }
+    const recordId = Number(parts[1]);
+    if (!recordId || isNaN(recordId)) {
       throw new ClientError(400, 'recordId must be a positive integer');
+    }
     const sql = `
     select "recordId",
            "imageSrc",
@@ -346,6 +363,7 @@ app.delete('/api/delete-listing/:recordId', async (req, res, next) => {
   }
 });
 
+// Update update-listing endpoint
 app.put(
   '/api/update-listing/:recordId',
   authMiddleware,
@@ -354,24 +372,38 @@ app.put(
     try {
       const { recordId } = req.params;
       const id = Number(recordId);
+      // Get genreId from genre name
+      const genreSql = `
+        SELECT "genreId" 
+        FROM "Genres" 
+        WHERE "name" = $1
+      `;
+      const genreResult = await db.query(genreSql, [req.body.genre]);
+      if (!genreResult.rows[0]) {
+        throw new ClientError(400, `Genre '${req.body.genre}' not found`);
+      }
+      const genreId = genreResult.rows[0].genreId;
+
       const sql = `
-    update "Records"
-    set "artist" = $1,
-    ${
-      req.file?.filename ? `"imageSrc" = '/images/${req.file?.filename}', ` : ''
-    }
-    "albumName" = $2,
-    "genreId" = $3,
-    "condition" = $4,
-    "price" = $5,
-    "info" = $6
-    where "recordId" = $7
-    returning *;
-    `;
+        UPDATE "Records"
+        SET "artist" = $1,
+        ${
+          req.file?.filename
+            ? `"imageSrc" = '/images/${req.file?.filename}', `
+            : ''
+        }
+        "albumName" = $2,
+        "genreId" = $3,
+        "condition" = $4,
+        "price" = $5,
+        "info" = $6
+        WHERE "recordId" = $7
+        RETURNING *;
+      `;
       const params = [
         req.body.artist,
         req.body.album,
-        req.body.genre,
+        genreId,
         req.body.condition,
         req.body.price,
         req.body.info,
@@ -418,18 +450,23 @@ app.delete(
   }
 );
 
-app.get('/api/shop-by-genre/:genreId', async (req, res, next) => {
+// Update shop-by-genre endpoint to use genre name
+app.get('/api/shop-by-genre/:genreName', async (req, res, next) => {
   try {
-    const genreId = Number(req.params.genreId);
+    const genreName = req.params.genreName;
     const sql = `
-  select *
-  from "Records"
-  where "genreId" = $1
+      SELECT *
+      FROM "Records"
+      JOIN "Genres" USING ("genreId")
+      WHERE "Genres"."name" = $1
     `;
-    const params = [genreId];
+    const params = [genreName];
     const result = await db.query(sql, params);
-    if (!result.rows) {
-      throw new ClientError(404, `Cannot find genre with genreId: ${genreId}`);
+    if (!result.rows.length) {
+      throw new ClientError(
+        404,
+        `Cannot find records with genre: ${genreName}`
+      );
     }
     res.json(result.rows);
   } catch (error) {

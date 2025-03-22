@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Genre, Products } from '../types/types';
 
-export default function GenreCatalog() {
+export default function ProductCatalog() {
   const [products, setProducts] = useState<Products[]>([]);
   const [sortBy, setSortBy] = useState<string>('');
+  const navigate = useNavigate();
   const [genres, setGenres] = useState<Genre[]>([]);
 
   useEffect(() => {
@@ -21,28 +22,19 @@ export default function GenreCatalog() {
     getGenres();
   }, []);
 
-  const { genreName } = useParams();
-  const navigate = useNavigate();
-
   useEffect(() => {
-    async function getProductsByGenre() {
+    async function getProducts() {
       try {
-        const res = await fetch(`/api/shop-by-genre/${genreName}`);
+        const res = await fetch('/api/all-products');
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const result = await res.json();
-        if (Array.isArray(result)) {
-          setProducts(result);
-        } else {
-          console.error('Invalid result is not an array', result);
-        }
+        setProducts(result);
       } catch (error) {
         console.error(error);
       }
     }
-    if (genreName) {
-      getProductsByGenre();
-    }
-  }, [genreName]);
+    getProducts();
+  }, []);
 
   const handleSort = useCallback((option) => {
     setSortBy(option);
@@ -84,6 +76,7 @@ export default function GenreCatalog() {
 
       <div>
         {products.length === 0 && <h2>No records available for sale</h2>}
+
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {/* Category Column */}
           <div className="flex flex-col w-full h-auto md:h-full bg-gray-100 p-4">

@@ -32,23 +32,6 @@ export function SideScrollCarousel() {
     getProducts();
   }, []);
 
-  const handleScrollToBeginning = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTo({ left: 0, behavior: 'smooth' });
-    }
-  };
-
-  const handleScrollToEnd = () => {
-    if (scrollContainerRef.current) {
-      const scrollWidth = scrollContainerRef.current.scrollWidth;
-      const containerWidth = scrollContainerRef.current.clientWidth;
-      scrollContainerRef.current.scrollTo({
-        left: scrollWidth - containerWidth,
-        behavior: 'smooth',
-      });
-    }
-  };
-
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 1086);
 
   useEffect(() => {
@@ -63,10 +46,10 @@ export function SideScrollCarousel() {
   }, []);
   return (
     <>
-      <div className="flex justify-center text-2xl bg-[ghostwhite] pt-[1rem] mobile-scroll">
+      <div className="flex justify-center  pt-[1rem] mobile-scroll">
         Browse available records
       </div>
-      <div className="relative bg-[ghostwhite] pt-[1rem] pb-[2rem]">
+      <div className="relative pt-[1rem] pb-[2rem]">
         <div
           ref={scrollContainerRef}
           className="flex overflow-x-auto max-w-screen-lg mx-auto p-4">
@@ -84,7 +67,7 @@ export function SideScrollCarousel() {
                 src={product.imageSrc}
                 alt={`Product ${product.recordId}`}
               />
-              <div className="bg-[ghostwhite] p-4">
+              <div className="p-4">
                 <div className="text-lg font-bold mb-2">{product.artist}</div>
                 <div className="text-xl font-bold mb-2">
                   {product.albumName}
@@ -94,20 +77,6 @@ export function SideScrollCarousel() {
             </div>
           ))}
         </div>
-        {!isMobile && (
-          <div>
-            <button
-              className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white p-2 rounded-full shadow cursor-pointer"
-              onClick={handleScrollToBeginning}>
-              Scroll to Beginning
-            </button>
-            <button
-              className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white p-2 rounded-full shadow cursor-pointer"
-              onClick={handleScrollToEnd}>
-              Scroll to End
-            </button>
-          </div>
-        )}
       </div>
     </>
   );

@@ -1,30 +1,28 @@
-// Nav.tsx
 import { useContext, useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AppContext } from './AppContext';
-import { Genre } from '../types/types';
-import { RiAccountCircleFill } from 'react-icons/ri';
-import { IoCart } from 'react-icons/io5';
+// import { Genre } from '../types/types';
+import { IoCart, IoMenuSharp, IoPersonCircleSharp } from 'react-icons/io5';
 
 export default function Nav() {
-  const { token, user, signOut, cartItems } = useContext(AppContext);
+  const { user, signOut, cartItems } = useContext(AppContext);
   const navigate = useNavigate();
-  const [genres, setGenres] = useState<Genre[]>([]);
   const itemsAmount = cartItems.length === 0 ? '' : cartItems.length;
 
-  useEffect(() => {
-    async function getGenres() {
-      try {
-        const res = await fetch('/api/get-genre-ids');
-        if (!res.ok) throw new Error(`Error: ${res.status}`);
-        const result = await res.json();
-        setGenres(result);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-    getGenres();
-  }, []);
+  // const [genres, setGenres] = useState<Genre[]>([]);
+  // useEffect(() => {
+  //   async function getGenres() {
+  //     try {
+  //       const res = await fetch('/api/get-genre-ids');
+  //       if (!res.ok) throw new Error(`Error: ${res.status}`);
+  //       const result = await res.json();
+  //       setGenres(result);
+  //     } catch (error) {
+  //       console.error(error);
+  //     }
+  //   }
+  //   getGenres();
+  // }, []);
 
   const handleSignOutClick = () => {
     signOut();
@@ -33,72 +31,119 @@ export default function Nav() {
   };
 
   return (
-    <nav className="bg-[#E1CE7A] p-2">
-      <div className="w-full flex justify-between items-start">
-        <Link to="/">
-          <div className="relative group">
-            <img
-              className="mobile-logo relative object-cover max-w-[8rem] z-20"
-              src="/spin-trade-red.png"
-              alt="logo"
-            />
-            <img
-              className="mobile-logo vinyl object-cover max-w-[7rem] absolute bottom-[-0.1rem] left-0 transition-transform duration-300 ease-in-out group-hover:translate-x-[7rem] z-0 opacity-0 group-hover:opacity-100"
-              src="/vinyl.webp"
-              alt="vinyl record"
-            />
-          </div>
+    <div className="w-full py-4">
+      <nav className="w-full justify-between items-end hidden lg:flex">
+        <div className="flex gap-10 items-end">
+          <Link to="/" className="relative group">
+            Home
+            <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
+          </Link>
+          <Link to="/about" className="relative group">
+            About{' '}
+            <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
+          </Link>
+          <Link to="/shop" className="relative group">
+            Shop
+            <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
+          </Link>
+        </div>
+
+        <Link
+          to="/"
+          className="flex items-end text-xl font-bold italic tracking-tighter whitespace-nowrap leading-none lg:text-large">
+          RIPPLE RECORDS
         </Link>
 
-        <div className="flex flex-col justify-between h-[120px] items-end">
-          <div className="flex gap-5">
-            {token && (
-              <Link to="account" className="text-3xl">
-                <RiAccountCircleFill />
-              </Link>
-            )}
-            <Link to={token ? '/cart' : '/login'} className="relative text-3xl">
-              <IoCart />
-              {itemsAmount && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                  {itemsAmount}
-                </span>
-              )}
-            </Link>
-            <Link
-              to={`${token ? '/create' : '/login'}`}
-              className="bg-[#C84C09] text-white px-2 py-1 rounded-md">
-              Sell Now
-            </Link>
-            {!token && (
-              <Link
-                to="/sign-up"
-                className="bg-[#C84C09] text-white px-2 py-1 rounded-md">
-                Sign Up
-              </Link>
-            )}
-            {token && <button onClick={handleSignOutClick}>Sign Out</button>}
-            {!token && <Link to="/login">Log In</Link>}
-          </div>
-          <div className="flex gap-5 text-xl">
-            <Link to="/">Home</Link>
-            <Link to="/shop">Shop All</Link>
-            <div className="dropdown">
-              <p className="text-black cursor-pointer hover:underline duration-200">
-                Shop by Genre
-              </p>
-              <div className="dropdown-content">
-                {genres.map((genre) => (
-                  <Link key={genre.genreId} to={`/genre/${genre.genreId}`}>
-                    {genre.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-            <div>{user && <Link to="/create">Create Listing</Link>}</div>
-          </div>
+        <div className="flex gap-2 items-end">
+          {user && (
+            <button
+              onClick={handleSignOutClick}
+              className="mr-2 relative group">
+              Sign Out
+              <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
+            </button>
+          )}
+
+          <Link
+            className="bg-emerald text-snow px-3 rounded-md h-min py-1 drop-shadow-lg"
+            to={`${user ? '/create' : '/login'}`}>
+            Sell Now
+          </Link>
+          <Link to={`${user ? '/account' : '/login'}`}>
+            <IoPersonCircleSharp size={30} />
+          </Link>
+          <Link to="/cart" className="flex gap-2">
+            <IoCart size={30} />
+            <span className="text-xl mt-auto">{itemsAmount}</span>
+          </Link>
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      <MobileNav
+        user={user}
+        cartItems={itemsAmount}
+        onSignOut={handleSignOutClick}
+      />
+    </div>
   );
 }
+
+const MobileNav = ({ user, onSignOut, cartItems }) => {
+  const [showMenu, setShowMenu] = useState(false);
+  const location = useLocation();
+
+  function handleMenuClick() {
+    setShowMenu((prev) => !prev);
+  }
+
+  useEffect(() => {
+    setShowMenu(false);
+  }, [location.pathname]);
+
+  return (
+    <div className="w-full">
+      <nav className="flex lg:hidden w-full justify-between items-end">
+        <div>
+          <Link
+            className="text-3xl font-bold italic whitespace-nowrap tracking-tighter leading-none"
+            to="/">
+            RIPPLE RECORDS
+          </Link>
+        </div>
+
+        <div className="flex gap-2 items-center">
+          <Link to={`${user ? '/account' : '/login'}`}>
+            <IoPersonCircleSharp size={30} />
+          </Link>
+          <Link to="/cart" className="flex gap-2">
+            <IoCart size={30} />
+            <span className="text-xl mt-auto">{cartItems}</span>
+          </Link>
+          <button onClick={handleMenuClick}>
+            <IoMenuSharp size={30} />
+          </button>
+        </div>
+      </nav>
+      <hr className="border-t border-black mt-4" />
+      {showMenu && (
+        <div className="flex flex-col gap-4 mt-2">
+          <Link to="/">Home</Link>
+          <Link to="/about">About</Link>
+          <Link to="/shop">Shop</Link>
+
+          <Link
+            className="bg-emerald px-4 py-1 rounded-md h-min w-min mx-auto whitespace-nowrap"
+            to={`${user ? '/create' : '/login'}`}>
+            Sell Now
+          </Link>
+          {user && (
+            <button onClick={onSignOut} className="pr-2">
+              Sign Out
+            </button>
+          )}
+        </div>
+      )}
+      {showMenu && <hr className="border-t border-black mt-4" />}
+    </div>
+  );
+};

@@ -1,4 +1,4 @@
-import ProductCatalog from '../components/ProductCatalog';
+import ProductCatalog from '../components/Products';
 
 export function Shop() {
   return (

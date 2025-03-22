@@ -9,18 +9,18 @@ type Genre = {
 export function NewListingForm() {
   const [genres, setGenres] = useState<Genre[]>([]);
   const [selectedFile, setSelectedFile] = useState<File>();
-  const product = useLocation().state;
+  const product = useLocation().state; // Existing product data for editing
   const [preview, setPreview] = useState<string>();
 
   const navigate = useNavigate();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     try {
+      event.preventDefault();
       const formData = new FormData(event.currentTarget);
 
-      event.preventDefault();
-
       if (!product) {
+        // Create new listing
         const response = await fetch('/api/create-listing', {
           method: 'POST',
           headers: {
@@ -32,6 +32,7 @@ export function NewListingForm() {
         if (!response.ok) throw new Error(`Error: ${response.status}`);
         await response.json();
       } else {
+        // Update existing listing
         await fetch(`/api/update-listing/${product.recordId}`, {
           method: 'PUT',
           headers: {
@@ -40,7 +41,7 @@ export function NewListingForm() {
           body: formData,
         });
       }
-      navigate('/ProductPage');
+      navigate('/shop');
     } catch (error) {
       console.error(error);
     }
@@ -57,7 +58,7 @@ export function NewListingForm() {
   }, [selectedFile, product?.imageSrc]);
 
   function handleImageUpload(event) {
-    if (!event) throw new Error('No image file');
+    if (!event.target.files) throw new Error('No image file');
     setSelectedFile(event.target.files[0]);
   }
 
@@ -79,16 +80,17 @@ export function NewListingForm() {
     setPreview('');
     setSelectedFile(undefined);
   }
+
   return (
     <div className="bg-[ghostwhite] min-h-screen p-4 text-lg">
       <h3 className="flex justify-center text-4xl underline">
-        Create New Listing
+        {product ? 'Edit Listing' : 'Create New Listing'}
       </h3>
       <form onSubmit={handleSubmit} className="max-w-screen-md mx-auto mt-8">
-        <div className="flex flex-col ">
+        <div className="flex flex-col">
           {/* Image Input */}
-          <div className="mb-4 ">
-            <label className="block mb-2 font-bold  ">Image:</label>
+          <div className="mb-4">
+            <label className="block mb-2 font-bold">Image:</label>
             <input
               type="file"
               id="file-upload"
@@ -105,7 +107,7 @@ export function NewListingForm() {
           {/* Artist and Album Name */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-4">
             <div>
-              <label className="block mb-2 font-bold ">Artist:</label>
+              <label className="block mb-2 font-bold">Artist:</label>
               <input
                 type="text"
                 defaultValue={product?.artist}
@@ -137,11 +139,12 @@ export function NewListingForm() {
               <select
                 id="genre"
                 name="genre"
-                defaultValue={product?.genreId}
+                defaultValue={product?.genre} // Use genre name, not genreId
                 className="w-full p-2 border rounded"
                 required>
+                <option value="">Select a genre</option>
                 {genres.map((genre) => (
-                  <option key={genre.genreId} value={genre.genreId}>
+                  <option key={genre.genreId} value={genre.name}>
                     {genre.name}
                   </option>
                 ))}
@@ -156,6 +159,7 @@ export function NewListingForm() {
                 name="condition"
                 className="w-full p-2 border rounded"
                 required>
+                <option value="">Select condition</option>
                 <option>Mint (M)</option>
                 <option>Near Mint (NM)</option>
                 <option>Excellent (E)</option>
@@ -167,9 +171,9 @@ export function NewListingForm() {
             </div>
             <div>
               <label className="block mb-2 font-bold">Price ($):</label>
-
               <input
-                type="text"
+                type="number"
+                step="0.01"
                 defaultValue={product?.price}
                 id="price"
                 name="price"
@@ -202,7 +206,7 @@ export function NewListingForm() {
             <button
               type="submit"
               className="bg-blue-500 text-white p-2 rounded hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue active:bg-blue-800">
-              Post Listing
+              {product ? 'Update Listing' : 'Post Listing'}
             </button>
           </div>
         </div>
