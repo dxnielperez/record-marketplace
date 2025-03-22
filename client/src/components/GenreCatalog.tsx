@@ -69,58 +69,92 @@ export default function GenreCatalog() {
   const formatAlbumNameForUrl = (albumName) =>
     albumName.toLowerCase().replace(/\s+/g, '-');
   return (
-    <div className="min-h-screen">
-      <div className="flex justify-end">
-        <label className="pr-2">Sort By</label>
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className="border border-gray-300 rounded">
-          <option value="">Select</option>
-          <option value="price">Price</option>
-          <option value="name">Name</option>
-        </select>
+    <div className="min-h-screen flex flex-col lg:flex-row gap-4">
+      <div className="hidden lg:block w-64 flex-shrink-0">
+        <div className="bg-flash-white p-4 h-full">
+          <h3 className="mb-2">Genres</h3>
+          <Link
+            to="/shop"
+            className="block py-1 relative group w-min whitespace-nowrap">
+            all
+            <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
+          </Link>
+          {genres.map((genre) => (
+            <Link
+              key={genre.genreId}
+              to={`/shop/genre/${genre.name}`}
+              className="block py-1 relative group w-min">
+              {genre.name}
+              <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
+            </Link>
+          ))}
+        </div>
       </div>
 
-      <div>
-        {products.length === 0 && <h2>No records available for sale</h2>}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {/* Category Column */}
-          <div className="flex flex-col w-full h-auto md:h-full bg-gray-100 p-4">
-            {genres.map((genre) => {
-              const name = genre.name.toLowerCase();
-              return (
-                <Link to={`/genre/${genre.name}`} key={genre.genreId}>
-                  {name}
+      <div className="flex-1">
+        <div className="flex justify-between lg:justify-end gap-4 pb-4">
+          <div className="dropdown lg:hidden">
+            <a className="text-black cursor-pointer hover:underline duration-200 border border-1 border-black px-4 py-1 rounded-md">
+              Genres
+            </a>
+            <div className="dropdown-content">
+              <Link to="/shop" className="block py-1 w-full whitespace-nowrap">
+                all
+              </Link>
+              {genres.map((genre) => (
+                <Link key={genre.genreId} to={`/shop/genre/${genre.name}`}>
+                  {genre.name}
                 </Link>
-              );
-            })}
+              ))}
+            </div>
           </div>
 
-          {/* Product List */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 col-span-1 md:col-span-2 lg:col-span-3">
-            {products.map((product) => (
-              <a
-                key={product.recordId}
-                onClick={() =>
-                  navigate(
-                    `/products/${formatAlbumNameForUrl(product.albumName)}+${
-                      product.recordId
-                    }`
-                  )
-                }
-                className="flex flex-col">
-                <div>
-                  <img
-                    src={product.imageSrc}
-                    alt={product.albumName}
-                    className="inset-x-0 inset-y-0 object-cover cursor-pointer hover:opacity-75"
-                  />
-                </div>
-                <h3>{`${product.albumName} - ${product.artist}`}</h3>
-                <p>{`$${product.price}`}</p>
-              </a>
-            ))}
+          <input id="search" className="bg-emerald text-white" />
+          <div>
+            <label className="pr-2">Sort By</label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="border border-gray-300 rounded">
+              <option value="">Select</option>
+              <option value="price">Price</option>
+              <option value="name">Name</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          {products.length === 0 && <h2>No records available for sale</h2>}
+
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+            {products ? (
+              products.map((product) => (
+                <a
+                  key={product.recordId}
+                  onClick={() =>
+                    navigate(
+                      `/products/${formatAlbumNameForUrl(product.albumName)}+${
+                        product.recordId
+                      }`
+                    )
+                  }
+                  className="flex flex-col">
+                  <div>
+                    <img
+                      src={product.imageSrc}
+                      alt={product.albumName}
+                      className="w-full object-cover cursor-pointer hover:opacity-75"
+                    />
+                  </div>
+                  <h3>{`${product.albumName} - ${product.artist}`}</h3>
+                  <p>{`$${product.price}`}</p>
+                </a>
+              ))
+            ) : (
+              <div>
+                products.length === 0 && <h2>No records available for sale</h2>
+              </div>
+            )}
           </div>
         </div>
       </div>

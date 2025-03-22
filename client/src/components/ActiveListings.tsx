@@ -25,6 +25,9 @@ export function ActiveListings() {
     getSellersProducts();
   }, [user?.userId, token]);
 
+  const formatAlbumNameForUrl = (albumName) =>
+    albumName.toLowerCase().replace(/\s+/g, '-');
+
   return (
     <div>
       <div className="bg-[ghostwhite] min-h-screen ">
@@ -44,7 +47,11 @@ export function ActiveListings() {
                     <img
                       src={product.imageSrc}
                       onClick={() =>
-                        navigate(`/ListingDetailsPage/${product.recordId}`)
+                        navigate(
+                          `/products/${formatAlbumNameForUrl(
+                            product.albumName
+                          )}+${product.recordId}`
+                        )
                       }
                       className="img-shop h-full w-full h-fit inset-x-0 inset-y-0 object-cover cursor-pointer object-center group-hover:opacity-75"
                     />

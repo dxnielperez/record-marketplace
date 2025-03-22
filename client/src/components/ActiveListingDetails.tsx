@@ -52,6 +52,7 @@ export function ActiveListingDetails() {
       }
     }
   }
+
   return (
     <div className="bg-[ghostwhite] min-h-screen">
       {showModal && <div onClick={handleCancel} className="overlay" />}

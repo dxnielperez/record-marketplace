@@ -43,7 +43,7 @@ export default function App() {
             path="OrderConfirmationPage"
             element={<OrderConfirmationPage />}
           />
-          <Route path="genre/:genreName" element={<GenreCatalogPage />} />
+          <Route path="shop/genre/:genreName" element={<GenreCatalogPage />} />
         </Routes>
         <Footer />
       </div>

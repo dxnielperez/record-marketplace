@@ -19,6 +19,7 @@ export default {
         almond: '#F1DABF',
         mocha: '#92817A',
         chestnut: '#362417',
+        'flash-white': '#F3F5F7',
       },
       fontFamily: {
         ibm: ['IBM Plex Mono', 'monospace'],
