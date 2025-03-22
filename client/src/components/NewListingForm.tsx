@@ -8,16 +8,37 @@ type Genre = {
 
 export function NewListingForm() {
   const [genres, setGenres] = useState<Genre[]>([]);
-  const [selectedFile, setSelectedFile] = useState<File>();
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]); // Array for multiple files
   const product = useLocation().state; // Existing product data for editing
-  const [preview, setPreview] = useState<string>();
+  const [previews, setPreviews] = useState<string[]>([]); // Array for multiple previews
 
   const navigate = useNavigate();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     try {
       event.preventDefault();
-      const formData = new FormData(event.currentTarget);
+
+      // Create a new FormData object manually
+      const formData = new FormData();
+
+      // Append form fields manually
+      const form = event.currentTarget;
+      formData.append('artist', form.artist.value);
+      formData.append('album', form.album.value);
+      formData.append('genre', form.genre.value);
+      formData.append('condition', form.condition.value);
+      formData.append('price', form.price.value);
+      formData.append('info', form.info.value);
+
+      // Append all selected files under 'images'
+      selectedFiles.forEach((file) => {
+        formData.append('images', file);
+      });
+
+      // Debug: Log FormData contents
+      for (const pair of formData.entries()) {
+        console.log(`${pair[0]}: ${pair[1]}`);
+      }
 
       if (!product) {
         // Create new listing
@@ -28,7 +49,6 @@ export function NewListingForm() {
           },
           body: formData,
         });
-
         if (!response.ok) throw new Error(`Error: ${response.status}`);
         await response.json();
       } else {
@@ -48,18 +68,21 @@ export function NewListingForm() {
   }
 
   useEffect(() => {
-    if (!selectedFile) {
-      setPreview(product?.imageSrc);
+    if (selectedFiles.length === 0) {
+      setPreviews(product?.imageSrc ? [product.imageSrc] : []);
       return;
     }
-    const url = URL.createObjectURL(selectedFile);
-    setPreview(url);
-    return () => URL.revokeObjectURL(url);
-  }, [selectedFile, product?.imageSrc]);
+    const urls = selectedFiles.map((file) => URL.createObjectURL(file));
+    setPreviews(urls);
+    return () => urls.forEach((url) => URL.revokeObjectURL(url));
+  }, [selectedFiles, product?.imageSrc]);
 
-  function handleImageUpload(event) {
-    if (!event.target.files) throw new Error('No image file');
-    setSelectedFile(event.target.files[0]);
+  function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    if (!event.target.files || event.target.files.length === 0) {
+      throw new Error('No image files selected');
+    }
+    const filesArray = Array.from(event.target.files).slice(0, 4); // Enforce max 4 files
+    setSelectedFiles(filesArray);
   }
 
   useEffect(() => {
@@ -77,12 +100,12 @@ export function NewListingForm() {
   }, []);
 
   function handleCancelClick() {
-    setPreview('');
-    setSelectedFile(undefined);
+    setPreviews([]);
+    setSelectedFiles([]);
   }
 
   return (
-    <div className="bg-[ghostwhite] min-h-screen p-4 text-lg">
+    <div className="min-h-screen p-4 text-lg">
       <h3 className="flex justify-center text-4xl underline">
         {product ? 'Edit Listing' : 'Create New Listing'}
       </h3>
@@ -90,17 +113,27 @@ export function NewListingForm() {
         <div className="flex flex-col">
           {/* Image Input */}
           <div className="mb-4">
-            <label className="block mb-2 font-bold">Image:</label>
+            <label className="block mb-2 font-bold">Images (up to 4):</label>
             <input
               type="file"
               id="file-upload"
-              name="image"
+              name="images"
               onChange={handleImageUpload}
               accept="image/*"
+              multiple
               className="mb-2 cursor-pointer"
             />
-            {preview && (
-              <img src={preview} alt="Uploaded" className="max-w-xs" />
+            {previews.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {previews.map((preview, index) => (
+                  <img
+                    key={index}
+                    src={preview}
+                    alt={`Preview ${index + 1}`}
+                    className="max-w-xs"
+                  />
+                ))}
+              </div>
             )}
           </div>
 
@@ -139,7 +172,7 @@ export function NewListingForm() {
               <select
                 id="genre"
                 name="genre"
-                defaultValue={product?.genre} // Use genre name, not genreId
+                defaultValue={product?.genre}
                 className="w-full p-2 border rounded"
                 required>
                 <option value="">Select a genre</option>

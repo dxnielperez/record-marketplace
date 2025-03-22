@@ -27,10 +27,10 @@ export function ActiveListings() {
 
   const formatAlbumNameForUrl = (albumName) =>
     albumName.toLowerCase().replace(/\s+/g, '-');
-
+  console.log(activeListings);
   return (
     <div>
-      <div className="bg-[ghostwhite] min-h-screen ">
+      <div className=" min-h-screen ">
         <div className="mx-auto max-w-2xl px-4 py-[2rem] sm:px-6 sm:py-[2rem] lg:max-w-[110rem] lg:px-8 mobile-format">
           <h2 className="text-4xl mb-[3rem] ml-[2.4%] mobile-category underline">
             Active Listings
@@ -45,10 +45,11 @@ export function ActiveListings() {
                 <div className="">
                   <div className="flex-shrink-0 parent w-[14rem] h-[14rem] sm:w-[10rem] md:w-[12rem] md:h-[12rem] lg:h-[20rem] lg:w-[20rem] ">
                     <img
-                      src={product.imageSrc}
+                      src={product.images[0]}
+                      alt=""
                       onClick={() =>
                         navigate(
-                          `/products/${formatAlbumNameForUrl(
+                          `/account/record/${formatAlbumNameForUrl(
                             product.albumName
                           )}+${product.recordId}`
                         )

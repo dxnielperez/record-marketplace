@@ -15,7 +15,6 @@ CREATE TABLE "Users" (
 
 CREATE TABLE "Records" (
   "recordId" serial PRIMARY KEY,
-  "imageSrc" text,
   "artist" text,
   "albumName" text,
   "genreId" integer,
@@ -56,18 +55,21 @@ CREATE TABLE "Images" (
   "recordId" integer
 );
 
-ALTER TABLE "Records" ADD FOREIGN KEY ("genreId") REFERENCES "Genres" ("genreId");
+-- Add foreign key constraints
+ALTER TABLE "Records" 
+  ADD FOREIGN KEY ("genreId") REFERENCES "Genres" ("genreId"),
+  ADD FOREIGN KEY ("sellerId") REFERENCES "Users" ("userId");
 
-ALTER TABLE "Records" ADD FOREIGN KEY ("sellerId") REFERENCES "Users" ("userId");
+ALTER TABLE "Transactions" 
+  ADD FOREIGN KEY ("buyerId") REFERENCES "Users" ("userId"),
+  ADD FOREIGN KEY ("recordId") REFERENCES "Records" ("recordId");
 
-ALTER TABLE "Transactions" ADD FOREIGN KEY ("buyerId") REFERENCES "Users" ("userId");
+ALTER TABLE "Cart" 
+  ADD FOREIGN KEY ("userId") REFERENCES "Users" ("userId");
 
-ALTER TABLE "Transactions" ADD FOREIGN KEY ("recordId") REFERENCES "Records" ("recordId");
+ALTER TABLE "CartItems" 
+  ADD FOREIGN KEY ("cartId") REFERENCES "Cart" ("cartId"),
+  ADD FOREIGN KEY ("recordId") REFERENCES "Records" ("recordId") ON DELETE CASCADE;
 
-ALTER TABLE "Cart" ADD FOREIGN KEY ("userId") REFERENCES "Users" ("userId");
-
-ALTER TABLE "CartItems" ADD FOREIGN KEY ("cartId") REFERENCES "Cart" ("cartId");
-
-ALTER TABLE "CartItems" ADD FOREIGN KEY ("recordId") REFERENCES "Records" ("recordId");
-
-ALTER TABLE "Images" ADD FOREIGN KEY ("recordId") REFERENCES "Records" ("recordId");
+ALTER TABLE "Images" 
+  ADD FOREIGN KEY ("recordId") REFERENCES "Records" ("recordId") ON DELETE CASCADE;

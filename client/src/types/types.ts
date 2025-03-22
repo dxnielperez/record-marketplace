@@ -1,7 +1,6 @@
 export type Product = {
   recordId: number;
-  imageSrc: string;
-  artist: string;
+  images: string[];
   albumName: string;
   genreId: number;
   condition: string;
@@ -9,6 +8,7 @@ export type Product = {
   info: string;
   sellerId: number;
   genre: string;
+  artist: string;
 };
 
 export type CartItemsProps = {
@@ -34,7 +34,7 @@ export type User = {
 
 export type Products = {
   recordId: number;
-  imageSrc: string;
+  images: string[];
   artist: string;
   albumName: string;
   genreId: number;

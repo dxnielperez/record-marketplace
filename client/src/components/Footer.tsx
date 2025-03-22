@@ -1,6 +1,6 @@
 export function Footer() {
   return (
-    <footer className="w-[300px] mx-auto py-6 text-sm">
+    <footer className="w-[300px] mx-auto py-6 text-sm bg-snow">
       <div className="text-center flex justify-around py-2">
         <a
           href="https://github.com/dxnielperez"

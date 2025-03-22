@@ -45,3 +45,12 @@
 .dropdown:hover .dropbtn {
   background-color: #3e8e41;
 }
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

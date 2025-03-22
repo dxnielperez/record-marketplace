@@ -93,21 +93,31 @@ export function AppProvider({ children }) {
     }
   }
 
+  // AppProvider.tsx
   async function deleteListing(recordId: number) {
     try {
-      const response = await fetch(`/api/delete-listing/${recordId}`, {
+      const response = await fetch(`/api/delete-record/${recordId}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
       });
       if (!response.ok) {
-        if (response.status === 421) throw new Error('421');
-        throw new Error('An error occurred');
+        const errorText = await response.text();
+        throw new Error(
+          `Failed to delete listing: ${response.status} - ${errorText}`
+        );
+      }
+      const result = await response.json();
+      if (!result) {
+        throw new Error('No record deleted');
       }
     } catch (error) {
-      console.error(error);
+      console.error('Error deleting listing:', error);
+      throw error; // Re-throw to be caught by the caller
     }
   }
-
   async function handleCheckout() {
     try {
       const cartResponse = await fetch(`/api/cart/all/${user?.userId}`, {

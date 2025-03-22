@@ -46,13 +46,13 @@ export function SideScrollCarousel() {
   }, []);
   return (
     <>
-      <div className="flex justify-center  pt-[1rem] mobile-scroll">
+      <div className="flex justify-center pt-[1rem]">
         Browse available records
       </div>
       <div className="relative pt-[1rem] pb-[2rem]">
         <div
           ref={scrollContainerRef}
-          className="flex overflow-x-auto max-w-screen-lg mx-auto p-4">
+          className="flex overflow-x-auto max-w-screen-lg mx-auto p-4 scrollbar-none">
           {products.map((product) => (
             <div
               key={product.recordId}

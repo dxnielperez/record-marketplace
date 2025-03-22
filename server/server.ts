@@ -88,28 +88,29 @@ app.post('/api/sign-in', async (req, res, next) => {
 app.post(
   '/api/create-listing',
   authMiddleware,
-  uploadsMiddleware.single('image'),
+  uploadsMiddleware.array('images', 4),
   async (req, res, next) => {
     try {
       const { artist, album, genre, condition, price, info } = req.body;
+      const files = req.files as Express.Multer.File[];
+
       const genreSql = `
-      SELECT "genreId" 
-      FROM "Genres" 
-      WHERE "name" = $1
-    `;
+        SELECT "genreId" 
+        FROM "Genres" 
+        WHERE "name" = $1
+      `;
       const genreResult = await db.query(genreSql, [genre]);
       if (!genreResult.rows[0]) {
         throw new ClientError(400, `Genre '${genre}' not found`);
       }
       const genreId = genreResult.rows[0].genreId;
 
-      const sql = `
-      INSERT INTO "Records" ("imageSrc", "artist", "albumName", "genreId", "condition", "price", "info", "sellerId")
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      RETURNING *;
-    `;
-      const params = [
-        `/images/${req.file?.filename}`,
+      const recordSql = `
+        INSERT INTO "Records" ("artist", "albumName", "genreId", "condition", "price", "info", "sellerId")
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING *;
+      `;
+      const recordParams = [
         artist,
         album,
         genreId,
@@ -118,9 +119,21 @@ app.post(
         info,
         req.user?.userId,
       ];
-      console.log('params:', params);
-      const result = await db.query(sql, params);
-      const listing = result.rows[0];
+      const recordResult = await db.query(recordSql, recordParams);
+      const listing = recordResult.rows[0];
+
+      if (files && files.length > 0) {
+        const imageSql = `
+          INSERT INTO "Images" ("imageUrl", "recordId")
+          VALUES ($1, $2)
+          RETURNING *;
+        `;
+        for (const file of files) {
+          const imageParams = [`/images/${file.filename}`, listing.recordId];
+          await db.query(imageSql, imageParams);
+        }
+      }
+
       res.status(201).json(listing);
     } catch (error) {
       next(error);
@@ -142,11 +155,62 @@ app.get('/api/get-genres', async (req, res, next) => {
 
 app.get('/api/all-products', async (req, res, next) => {
   try {
-    const sql = `
-    select * from "Records"
+    const { search, artist, album, genre } = req.query;
+
+    let sql = `
+      SELECT "Records".*,
+             "Genres"."name" AS "genre",
+             (SELECT array_agg("imageUrl") FROM "Images" WHERE "Images"."recordId" = "Records"."recordId") AS "images"
+      FROM "Records"
+      JOIN "Genres" USING ("genreId")
     `;
-    const result = await db.query(sql);
+    const params = [];
+    const conditions = [];
+
+    if (search) {
+      conditions.push(
+        `("Records"."albumName" ILIKE $${params.length + 1} 
+        OR "Records"."artist" ILIKE $${params.length + 1})`
+      );
+      params.push(`%${search}%`);
+    }
+
+    if (artist) {
+      conditions.push(`"Records"."artist" ILIKE $${params.length + 1}`);
+      params.push(`%${artist}%`);
+    }
+
+    if (album) {
+      conditions.push(`"Records"."albumName" ILIKE $${params.length + 1}`);
+      params.push(`%${album}%`);
+    }
+
+    if (genre) {
+      conditions.push(`"Genres"."name" ILIKE $${params.length + 1}`);
+      params.push(`%${genre}%`);
+    }
+
+    if (conditions.length > 0) {
+      sql += ` WHERE ${conditions.join(' AND ')}`;
+    }
+
+    const result = await db.query(sql, params);
     res.json(result.rows);
+  } catch (error) {
+    next(error);
+  }
+});
+app.get('/api/get-images/:recordId', async (req, res, next) => {
+  try {
+    const recordId = Number(req.params.recordId);
+    const sql = `
+      SELECT "imageUrl"
+      FROM "Images"
+      WHERE "recordId" = $1
+    `;
+    const params = [recordId];
+    const result = await db.query(sql, params);
+    res.json(result.rows.map((row) => row.imageUrl));
   } catch (error) {
     next(error);
   }
@@ -164,19 +228,19 @@ app.get('/api/products/:record', async (req, res, next) => {
       throw new ClientError(400, 'recordId must be a positive integer');
     }
     const sql = `
-    select "recordId",
-           "imageSrc",
-           "artist",
-           "albumName",
-           "genreId",
-           "condition",
-           "price",
-           "info",
-           "sellerId",
-           "Genres"."name" as "genre"
-    from "Records"
-    join "Genres" using ("genreId")
-    where "recordId" = $1
+   SELECT "recordId",
+       "artist",
+       "albumName",
+       "genreId",
+       "condition",
+       "price",
+       "info",
+       "sellerId",
+       "Genres"."name" AS "genre",
+       (SELECT array_agg("imageUrl") FROM "Images" WHERE "Images"."recordId" = "Records"."recordId") AS "images"
+FROM "Records"
+JOIN "Genres" USING ("genreId")
+WHERE "recordId" = $1
     `;
     const params = [recordId];
     const result = await db.query(sql, params);
@@ -218,55 +282,47 @@ app.post('/api/cart/add', authMiddleware, async (req, res, next) => {
     const { recordId } = req.body;
     const userId = req.user?.userId;
     if (!userId) {
-      console.error('User ID not available in request');
-      return res.status(500).json({ error: 'Internal Server Error' });
+      throw new Error('User ID not available in request');
     }
 
     const checkCartSql = `
-      select * from "Cart" where "userId" = $1
-      `;
+      SELECT * FROM "Cart" WHERE "userId" = $1
+    `;
     const checkCartParams = [userId];
     const checkCartResult = await db.query(checkCartSql, checkCartParams);
     if (checkCartResult.rowCount === 0) {
       const createCartSql = `
-        insert into "Cart" ("userId") values ($1) returning *;
+        INSERT INTO "Cart" ("userId") VALUES ($1) RETURNING *;
       `;
       const createCartParams = [userId];
-      const createCartResult = await db.query(createCartSql, createCartParams);
-
-      if (createCartResult.rowCount === 0) {
-        console.error('Error creating cart for user:', userId);
-        return res.status(500).json({ error: 'Internal Server Error' });
-      }
+      await db.query(createCartSql, createCartParams);
     }
-    console.log('userId:', userId);
+
     const sql = `
-    insert into "CartItems" ("cartId", "recordId","quantity")
-    select "cartId", $2, 1
-    from "Cart"
-    where "userId" = $1
-    returning *;
+      INSERT INTO "CartItems" ("cartId", "recordId", "quantity")
+      SELECT "cartId", $2, 1
+      FROM "Cart"
+      WHERE "userId" = $1
+      RETURNING *;
     `;
     const params = [userId, recordId];
-    console.log('params', params);
-
     const result = await db.query(sql, params);
-
     const cart = result.rows[0];
-    console.log('cart:', cart);
-    const readProduct = `select "recordId",
-           "imageSrc",
-           "artist",
-           "albumName",
-           "genreId",
-           "condition",
-           "price",
-           "info",
-           "sellerId",
-           "Genres"."name" as "genre"
-    from "Records"
-    join "Genres" using ("genreId")
-    where "recordId" = $1
+
+    const readProduct = `
+      SELECT "recordId",
+             "artist",
+             "albumName",
+             "genreId",
+             "condition",
+             "price",
+             "info",
+             "sellerId",
+             "Genres"."name" AS "genre",
+             (SELECT array_agg("imageUrl") FROM "Images" WHERE "Images"."recordId" = "Records"."recordId") AS "images"
+      FROM "Records"
+      JOIN "Genres" USING ("genreId")
+      WHERE "recordId" = $1
     `;
     const productParams = [recordId];
     const productResult = await db.query(readProduct, productParams);
@@ -281,10 +337,23 @@ app.get('/api/cart', authMiddleware, async (req, res, next) => {
     const userId = req.user?.userId;
     if (!userId) throw new Error('User ID not available in request');
     const sql = `
-    select * from "Cart"
-    join "CartItems" using ("cartId")
-    join "Records" using ("recordId")
-    where "userId" = $1
+      SELECT "Cart".*,
+             "CartItems".*,
+             "Records"."recordId",
+             "Records"."artist",
+             "Records"."albumName",
+             "Records"."genreId",
+             "Records"."condition",
+             "Records"."price",
+             "Records"."info",
+             "Records"."sellerId",
+             "Genres"."name" AS "genre",
+             (SELECT array_agg("imageUrl") FROM "Images" WHERE "Images"."recordId" = "Records"."recordId") AS "images"
+      FROM "Cart"
+      JOIN "CartItems" USING ("cartId")
+      JOIN "Records" USING ("recordId")
+      JOIN "Genres" USING ("genreId")
+      WHERE "userId" = $1
     `;
     const params = [userId];
     const result = await db.query(sql, params);
@@ -330,10 +399,14 @@ app.get(
     try {
       const userId = Number(req.params.userId);
       const sql = `
-    select * from "Records"
-    join "Users" on "Records"."sellerId" = "Users"."userId"
-    where "Users"."userId" = $1
-    `;
+        SELECT "Records".*,
+               "Genres"."name" AS "genre",
+               (SELECT array_agg("imageUrl") FROM "Images" WHERE "Images"."recordId" = "Records"."recordId") AS "images"
+        FROM "Records"
+        JOIN "Users" ON "Records"."sellerId" = "Users"."userId"
+        JOIN "Genres" USING ("genreId")
+        WHERE "Users"."userId" = $1
+      `;
       const params = [userId];
       const result = await db.query(sql, params);
       res.json(result.rows);
@@ -363,55 +436,73 @@ app.delete('/api/delete-listing/:recordId', async (req, res, next) => {
   }
 });
 
-// Update update-listing endpoint
 app.put(
   '/api/update-listing/:recordId',
   authMiddleware,
-  uploadsMiddleware.single('image'),
+  uploadsMiddleware.array('images', 4),
   async (req, res, next) => {
     try {
       const { recordId } = req.params;
       const id = Number(recordId);
-      // Get genreId from genre name
+      const { artist, album, genre, condition, price, info } = req.body;
+      const files = req.files as Express.Multer.File[];
+
       const genreSql = `
         SELECT "genreId" 
         FROM "Genres" 
         WHERE "name" = $1
       `;
-      const genreResult = await db.query(genreSql, [req.body.genre]);
+      const genreResult = await db.query(genreSql, [genre]);
       if (!genreResult.rows[0]) {
-        throw new ClientError(400, `Genre '${req.body.genre}' not found`);
+        throw new ClientError(400, `Genre '${genre}' not found`);
       }
       const genreId = genreResult.rows[0].genreId;
 
-      const sql = `
+      const recordSql = `
         UPDATE "Records"
         SET "artist" = $1,
-        ${
-          req.file?.filename
-            ? `"imageSrc" = '/images/${req.file?.filename}', `
-            : ''
-        }
-        "albumName" = $2,
-        "genreId" = $3,
-        "condition" = $4,
-        "price" = $5,
-        "info" = $6
+            "albumName" = $2,
+            "genreId" = $3,
+            "condition" = $4,
+            "price" = $5,
+            "info" = $6
         WHERE "recordId" = $7
         RETURNING *;
       `;
-      const params = [
-        req.body.artist,
-        req.body.album,
-        genreId,
-        req.body.condition,
-        req.body.price,
-        req.body.info,
-        id,
-      ];
-      const result = await db.query(sql, params);
-      const listing = result.rows[0];
-      res.status(200).json(listing);
+      const recordParams = [artist, album, genreId, condition, price, info, id];
+      const recordResult = await db.query(recordSql, recordParams);
+      const listing = recordResult.rows[0];
+
+      let images = [];
+      if (files && files.length > 0) {
+        const deleteImagesSql = `
+          DELETE FROM "Images"
+          WHERE "recordId" = $1
+        `;
+        await db.query(deleteImagesSql, [id]);
+
+        const imageSql = `
+          INSERT INTO "Images" ("imageUrl", "recordId")
+          VALUES ($1, $2)
+          RETURNING "imageUrl";
+        `;
+        for (const file of files) {
+          const imageParams = [`/images/${file.filename}`, id];
+          const imageResult = await db.query(imageSql, imageParams);
+          images.push(imageResult.rows[0].imageUrl);
+        }
+      } else {
+        // If no new images uploaded, fetch existing images
+        const existingImagesSql = `
+          SELECT "imageUrl"
+          FROM "Images"
+          WHERE "recordId" = $1
+        `;
+        const existingImagesResult = await db.query(existingImagesSql, [id]);
+        images = existingImagesResult.rows.map((row) => row.imageUrl);
+      }
+
+      res.status(200).json({ ...listing, images });
     } catch (error) {
       next(error);
     }
@@ -440,27 +531,75 @@ app.delete(
   async (req, res, next) => {
     try {
       const recordId = Number(req.params.recordId);
-      const sql = 'DELETE FROM "Records" WHERE "recordId" = $1 RETURNING *';
-      const params = [recordId];
+      if (isNaN(recordId) || recordId <= 0) {
+        throw new ClientError(400, 'recordId must be a positive integer');
+      }
+
+      const sql = `
+        DELETE FROM "Records"
+        WHERE "recordId" = $1 AND "sellerId" = $2
+        RETURNING *
+      `;
+      const params = [recordId, req.user?.userId];
       const result = await db.query(sql, params);
-      res.json(result.rows);
+      if (result.rows.length === 0) {
+        throw new ClientError(
+          404,
+          `Record with recordId ${recordId} not found or not owned by user`
+        );
+      }
+      res.json(result.rows[0]);
     } catch (error) {
       next(error);
     }
   }
 );
 
-// Update shop-by-genre endpoint to use genre name
 app.get('/api/shop-by-genre/:genreName', async (req, res, next) => {
   try {
+    const { search, artist, album, genre } = req.query;
     const genreName = req.params.genreName;
-    const sql = `
-      SELECT *
+
+    let sql = `
+      SELECT "Records".*,
+             "Genres"."name" AS "genre",
+             (SELECT array_agg("imageUrl") FROM "Images" WHERE "Images"."recordId" = "Records"."recordId") AS "images"
       FROM "Records"
       JOIN "Genres" USING ("genreId")
-      WHERE "Genres"."name" = $1
     `;
-    const params = [genreName];
+    const params = [];
+    const conditions = [];
+
+    conditions.push(`"Genres"."name" = $${params.length + 1}`);
+    params.push(genreName);
+
+    if (search) {
+      conditions.push(
+        `("Records"."albumName" ILIKE $${params.length + 1} 
+        OR "Records"."artist" ILIKE $${params.length + 1})`
+      );
+      params.push(`%${search}%`);
+    }
+
+    if (artist) {
+      conditions.push(`"Records"."artist" ILIKE $${params.length + 1}`);
+      params.push(`%${artist}%`);
+    }
+
+    if (album) {
+      conditions.push(`"Records"."albumName" ILIKE $${params.length + 1}`);
+      params.push(`%${album}%`);
+    }
+
+    if (genre) {
+      conditions.push(`"Genres"."name" ILIKE $${params.length + 1}`);
+      params.push(`%${genre}%`);
+    }
+
+    if (conditions.length > 0) {
+      sql += ` WHERE ${conditions.join(' AND ')}`;
+    }
+
     const result = await db.query(sql, params);
     if (!result.rows.length) {
       throw new ClientError(
