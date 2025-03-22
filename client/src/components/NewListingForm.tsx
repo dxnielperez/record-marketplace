@@ -11,6 +11,11 @@ export function NewListingForm() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]); // Array for multiple files
   const product = useLocation().state; // Existing product data for editing
   const [previews, setPreviews] = useState<string[]>([]); // Array for multiple previews
+  // State for controlled select inputs
+  const [genreValue, setGenreValue] = useState(product?.genre || '');
+  const [conditionValue, setConditionValue] = useState(
+    product?.condition || ''
+  );
 
   const navigate = useNavigate();
 
@@ -25,8 +30,8 @@ export function NewListingForm() {
       const form = event.currentTarget;
       formData.append('artist', form.artist.value);
       formData.append('album', form.album.value);
-      formData.append('genre', form.genre.value);
-      formData.append('condition', form.condition.value);
+      formData.append('genre', genreValue);
+      formData.append('condition', conditionValue);
       formData.append('price', form.price.value);
       formData.append('info', form.info.value);
 
@@ -81,7 +86,7 @@ export function NewListingForm() {
     if (!event.target.files || event.target.files.length === 0) {
       throw new Error('No image files selected');
     }
-    const filesArray = Array.from(event.target.files).slice(0, 4); // Enforce max 4 files
+    const filesArray = Array.from(event.target.files).slice(0, 4);
     setSelectedFiles(filesArray);
   }
 
@@ -172,7 +177,8 @@ export function NewListingForm() {
               <select
                 id="genre"
                 name="genre"
-                defaultValue={product?.genre}
+                value={genreValue} // Controlled
+                onChange={(e) => setGenreValue(e.target.value)}
                 className="w-full p-2 border rounded"
                 required>
                 <option value="">Select a genre</option>
@@ -188,18 +194,19 @@ export function NewListingForm() {
               <label className="block mb-2 font-bold">Condition:</label>
               <select
                 id="condition"
-                defaultValue={product?.condition}
                 name="condition"
+                value={conditionValue} // Controlled
+                onChange={(e) => setConditionValue(e.target.value)}
                 className="w-full p-2 border rounded"
                 required>
                 <option value="">Select condition</option>
-                <option>Mint (M)</option>
-                <option>Near Mint (NM)</option>
-                <option>Excellent (E)</option>
-                <option>Very Good Plus (VG+)</option>
-                <option>Very Good (VG)</option>
-                <option>Good (G)</option>
-                <option>Poor (P)</option>
+                <option value="Mint">Mint (M)</option>
+                <option value="Near Mint">Near Mint (NM)</option>
+                <option value="Excellent">Excellent (E)</option>
+                <option value="Very Good Plus">Very Good Plus (VG+)</option>
+                <option value="Very Good">Very Good (VG)</option>
+                <option value="Good">Good (G)</option>
+                <option value="Poor">Poor (P)</option>
               </select>
             </div>
             <div>

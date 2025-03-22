@@ -65,26 +65,31 @@ app.post('/api/sign-in', async (req, res, next) => {
     }
 
     const sql = `
-    select "userId","hashedPassword"
-    from "Users"
-    where "username" = $1
+      select "userId", "hashedPassword"
+      from "Users"
+      where "username" = $1
     `;
     const params = [username];
     const result = await db.query(sql, params);
     const [user] = result.rows;
-    if (!user) throw new ClientError(401, `User: ${user} does not exist`);
+    if (!user) {
+      throw new ClientError(401, `User: ${username} does not exist`); // Fixed user reference
+    }
+
     const { userId, hashedPassword } = user;
     if (!(await argon2.verify(hashedPassword, password))) {
       throw new ClientError(401, 'invalid login');
     }
+
     const payload = { userId, username };
+    const hashKey = process.env.TOKEN_SECRET ?? '';
+    if (!hashKey) throw new Error('TOKEN_SECRET not found in env');
     const token = jwt.sign(payload, hashKey);
     res.json({ token, user: payload });
   } catch (error) {
     next(error);
   }
 });
-
 app.post(
   '/api/create-listing',
   authMiddleware,

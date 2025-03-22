@@ -54,7 +54,6 @@ export function ActiveListingDetails() {
   function handleImageSelect(imageUrl: string) {
     setSelectedImage(imageUrl);
   }
-
   return (
     <div className="min-h-screen">
       {showModal && <div onClick={handleCancel} className="overlay" />}

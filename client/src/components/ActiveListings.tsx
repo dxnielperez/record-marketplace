@@ -54,7 +54,7 @@ export function ActiveListings() {
                           )}+${product.recordId}`
                         )
                       }
-                      className="img-shop h-full w-full h-fit inset-x-0 inset-y-0 object-cover cursor-pointer object-center group-hover:opacity-75"
+                      className="img-shop w-full h-fit inset-x-0 inset-y-0 object-cover cursor-pointer object-center group-hover:opacity-75"
                     />
                   </div>
                 </div>
