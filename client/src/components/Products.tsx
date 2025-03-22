@@ -35,7 +35,6 @@ export default function ProductCatalog() {
         const result = await res.json();
         setProducts(result);
         setOriginalProducts(result);
-        console.log('products', result); // Debug: Check the response
       } catch (error) {
         console.error(error);
       }

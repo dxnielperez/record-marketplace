@@ -523,7 +523,6 @@ app.delete('/api/cart/all/:userId', authMiddleware, async (req, res, next) => {
     `;
     const params = [req.user?.userId];
     const result = await db.query(sql, params);
-    console.log('test');
     res.json(result.rows);
   } catch (error) {
     next(error);

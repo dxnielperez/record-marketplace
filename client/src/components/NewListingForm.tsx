@@ -40,11 +40,6 @@ export function NewListingForm() {
         formData.append('images', file);
       });
 
-      // Debug: Log FormData contents
-      for (const pair of formData.entries()) {
-        console.log(`${pair[0]}: ${pair[1]}`);
-      }
-
       if (!product) {
         // Create new listing
         const response = await fetch('/api/create-listing', {

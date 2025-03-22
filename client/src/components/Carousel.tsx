@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 type Products = {
   recordId: number;
-  imageSrc: string;
+  images: string[];
   artist: string;
   albumName: string;
   genreId: number;
@@ -44,6 +44,10 @@ export function SideScrollCarousel() {
       window.removeEventListener('resize', handleResize);
     };
   }, []);
+
+  const formatAlbumNameForUrl = (albumName) =>
+    albumName.toLowerCase().replace(/\s+/g, '-');
+
   return (
     <>
       <div className="flex justify-center pt-[1rem]">
@@ -60,11 +64,15 @@ export function SideScrollCarousel() {
                 isMobile ? '48' : '64'
               }`}
               onClick={() =>
-                navigate(`/ProductDetailsPage/${product.recordId}`)
+                navigate(
+                  `/products/${formatAlbumNameForUrl(product.albumName)}+${
+                    product.recordId
+                  }`
+                )
               }>
               <img
                 className={`w-full ${isMobile ? 'h-36' : 'h-48'} object-cover`}
-                src={product.imageSrc}
+                src={product.images[0]}
                 alt={`Product ${product.recordId}`}
               />
               <div className="p-4">

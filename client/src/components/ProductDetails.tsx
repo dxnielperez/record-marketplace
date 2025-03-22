@@ -18,7 +18,6 @@ export function ProductDetails() {
         const result = await res.json();
         setProduct(result);
         setSelectedImage(result.images?.[0] || null); // Set the first image as default
-        console.log('result', result);
       } catch (error) {
         console.error(error);
       }
