@@ -10,7 +10,7 @@ export default {
         },
       },
       animation: {
-        slide: 'slide 20s linear infinite running',
+        slide: 'slide 60s linear infinite running',
       },
       colors: {
         snow: '#FFFBFF',

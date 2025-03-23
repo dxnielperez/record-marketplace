@@ -8,7 +8,13 @@ export default function GenreCatalog() {
   const [genres, setGenres] = useState<Genre[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [originalProducts, setOriginalProducts] = useState<Products[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  const { genreName } = useParams();
+  const navigate = useNavigate();
+
+  // Fetch genres
   useEffect(() => {
     async function getGenres() {
       try {
@@ -17,17 +23,21 @@ export default function GenreCatalog() {
         const result = await res.json();
         setGenres(result);
       } catch (error) {
-        console.error(error);
+        console.error('Failed to fetch genres:', error);
       }
     }
     getGenres();
   }, []);
 
-  const { genreName } = useParams();
-  const navigate = useNavigate();
-
+  // Fetch products by genre
   useEffect(() => {
     async function getProductsByGenre() {
+      if (!genreName) return;
+
+      setIsLoading(true);
+      setError(null);
+      setProducts([]); // Reset products on genre change
+
       try {
         const query = searchTerm
           ? `?search=${encodeURIComponent(searchTerm)}`
@@ -35,27 +45,32 @@ export default function GenreCatalog() {
         const res = await fetch(`/api/shop-by-genre/${genreName}${query}`);
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const result = await res.json();
+
         if (Array.isArray(result)) {
           setProducts(result);
           setOriginalProducts(result);
         } else {
-          console.error('Invalid result is not an array', result);
+          console.error('Invalid result is not an array:', result);
+          setProducts([]);
+          setError('No valid products found for this genre.');
         }
       } catch (error) {
-        console.error(error);
+        console.error('Failed to fetch products:', error);
+        setProducts([]);
+        setError('Failed to load products. Please try again later.');
+      } finally {
+        setIsLoading(false);
       }
     }
-    if (genreName) {
-      getProductsByGenre();
-    }
+    getProductsByGenre();
   }, [genreName, searchTerm]);
 
+  // Sorting logic (unchanged)
   const handleSort = useCallback(
     (sortOption) => {
       setSortBy(sortOption);
       setProducts((prevProducts) => {
         const sortedProductsCopy = [...prevProducts];
-
         switch (sortOption) {
           case 'price-asc':
             sortedProductsCopy.sort((a, b) => a.price - b.price);
@@ -89,16 +104,17 @@ export default function GenreCatalog() {
   );
 
   useEffect(() => {
-    if (sortBy) {
-      handleSort(sortBy);
-    }
+    if (sortBy) handleSort(sortBy);
   }, [sortBy, handleSort]);
+
   const formatAlbumNameForUrl = (albumName) =>
     albumName.toLowerCase().replace(/\s+/g, '-');
+
   const results =
     products.length === 1
       ? `${products.length} result`
       : `${products.length} results`;
+
   return (
     <div className="min-h-screen flex flex-col lg:flex-row gap-4">
       <div className="hidden lg:block w-64 flex-shrink-0">
@@ -125,7 +141,7 @@ export default function GenreCatalog() {
       <div className="flex-1">
         <div className="flex flex-col gap-4 pb-4 lg:flex-row lg:justify-end">
           <div className="flex flex-row lg:flex-col justify-between order-last lg:order-first w-full">
-            <h3 className="text-xl font-medium">All</h3>
+            <h3 className="text-xl font-medium">{genreName || 'All'}</h3>
             <p>{results}</p>
           </div>
 
@@ -168,39 +184,45 @@ export default function GenreCatalog() {
             </div>
           </div>
         </div>
-        <div>
-          {products.length === 0 && <h2>No records available for sale</h2>}
 
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
-            {products.map((product) => (
-              <a
-                key={product.recordId}
-                onClick={() =>
-                  navigate(
-                    `/products/${formatAlbumNameForUrl(product.albumName)}+${
-                      product.recordId
-                    }`
-                  )
-                }
-                className="flex flex-col">
-                <div>
-                  {product.images && product.images.length > 0 ? (
-                    <img
-                      src={product.images[0]} // Use the first image
-                      alt={product.albumName}
-                      className="w-full object-cover cursor-pointer hover:opacity-75"
-                    />
-                  ) : (
-                    <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                      <span>No Image Available</span>
-                    </div>
-                  )}
-                </div>
-                <h3>{`${product.albumName} - ${product.artist}`}</h3>
-                <p>{`$${product.price}`}</p>
-              </a>
-            ))}
-          </div>
+        <div>
+          {isLoading && <p>Loading products...</p>}
+          {error && <p className="text-red-500">{error}</p>}
+          {!isLoading && !error && products.length === 0 && (
+            <h2>No records available for this genre</h2>
+          )}
+          {!isLoading && !error && products.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+              {products.map((product) => (
+                <a
+                  key={product.recordId}
+                  onClick={() =>
+                    navigate(
+                      `/products/${formatAlbumNameForUrl(product.albumName)}+${
+                        product.recordId
+                      }`
+                    )
+                  }
+                  className="flex flex-col">
+                  <div>
+                    {product.images && product.images.length > 0 ? (
+                      <img
+                        src={product.images[0]}
+                        alt={product.albumName}
+                        className="w-full object-cover cursor-pointer hover:opacity-75"
+                      />
+                    ) : (
+                      <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                        <span>No Image Available</span>
+                      </div>
+                    )}
+                  </div>
+                  <h3>{`${product.albumName} - ${product.artist}`}</h3>
+                  <p>{`$${product.price}`}</p>
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

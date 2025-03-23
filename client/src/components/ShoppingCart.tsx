@@ -22,17 +22,16 @@ export function ShoppingCart() {
   const noItems = cartItems.length === 0;
 
   return (
-    <div className="pl-[4rem] pr-[4rem] pb-[4rem] min-h-screen">
-      <div className="text-4xl mb-[2rem] pt-[2rem] flex justify-between ">
+    <div className="min-h-screen">
+      <div className="flex justify-between ">
         {!noItems && (
-          <>
-            <h1 className="mobile-cart">Your Cart</h1>
-            <Link
-              to="/shop"
-              className="text-lg cursor-pointer hover:underline hover:text-slate-500 mobile-continue">
+          <div className="py-4 flex justify-between w-full">
+            <h1>Your Cart</h1>
+            <Link to="/shop" className="group relative">
               Continue shopping
+              <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
             </Link>
-          </>
+          </div>
         )}
         {noItems && (
           <div className="flex justify-center w-full flex-col">
@@ -42,14 +41,14 @@ export function ShoppingCart() {
             <div className="flex justify-center">
               <button
                 onClick={() => navigate('/shop')}
-                className="text-xl max-w-fit px-[1.8rem] py-[0.8rem] bg-[#8F93A3] rounded-md text-white hover:bg-[#787D91] transition ease-in-out delay-50 mobile-start-button">
+                className="w-max px-2 py-2 border-2 border-black rounded-md hover:text-snow bg-emerald whitespace-nowrap">
                 Start shopping
               </button>
             </div>
           </div>
         )}
       </div>
-      <div className="flex flex-col lg:flex-row justify-between text-xl">
+      <div className="flex flex-col lg:flex-row justify-between ">
         {/* Product Cards */}
 
         <div className="mb-[2rem] lg:mb-0 lg:w-[65%]">
@@ -67,48 +66,50 @@ export function ShoppingCart() {
                 <h3>{`$${item.price}`}</h3>
                 <FaRegTrashAlt
                   onClick={() => removeFromCart(item.itemsId)}
-                  className="cursor-pointer hover:text-[red] hover:translate-y-px	transition ease-in-out delay-100"
+                  className="cursor-pointer hover:text-[red] transition ease-in-out delay-100"
                 />
               </div>
             </div>
           ))}
           {cartItems.length > 3 && !showAllItems && (
             <button
-              className="text-lg cursor-pointer hover:underline hover:text-slate-500"
+              className="group relative"
               onClick={() => setShowAllItems(true)}>
               View More
+              <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
             </button>
           )}
           {showAllItems && (
             <button
-              className="text-lg cursor-pointer hover:underline hover:text-slate-500"
+              className="group relative"
               onClick={() => setShowAllItems(false)}>
               View Less
+              <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
             </button>
           )}
         </div>
 
         {/* Order Summary */}
         {!noItems && (
-          <div className="text-3xl border border-black w-[100%] lg:w-[35%] mb-[2rem] lg:mb-0 p-4 max-h-[15rem]">
+          <div className="border border-black w-[100%] lg:w-[35%] mb-[2rem] lg:mb-0 p-4 max-h-[15rem]">
             <h3 className="mb-[1rem]">Order Summary</h3>
-            <div className="flex text-lg justify-between mb-[0.5rem]">
+            <div className="flex justify-between mb-[0.5rem]">
               <h3>Subtotal ({`${cartItems.length} ${items}`}) </h3>
               <h3>{`$${subtotal}`}</h3>
             </div>
-            <div className="flex text-lg justify-between mb-[0.5rem]">
+            <div className="flex justify-between mb-[0.5rem]">
               <h3>Taxes</h3>
               <h3>{`$${salesTax}`}</h3>
             </div>
             <hr className="border-black" />
-            <div className="flex text-lg justify-between mb-[0.5rem]">
+            <div className="flex justify-between mb-[0.5rem]">
               <h3>Total</h3>
               <h3>{`$${totalPrice}`}</h3>
             </div>
-            <div className="flex justify-end text-2xl">
+            <div className="flex justify-end">
               <button
                 onClick={() => navigate('/CheckoutPage')}
-                className="border max-w-fit px-[1rem] py-[0.3rem] bg-[#8F93A3] rounded-md text-white hover:bg-[#787D91] transition ease-in-out delay-50 mobile-checkout-button">
+                className="w-min whitespace-nowrap text-center px-4 py-[6px] border-2 border-black rounded-md hover:text-snow bg-emerald">
                 Checkout
               </button>
             </div>

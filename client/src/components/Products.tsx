@@ -120,7 +120,7 @@ export default function ProductCatalog() {
       <div className="flex-1">
         <div className="flex flex-col gap-4 pb-4 lg:flex-row lg:justify-end">
           <div className="flex flex-row lg:flex-col justify-between order-last lg:order-first w-full">
-            <h3 className="text-xl font-medium">All</h3>
+            <h3 className="text-xl font-medium">all</h3>
             <p>{results}</p>
           </div>
 

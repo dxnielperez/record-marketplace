@@ -605,13 +605,7 @@ app.get('/api/shop-by-genre/:genreName', async (req, res, next) => {
     }
 
     const result = await db.query(sql, params);
-    if (!result.rows.length) {
-      throw new ClientError(
-        404,
-        `Cannot find records with genre: ${genreName}`
-      );
-    }
-    res.json(result.rows);
+    res.status(200).json(result.rows); // Always return 200 with rows (empty or not)
   } catch (error) {
     next(error);
   }

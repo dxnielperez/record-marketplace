@@ -65,7 +65,7 @@ export default function Nav() {
           )}
 
           <Link
-            className="bg-emerald text-snow px-3 rounded-md h-min py-1 drop-shadow-lg"
+            className="w-min whitespace-nowrap text-center px-4 py-1 border-2 border-black rounded-md hover:text-snow bg-emerald"
             to={`${user ? '/create' : '/login'}`}>
             Sell Now
           </Link>
