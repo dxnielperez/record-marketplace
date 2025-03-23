@@ -37,7 +37,7 @@ export function Checkout() {
         artist: item.artist,
         albumName: item.albumName,
         price: item.price,
-        imageSrc: item.imageSrc,
+        images: item.images,
       }));
 
       navigate('/OrderConfirmationPage', {
@@ -62,9 +62,9 @@ export function Checkout() {
   }
   return (
     <>
-      <div className="w-full flex justify-between felx-col checkout-container">
+      <div className="w-full flex justify-between flex-col checkout-container">
         <div className="flex flex-col items-center text-2xl w-1/2 order-summary">
-          <div className="mb-4 custom-section-header2 mb-[2rem] mt-[2rem] text-2xl flex items-center flex-col w-1/2  flex bg-[#F5F5F5]">
+          <div className="mb-4 custom-section-header2  mt-[2rem] text-2xl items-center flex-col w-1/2  flex bg-[#F5F5F5]">
             Order Summary
           </div>
 
@@ -74,7 +74,7 @@ export function Checkout() {
                 <div className="flex gap-[1rem] mb-[2rem]" key={item.itemsId}>
                   <div>
                     <img
-                      src={item.imageSrc}
+                      src={item.images[0]}
                       className="max-w-[150px]"
                       alt="Product"
                     />
@@ -214,7 +214,7 @@ export function Checkout() {
                   onChange={(e) => setPostalCode(e.target.value)}
                 />
               </div>
-              <div className="mb-[2rem] mt-[2rem] text-2xl flex items-center flex-col w-full  flex bg-[#F5F5F5]">
+              <div className="mb-[2rem] mt-[2rem] text-2xl items-center flex-col w-full  flex bg-[#F5F5F5]">
                 Payment
               </div>
               <div className="mb-[1rem] flex flex-col gap-[1rem] border">

@@ -17,7 +17,7 @@ export type CartItemsProps = {
   cartId: number;
   condition: string;
   genreId: number;
-  imageSrc: string;
+  images: string[];
   info: string;
   itemsId: number;
   price: number;

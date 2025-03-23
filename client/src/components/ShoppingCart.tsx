@@ -22,7 +22,7 @@ export function ShoppingCart() {
   const noItems = cartItems.length === 0;
 
   return (
-    <div className="pl-[4rem] pr-[4rem] pb-[4rem] bg-[ghostwhite] min-h-screen">
+    <div className="pl-[4rem] pr-[4rem] pb-[4rem] min-h-screen">
       <div className="text-4xl mb-[2rem] pt-[2rem] flex justify-between ">
         {!noItems && (
           <>
@@ -57,7 +57,7 @@ export function ShoppingCart() {
             <div className="flex gap-[1rem] mb-[2rem]" key={item.itemsId}>
               <div>
                 <img
-                  src={item.imageSrc}
+                  src={item.images[0]}
                   className="max-w-[150px]"
                   alt="Product"
                 />
