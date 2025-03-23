@@ -1,28 +1,12 @@
 import { useContext, useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AppContext } from './AppContext';
-// import { Genre } from '../types/types';
 import { IoCart, IoMenuSharp, IoPersonCircleSharp } from 'react-icons/io5';
 
 export default function Nav() {
   const { user, signOut, cartItems } = useContext(AppContext);
   const navigate = useNavigate();
   const itemsAmount = cartItems.length === 0 ? '' : cartItems.length;
-
-  // const [genres, setGenres] = useState<Genre[]>([]);
-  // useEffect(() => {
-  //   async function getGenres() {
-  //     try {
-  //       const res = await fetch('/api/get-genre-ids');
-  //       if (!res.ok) throw new Error(`Error: ${res.status}`);
-  //       const result = await res.json();
-  //       setGenres(result);
-  //     } catch (error) {
-  //       console.error(error);
-  //     }
-  //   }
-  //   getGenres();
-  // }, []);
 
   const handleSignOutClick = () => {
     signOut();
@@ -65,7 +49,7 @@ export default function Nav() {
           )}
 
           <Link
-            className="w-min whitespace-nowrap text-center px-4 py-1 border-2 border-black rounded-md hover:text-snow bg-emerald"
+            className="w-min whitespace-nowrap text-center px-4 py-1 border-1 border border-black rounded-md hover:text-snow bg-emerald"
             to={`${user ? '/create' : '/login'}`}>
             Sell Now
           </Link>

@@ -10,7 +10,6 @@ export function ProductDetails() {
   const { recordId } = useParams();
   const navigate = useNavigate();
 
-  // Fetch product details
   useEffect(() => {
     const loadProduct = async () => {
       try {
@@ -26,7 +25,6 @@ export function ProductDetails() {
     loadProduct();
   }, [recordId]);
 
-  // Handle adding to cart
   const handleAddToCart = async () => {
     if (!product) return;
     try {
@@ -37,12 +35,10 @@ export function ProductDetails() {
     }
   };
 
-  // Check if item is already in cart
   const isItemInCart = cartItems.some(
     (item) => item.recordId === product?.recordId
   );
 
-  // Handle image selection
   const handleImageSelect = (imageUrl: string) => setSelectedImage(imageUrl);
 
   if (!product) return null;
@@ -116,7 +112,7 @@ export function ProductDetails() {
             ) : (
               <button
                 onClick={handleAddToCart}
-                className="w-min whitespace-nowrap text-center px-4 py-[6px] border-2 border-black rounded-md hover:text-snow bg-emerald">
+                className="w-min whitespace-nowrap text-center px-4 py-[6px] border-1 border border-black rounded-md hover:text-snow bg-emerald">
                 Add to cart
               </button>
             )}

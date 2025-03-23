@@ -3,7 +3,7 @@ import { SideScrollCarousel } from '../components/Carousel';
 export default function About() {
   return (
     <div className="min-h-[80vh]">
-      <div className="bg-emerald w-full p-4 rounded-lg">
+      <div className="bg-royal-blue text-snow w-full p-4 rounded-lg">
         <div className="w-full max-w-[800px] mx-auto">
           <h3 className="text-xl font-medium">About Ripple Records</h3>
           <p>

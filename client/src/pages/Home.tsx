@@ -17,14 +17,12 @@ export function Home() {
           <p>The All Time Classic Album by Bob Marley on Reggae Red Vinyl</p>
           <a
             href="/"
-            className="w-min whitespace-nowrap text-center px-4 py-[6px] border-2 border-black rounded-md hover:text-snow bg-emerald">
+            className="w-min whitespace-nowrap text-center px-4 py-[6px] border-1 border  border-black rounded-md hover:text-snow bg-emerald">
             Buy Now
           </a>
         </div>
       </div>
-
       <SlidingBar />
-
       <SideScrollCarousel />
     </div>
   );

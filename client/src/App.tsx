@@ -23,7 +23,6 @@ export default function App() {
     <AppProvider>
       <div className="w-full max-w-[2000px] min-w-[330px] mx-auto px-4 bg-snow">
         <Nav />
-        {/* <hr className="border-t border-black pb-6" /> */}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="about" element={<About />} />
@@ -38,7 +37,7 @@ export default function App() {
             path="account/record/:recordId"
             element={<ListingDetailsPage />}
           />
-          <Route path="CheckoutPage" element={<CheckoutPage />} />
+          <Route path="checkout" element={<CheckoutPage />} />
           <Route
             path="OrderConfirmationPage"
             element={<OrderConfirmationPage />}
