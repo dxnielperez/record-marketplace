@@ -38,10 +38,7 @@ export default function App() {
             element={<ListingDetailsPage />}
           />
           <Route path="checkout" element={<CheckoutPage />} />
-          <Route
-            path="OrderConfirmationPage"
-            element={<OrderConfirmationPage />}
-          />
+          <Route path="confirmation" element={<OrderConfirmationPage />} />
           <Route path="shop/genre/:genreName" element={<GenreCatalogPage />} />
         </Routes>
         <Footer />

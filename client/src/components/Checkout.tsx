@@ -39,7 +39,7 @@ export function Checkout() {
         images: item.images,
       }));
 
-      navigate('/OrderConfirmationPage', {
+      navigate('/confirmation', {
         state: {
           firstName,
           lastName,
