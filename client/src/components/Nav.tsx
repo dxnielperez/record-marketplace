@@ -89,7 +89,7 @@ const MobileNav = ({ user, onSignOut, cartItems }) => {
       <nav className="flex lg:hidden w-full justify-between items-end">
         <div>
           <Link
-            className="text-3xl font-bold italic whitespace-nowrap tracking-tighter leading-none"
+            className="text-2xl font-bold italic whitespace-nowrap tracking-tighter leading-none"
             to="/">
             RIPPLE RECORDS
           </Link>

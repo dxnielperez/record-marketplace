@@ -65,7 +65,7 @@ export default function GenreCatalog() {
     getProductsByGenre();
   }, [genreName, searchTerm]);
 
-  // Sorting logic (unchanged)
+  // Sorting logic
   const handleSort = useCallback(
     (sortOption) => {
       setSortBy(sortOption);
@@ -116,9 +116,9 @@ export default function GenreCatalog() {
       : `${products.length} results`;
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row gap-4">
-      <div className="hidden lg:block w-64 flex-shrink-0">
-        <div className="bg-flash-white p-4 h-full">
+    <div className="min-h-screen flex flex-col xl:flex-row gap-4">
+      <div className="hidden xl:block w-64 flex-shrink-0">
+        <div className="bg-flash-white p-4 h-full rounded-md">
           <h3 className="mb-2">Genres</h3>
           <Link
             to="/shop"
@@ -139,21 +139,21 @@ export default function GenreCatalog() {
       </div>
 
       <div className="flex-1">
-        <div className="flex flex-col gap-4 pb-4 lg:flex-row lg:justify-end">
-          <div className="flex flex-row lg:flex-col justify-between order-last lg:order-first w-full">
+        <div className="flex flex-col gap-4 pb-4 xl:flex-row xl:justify-end">
+          <div className="flex flex-row xl:flex-col justify-between order-last xl:order-first w-full">
             <h3 className="text-xl font-medium">{genreName || 'All'}</h3>
             <p>{results}</p>
           </div>
 
           <input
             id="search"
-            className="w-full lg:w-auto order-first lg:order-none border border-black rounded-md px-1 h-min"
+            className="w-full xl:w-auto order-first xl:order-none border border-black rounded-md px-1 h-min"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search..."
           />
-          <div className="flex flex-row gap-4 justify-between lg:justify-end">
-            <div className="dropdown lg:hidden">
+          <div className="flex flex-row gap-4 justify-between xl:justify-end">
+            <div className="dropdown xl:hidden">
               <a className="text-black cursor-pointer hover:underline duration-200 border border-1 border-black px-4 py-1 rounded-md">
                 Genres
               </a>
@@ -192,7 +192,7 @@ export default function GenreCatalog() {
             <h2>No records available for this genre</h2>
           )}
           {!isLoading && !error && products.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
               {products.map((product) => (
                 <a
                   key={product.recordId}
@@ -203,22 +203,24 @@ export default function GenreCatalog() {
                       }`
                     )
                   }
-                  className="flex flex-col">
-                  <div>
+                  className="flex flex-col h-full">
+                  <div className="w-full h-48">
                     {product.images && product.images.length > 0 ? (
                       <img
                         src={product.images[0]}
                         alt={product.albumName}
-                        className="w-full object-cover cursor-pointer hover:opacity-75"
+                        className="w-full h-full object-cover cursor-pointer hover:opacity-75 rounded-md"
                       />
                     ) : (
-                      <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
                         <span>No Image Available</span>
                       </div>
                     )}
                   </div>
-                  <h3>{`${product.albumName} - ${product.artist}`}</h3>
-                  <p>{`$${product.price}`}</p>
+                  <div className="flex flex-col flex-grow justify-between p-2">
+                    <h3 className="text-sm line-clamp-2 text-ellipsis">{`${product.albumName} - ${product.artist}`}</h3>
+                    <p className="text-sm">${product.price}</p>
+                  </div>
                 </a>
               ))}
             </div>
