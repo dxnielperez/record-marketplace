@@ -29,14 +29,13 @@ export default function GenreCatalog() {
     getGenres();
   }, []);
 
-  // Fetch products by genre
   useEffect(() => {
     async function getProductsByGenre() {
       if (!genreName) return;
 
       setIsLoading(true);
       setError(null);
-      setProducts([]); // Reset products on genre change
+      setProducts([]);
 
       try {
         const query = searchTerm

@@ -177,16 +177,13 @@ export default function ProductCatalog() {
                     }`
                   )
                 }
-                className="flex flex-col h-full" // Added h-full to ensure equal height
-              >
+                className="flex flex-col h-full">
                 <div className="flex-shrink-0">
-                  {' '}
-                  {/* Prevents image from shrinking */}
                   {product.images && product.images.length > 0 ? (
                     <img
                       src={product.images[0]}
                       alt={product.albumName}
-                      className="w-full h-48 object-cover cursor-pointer hover:opacity-75 rounded-md" // Fixed height with h-48
+                      className="w-full h-48 object-cover cursor-pointer hover:opacity-75 rounded-md"
                     />
                   ) : (
                     <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
@@ -195,10 +192,7 @@ export default function ProductCatalog() {
                   )}
                 </div>
                 <div className="flex flex-col flex-grow justify-between p-2">
-                  {' '}
-                  {/* Added flex-grow and padding */}
                   <h3 className="text-sm line-clamp-2 text-ellipsis">{`${product.albumName} - ${product.artist}`}</h3>{' '}
-                  {/* Truncate long text */}
                   <p className="text-sm">${product.price}</p>
                 </div>
               </a>
