@@ -91,7 +91,7 @@ export function ProductDetails() {
           </div>
 
           <div className="lg:w-1/2 space-y-4">
-            <h1 className="text-2xl font-medium">{`${product.artist} - ${product.albumName}`}</h1>
+            <h1 className="text-xl font-medium">{`${product.artist} - ${product.albumName}`}</h1>
             <p className="text-xl">${product.price}</p>
 
             <div className="space-y-2">
