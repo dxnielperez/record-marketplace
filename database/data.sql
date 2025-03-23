@@ -37,18 +37,24 @@ values
   ('Miles Davis', 'Kind of Blue', 4, 'Very Good', 20, 'Jazz masterpiece', 1),
   ('Daft Punk', 'Random Access Memories', 3, 'Mint', 30, 'Electronic classic', 1),
   ('Johnny Cash', 'At Folsom Prison', 2, 'Good', 15, 'Live country album', 1),
-  ('Radiohead', 'OK Computer', 1, 'Near Mint', 22, 'Alternative rock', 1);
+  ('Radiohead', 'OK Computer', 1, 'Near Mint', 22, 'Alternative rock', 1),
+  ('George Harrison', 'All Things Must Pass', 9, 'Good', 29, 'Classic rock album', 1),
+  ('Mac Miller', 'Faces', 6, 'Good', 45, 'Rap album', 1);
 
 -- Insert images from public folder (assuming /public/ is served statically)
 insert into "Images" ("imageUrl", "recordId")
 values
-  ('/default-image.jpg', 1),    -- Abbey Road
-  ('/default-image-2.jpg', 1),  -- Abbey Road
-  ('/default-image.jpg', 2),    -- Kind of Blue
-  ('/default-image-2.jpg', 2),  -- Kind of Blue
-  ('/default-image.jpg', 3),    -- Random Access Memories
-  ('/default-image-2.jpg', 3),  -- Random Access Memories
-  ('/default-image.jpg', 4),    -- At Folsom Prison
-  ('/default-image-2.jpg', 4),  -- At Folsom Prison
-  ('/default-image.jpg', 5),    -- OK Computer
-  ('/default-image-2.jpg', 5);  -- OK Computer
+  ('/albums/abbey-road.webp', 1),
+  ('/default-image-2.jpg', 1),
+  ('/albums/kind-of-blue.jpg', 2),
+  ('/default-image-2.jpg', 2),
+  ('/albums/random-access.jpg', 3),
+  ('/default-image-2.jpg', 3),
+  ('/albums/folsom.jpeg', 4),
+  ('/default-image-2.jpg', 4),
+  ('/albums/ok-computer.webp', 5),
+  ('/default-image-2.jpg', 5),
+  ('/albums/all-things-must-pass.webp', 6),
+  ('/default-image-2.jpg', 6),
+  ('/albums/faces.jpeg', 7),
+  ('/default-image-2.jpg', 7);  -- <-- No semicolon before this line

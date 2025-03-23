@@ -60,8 +60,8 @@ export function SideScrollCarousel({
   }, []);
 
   return (
-    <div className="py-8 mx-auto max-w-7xl w-full flex flex-col items-center">
-      <h2 className="text-xl font-medium text-center mb-4">{title}</h2>
+    <div className="pt-4 mx-auto max-w-7xl w-full flex flex-col items-center">
+      <h2 className="text-xl font-medium text-center">{title}</h2>
       <div className="w-full flex justify-center">
         <div
           ref={scrollContainerRef}
@@ -73,12 +73,12 @@ export function SideScrollCarousel({
               onClick={() => item.url && navigate(item.url)}>
               <img
                 className={`w-full ${
-                  isMobile ? 'h-36' : 'h-48'
+                  isMobile ? 'h-36' : 'h-44'
                 } object-contain aspect-square`}
                 src={item.image}
                 alt={item.title || 'Item'}
               />
-              <div className="p-4 space-y-1 whitespace-wrap w-52 text-center">
+              <div className="space-y-1 whitespace-wrap w-52 text-center">
                 {item.title && <p>{item.title}</p>}
                 {item.artist && <p>{item.artist}</p>}
                 {item.price && <p>{`Price: $${item.price}`}</p>}
