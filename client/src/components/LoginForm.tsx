@@ -1,12 +1,14 @@
 import { type FormEvent, useState, useContext } from 'react';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AppContext } from './AppContext';
 
 export function LoginForm() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const { signIn } = useContext(AppContext);
+  const location = useLocation();
+  const { username: initialUsername } = location.state || {}; // Extract username from state
+  const [username, setUsername] = useState(initialUsername || ''); // Initialize with state value or empty string
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -27,7 +29,7 @@ export function LoginForm() {
       alert(`Signed in as ${user.username}`);
       navigate('/');
     } catch (error) {
-      console.error('error loging in ', error);
+      console.error('error logging in ', error);
       alert(`Error signing in: ${error}`);
     } finally {
       setIsLoading(false);
@@ -37,20 +39,16 @@ export function LoginForm() {
   async function handleGuest() {
     try {
       setIsLoading(true);
-
       const req = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: 'guest', password: 'guest_password' }),
       };
       const res = await fetch('/api/sign-in-guest', req);
-
       if (!res.ok) throw new Error(`fetch error ${res.status}`);
-
       const { user, token } = await res.json();
 
       signIn(user, token);
-
       alert(`Signed in as guest: ${user.username}`);
       navigate('/');
     } catch (error) {
@@ -62,32 +60,28 @@ export function LoginForm() {
   }
 
   return (
-    <div className="bg-[ghostwhite] min-h-screen flex items-start pt-[4rem] justify-center p-4 text-lg">
-      <div className="bg-white rounded-2xl max-w-xl mx-auto w-full p-8">
-        <h2 className="text-center text-4xl font-bold text-gray-900 mb-6">
-          Sign in to your account
-        </h2>
-        <form className="space-y-6" onSubmit={handleLogin}>
-          <div>
-            <label
-              htmlFor="username"
-              className="block text-sm font-medium text-gray-700">
+    <div className="min-h-screen flex flex-col items-center">
+      <div className="max-w-[620px] w-full flex flex-col gap-4 p-4 border border-black rounded-md">
+        <h1 className="text-xl font-semibold">Sign in to your account</h1>
+        <form className="flex flex-col gap-4" onSubmit={handleLogin}>
+          <div className="flex flex-col gap-2">
+            <label htmlFor="username" className="text-base font-medium">
               Username:
             </label>
             <input
               id="username"
               name="username"
-              type="username"
+              type="text" // Changed from "username" to "text" (correct input type)
               autoComplete="username"
               required
-              className="w-full mt-1 p-2 border rounded-md text-gray-900 focus:ring focus:ring-indigo-300 focus:outline-none"
+              value={username} // Controlled input with pre-populated value
+              onChange={(e) => setUsername(e.target.value)} // Update state on change
+              className="border border-black rounded-md p-2 text-base focus:outline-none"
             />
           </div>
 
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700">
+          <div className="flex flex-col gap-2">
+            <label htmlFor="password" className="text-base font-medium">
               Password:
             </label>
             <input
@@ -96,25 +90,27 @@ export function LoginForm() {
               type="password"
               autoComplete="current-password"
               required
-              className="w-full mt-1 p-2 border rounded-md text-gray-900 focus:ring focus:ring-indigo-300 focus:outline-none"
+              className="border border-black rounded-md p-2 text-base focus:outline-none"
             />
           </div>
 
-          <div>
+          <div className="flex justify-between gap-4">
             <button
               disabled={isLoading}
               type="submit"
-              className="w-full py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring focus:ring-indigo-300">
+              className="w-min whitespace-nowrap px-4 py-[6px] border border-black rounded-md hover:text-white bg-emerald text-base">
               Sign in
             </button>
           </div>
         </form>
-        <div className="flex justify-between mt-6 text-center text-sm text-indigo-600 cursor-pointer">
-          <Link to="/createAccount" className="hover:underline">
+        <div className="flex justify-between mt-6 text-base">
+          <Link to="/sign-up" className="group relative">
             Create Account
+            <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
           </Link>
-          <a onClick={handleGuest} className="self-end hover:underline">
-            Sign in as Guest
+          <a onClick={handleGuest} className="group relative cursor-pointer">
+            Guest Sign In
+            <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
           </a>
         </div>
       </div>

@@ -1,17 +1,16 @@
 import { useContext, useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Product } from '../types/types';
-import { MdEdit } from 'react-icons/md';
-import { MdDeleteForever } from 'react-icons/md';
+import { MdEdit, MdDeleteForever } from 'react-icons/md';
 import { AppContext } from './AppContext';
 
 export function ActiveListingDetails() {
   const [product, setProduct] = useState<Product>();
   const [showModal, setShowModal] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const { recordId } = useParams();
   const { deleteListing } = useContext(AppContext);
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,6 +20,7 @@ export function ActiveListingDetails() {
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const result = await res.json();
         setProduct(result);
+        setSelectedImage(result?.images[0]);
       } catch (error) {
         console.error(error);
       }
@@ -41,88 +41,103 @@ export function ActiveListingDetails() {
   async function handleDeleteClick() {
     try {
       setShowModal(false);
-      const id = Number(recordId);
+      const id = product?.recordId;
+      if (!id) return null;
       await deleteListing(id);
-      navigate('/SellerDashboard');
+      navigate('/account');
     } catch (error) {
-      if (error instanceof Error && error.message === '421') {
-        alert('Cant remove item in someones cart');
-      } else {
-        console.error(error);
-      }
+      console.error('Error deleting listing:', error);
+      alert('Failed to delete listing. Please try again.');
     }
   }
-  return (
-    <div className="bg-[ghostwhite] min-h-screen">
-      {showModal && <div onClick={handleCancel} className="overlay" />}
 
-      <div className="pt-6 mx-auto max-w-7xl px-4 py-10 lg:py-9 lg:px-8 relative z-1">
-        <div className="max-w-fit">
-          <Link to="/SellerDashboard">
-            <nav className="text-xl pb-4 flex gap-[0.5rem] cursor-pointer hover:underline hover:text-slate-500 mobile-back">
-              Back to listings
-            </nav>
+  function handleImageSelect(imageUrl: string) {
+    setSelectedImage(imageUrl);
+  }
+
+  return (
+    <div className="min-h-screen">
+      {showModal && (
+        <div
+          onClick={handleCancel}
+          className="fixed inset-0 bg-black bg-opacity-30"
+        />
+      )}
+      <div className="max-w-2xl lg:max-w-5xl mx-auto">
+        <div className="mb-4">
+          <Link to="/account" className="group relative">
+            Account
+            <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
           </Link>
+          <span className="">{` > ${product.albumName} `}</span>
         </div>
-        {/* Image gallery */}
+
         <div className="flex flex-col lg:flex-row lg:space-x-8">
-          <div className="lg:w-1/2 lg:pr-8">
-            <div className="aspect-h-4 aspect-w-3 overflow-hidden rounded-lg lg:block">
-              <img
-                src={product.imageSrc}
-                className="h-5/6 w-5/6 object-cover object-center sm:block"
-              />
+          <div className="lg:w-1/2">
+            <div className="mb-4">
+              {selectedImage ? (
+                <img
+                  src={selectedImage}
+                  alt={`${product.artist} - ${product.albumName}`}
+                  className="w-full max-w-[580px] h-[380px] object-cover object-center rounded-md"
+                />
+              ) : (
+                <p>No images available</p>
+              )}
             </div>
+
+            {product.images?.length > 1 && (
+              <div className="flex gap-2">
+                {product.images.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleImageSelect(image)}
+                    className={`h-24 w-24 flex-shrink-0 rounded-md overflow-hidden border-2 ${
+                      selectedImage === image
+                        ? 'border-black'
+                        : 'border-transparent hover:border-gray-300'
+                    }`}>
+                    <img
+                      src={image}
+                      alt={`Thumbnail ${index + 1}`}
+                      className="h-full w-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Product info */}
-          <div className="lg:w-1/2">
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl mt-4 lg:mt-0 flex gap-[4rem]">
-              {`${product.artist} - ${product.albumName}`}
-              <div className="flex pt-[0.5rem] text-2xl gap-[2rem] cursor-pointer">
+          <div className="lg:w-1/2 space-y-4">
+            <div className="flex justify-between items-center">
+              <h1 className="text-xl font-medium">{`${product.artist} - ${product.albumName}`}</h1>
+              <div className="flex gap-4 text-xl">
                 <MdEdit
-                  onClick={() => navigate('/CreateListing', { state: product })}
-                  className="hover:text-[#626CF8] transition ease-in-out delay-550"
+                  onClick={() => navigate('/create', { state: product })}
+                  className="cursor-pointer"
                 />
                 <MdDeleteForever
                   onClick={handleDelete}
-                  className="hover:text-[#C34667] transition ease-in-out delay-550"
+                  className="cursor-pointer"
                 />
               </div>
-            </h1>
+            </div>
+            <p className="text-xl">${product.price}</p>
 
-            {/* Price */}
-            <p className="text-3xl tracking-tight text-gray-900 mt-2">
-              {`$${product.price}`}
-            </p>
-            {/* </div> */}
-
-            <div className="mt-10">
-              {/* Genre */}
+            <div className="space-y-2">
               <div>
-                <h3 className="text-sm font-medium text-gray-900">Genre</h3>
-                <h3>{product.genre}</h3>
+                <h3 className="font-medium">Genre</h3>
+                <p>{product.genre}</p>
               </div>
-
-              {/* Condition */}
-              <div className="mt-4">
-                <h3 className="text-sm font-medium text-gray-900">Condition</h3>
-                <h3>{product.condition}</h3>
-              </div>
-
-              {/* <Link to="/ShoppingCart"> */}
-
-              {/* </Link> */}
-              <div className="mt-10"></div>
-              {/* Description*/}
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  Description
-                </h3>
-                <div className="space-y-6">
-                  <p className="text-base text-gray-900">{product.info}</p>
-                </div>
+                <h3 className="font-medium">Condition</h3>
+                <p>{product.condition}</p>
               </div>
+            </div>
+
+            <div>
+              <h3 className="font-medium">Description</h3>
+              <p>{product.info}</p>
             </div>
           </div>
         </div>
@@ -136,20 +151,20 @@ export function ActiveListingDetails() {
 
 function DeleteModal({ onCancel, onDelete }) {
   return (
-    <div className="delete-modal flex justify-center ">
-      <div className="bg-[#BCBEC8] border-[#BCBEC8] p-[5rem] flex flex-col justify-between absolute top-[25rem] border rounded-2xl z-30 mobile-modal">
-        <h3 className="pb-[4rem] text-2xl">
-          Are you sure you want to delete ?
+    <div className="fixed inset-0 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-md shadow-lg max-w-sm w-full">
+        <h3 className="text-lg font-medium mb-4">
+          Are you sure you want to delete?
         </h3>
-        <div className="flex justify-between text-xl ">
+        <div className="flex justify-end gap-4">
           <button
             onClick={onCancel}
-            className="border-none bg-[white] px-[1rem] py-[0.5rem] rounded-md hover:bg-[#E9E9ED]">
+            className="w-min whitespace-nowrap text-center px-4 py-[6px] border border-black rounded-md hover:bg-gray-100">
             Cancel
           </button>
           <button
             onClick={onDelete}
-            className="bg-[#FBB2B1] px-[1.8rem] py-[0.5rem] rounded-md hover:bg-[#FAA09E]">
+            className="w-min whitespace-nowrap text-center px-4 py-[6px] border border-black rounded-md bg-red-500 text-white hover:bg-red-600">
             Yes
           </button>
         </div>

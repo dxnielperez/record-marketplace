@@ -1,7 +1,5 @@
 import { useEffect } from 'react';
 // import { CreateNewListing } from '../components/CreateNewListing';
-import { Footer } from '../components/Footer';
-import { Header } from '../components/Header';
 import { useNavigate } from 'react-router-dom';
 import { NewListingForm } from '../components/NewListingForm';
 
@@ -15,10 +13,7 @@ export function CreateListingPage() {
   }, [navigate]);
   return (
     <div>
-      <Header />
       <NewListingForm />
-
-      <Footer />
     </div>
   );
 }

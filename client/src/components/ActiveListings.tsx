@@ -1,12 +1,17 @@
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { Products } from '../types/types';
 import { AppContext } from './AppContext';
 import { useNavigate } from 'react-router-dom';
 
 export function ActiveListings() {
   const [activeListings, setActiveListings] = useState<Products[]>([]);
+  const [originalListings, setOriginalListings] = useState<Products[]>([]);
+  const [sortBy, setSortBy] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
   const { user, token } = useContext(AppContext);
+
+  // Fetch active listings
   useEffect(() => {
     async function getSellersProducts() {
       try {
@@ -18,6 +23,7 @@ export function ActiveListings() {
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const result = await res.json();
         setActiveListings(result);
+        setOriginalListings(result);
       } catch (error) {
         console.error(error);
       }
@@ -25,37 +31,136 @@ export function ActiveListings() {
     getSellersProducts();
   }, [user?.userId, token]);
 
-  return (
-    <div>
-      <div className="bg-[ghostwhite] min-h-screen ">
-        <div className="mx-auto max-w-2xl px-4 py-[2rem] sm:px-6 sm:py-[2rem] lg:max-w-[110rem] lg:px-8 mobile-format">
-          <h2 className="text-4xl mb-[3rem] ml-[2.4%] mobile-category underline">
-            Active Listings
-          </h2>
+  // Filter by search term
+  useEffect(() => {
+    if (searchTerm) {
+      const filtered = originalListings.filter((product) =>
+        `${product.albumName} ${product.artist}`
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      );
+      setActiveListings(filtered);
+    } else {
+      setActiveListings([...originalListings]);
+    }
+  }, [searchTerm, originalListings]);
 
-          <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
+  // Sort logic
+  const handleSort = useCallback(
+    (sortOption) => {
+      setSortBy(sortOption);
+      setActiveListings((prevListings) => {
+        const sortedListingsCopy = [...prevListings];
+
+        switch (sortOption) {
+          case 'price-asc':
+            sortedListingsCopy.sort((a, b) => a.price - b.price);
+            break;
+          case 'price-desc':
+            sortedListingsCopy.sort((a, b) => b.price - a.price);
+            break;
+          case 'name-asc':
+            sortedListingsCopy.sort((a, b) =>
+              `${a.albumName} - ${a.artist}`.localeCompare(
+                `${b.albumName} - ${b.artist}`
+              )
+            );
+            break;
+          case 'name-desc':
+            sortedListingsCopy.sort((a, b) =>
+              `${b.albumName} - ${b.artist}`.localeCompare(
+                `${a.albumName} - ${a.artist}`
+              )
+            );
+            break;
+          case 'default':
+            return [...originalListings];
+          default:
+            return [...originalListings];
+        }
+        return sortedListingsCopy;
+      });
+    },
+    [originalListings]
+  );
+
+  useEffect(() => {
+    if (sortBy) {
+      handleSort(sortBy);
+    }
+  }, [sortBy, handleSort]);
+
+  const formatAlbumNameForUrl = (albumName) =>
+    albumName.toLowerCase().replace(/\s+/g, '-');
+
+  const results =
+    activeListings.length === 1
+      ? `${activeListings.length} result`
+      : `${activeListings.length} results`;
+
+  return (
+    <div className="min-h-screen flex flex-col gap-4">
+      <div className="flex-1">
+        <div className="flex flex-col gap-4 pb-4 xl:flex-row xl:justify-end mx-auto">
+          <div className="flex flex-row xl:flex-col justify-between order-last xl:order-first w-full">
+            <h3 className="text-xl font-medium">Active Listings</h3>
+            <p>{results}</p>
+          </div>
+
+          <input
+            id="search"
+            className="w-full xl:w-auto order-first xl:order-none border border-black rounded-md px-1 h-min"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search..."
+          />
+          <div className="flex flex-row gap-4 justify-between xl:justify-end">
+            <div>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="border border-black rounded-md px-1">
+                <option value="default">Default</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="name-asc">Name: A to Z</option>
+                <option value="name-desc">Name: Z to A</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div className="mx-auto">
+          {activeListings.length === 0 && <h2>No active listings available</h2>}
+
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {activeListings.map((product) => (
               <a
                 key={product.recordId}
-                style={{ height: '100%' }}
-                className="group flex flex-col items-center">
-                <div className="">
-                  <div className="flex-shrink-0 parent w-[14rem] h-[14rem] sm:w-[10rem] md:w-[12rem] md:h-[12rem] lg:h-[20rem] lg:w-[20rem] ">
+                onClick={() =>
+                  navigate(
+                    `/account/record/${formatAlbumNameForUrl(
+                      product.albumName
+                    )}+${product.recordId}`
+                  )
+                }
+                className="flex flex-col h-full">
+                <div className="w-full h-48">
+                  {product.images && product.images.length > 0 ? (
                     <img
-                      src={product.imageSrc}
-                      onClick={() =>
-                        navigate(`/ListingDetailsPage/${product.recordId}`)
-                      }
-                      className="img-shop h-full w-full h-fit inset-x-0 inset-y-0 object-cover cursor-pointer object-center group-hover:opacity-75"
+                      src={product.images[0]}
+                      alt={product.albumName}
+                      className="w-full h-full object-cover cursor-pointer hover:opacity-75 rounded-md"
                     />
-                  </div>
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <span>No Image Available</span>
+                    </div>
+                  )}
                 </div>
-                <h3 className="mt-4 text-2xl text-gray-700 overflow-hidden ">
-                  {`${product.albumName} - ${product.artist}`}
-                </h3>
-                <p className="mt-1 text-xl font-medium text-gray-900">
-                  {`$${product.price}`}
-                </p>
+                <div className="flex flex-col flex-grow justify-between p-2">
+                  <h3 className="text-sm line-clamp-2 text-ellipsis">{`${product.albumName} - ${product.artist}`}</h3>
+                  <p className="text-sm">${product.price}</p>
+                </div>
               </a>
             ))}
           </div>

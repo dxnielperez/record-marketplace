@@ -1,20 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Genre, Products } from '../types/types';
 
-export default function GenreCatalog() {
+export default function ProductCatalog() {
   const [products, setProducts] = useState<Products[]>([]);
+  const [originalProducts, setOriginalProducts] = useState<Products[]>([]);
   const [sortBy, setSortBy] = useState<string>('');
   const [genres, setGenres] = useState<Genre[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [originalProducts, setOriginalProducts] = useState<Products[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const { genreName } = useParams();
   const navigate = useNavigate();
 
-  // Fetch genres
   useEffect(() => {
     async function getGenres() {
       try {
@@ -23,53 +18,36 @@ export default function GenreCatalog() {
         const result = await res.json();
         setGenres(result);
       } catch (error) {
-        console.error('Failed to fetch genres:', error);
+        console.error(error);
       }
     }
     getGenres();
   }, []);
 
   useEffect(() => {
-    async function getProductsByGenre() {
-      if (!genreName) return;
-
-      setIsLoading(true);
-      setError(null);
-      setProducts([]);
-
+    async function getProducts() {
       try {
         const query = searchTerm
           ? `?search=${encodeURIComponent(searchTerm)}`
           : '';
-        const res = await fetch(`/api/shop-by-genre/${genreName}${query}`);
+        const res = await fetch(`/api/all-products${query}`);
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const result = await res.json();
-
-        if (Array.isArray(result)) {
-          setProducts(result);
-          setOriginalProducts(result);
-        } else {
-          console.error('Invalid result is not an array:', result);
-          setProducts([]);
-          setError('No valid products found for this genre.');
-        }
+        setProducts(result);
+        setOriginalProducts(result);
       } catch (error) {
-        console.error('Failed to fetch products:', error);
-        setProducts([]);
-        setError('Failed to load products. Please try again later.');
-      } finally {
-        setIsLoading(false);
+        console.error(error);
       }
     }
-    getProductsByGenre();
-  }, [genreName, searchTerm]);
+    getProducts();
+  }, [searchTerm]);
 
-  // Sorting logic
   const handleSort = useCallback(
     (sortOption) => {
       setSortBy(sortOption);
       setProducts((prevProducts) => {
         const sortedProductsCopy = [...prevProducts];
+
         switch (sortOption) {
           case 'price-asc':
             sortedProductsCopy.sort((a, b) => a.price - b.price);
@@ -103,7 +81,9 @@ export default function GenreCatalog() {
   );
 
   useEffect(() => {
-    if (sortBy) handleSort(sortBy);
+    if (sortBy) {
+      handleSort(sortBy);
+    }
   }, [sortBy, handleSort]);
 
   const formatAlbumNameForUrl = (albumName) =>
@@ -140,7 +120,7 @@ export default function GenreCatalog() {
       <div className="flex-1">
         <div className="flex flex-col gap-4 pb-4 xl:flex-row xl:justify-end">
           <div className="flex flex-row xl:flex-col justify-between order-last xl:order-first w-full">
-            <h3 className="text-xl font-medium">{genreName || 'All'}</h3>
+            <h3 className="text-xl font-medium">all</h3>
             <p>{results}</p>
           </div>
 
@@ -183,47 +163,41 @@ export default function GenreCatalog() {
             </div>
           </div>
         </div>
-
         <div>
-          {isLoading && <p>Loading products...</p>}
-          {error && <p className="text-red-500">{error}</p>}
-          {!isLoading && !error && products.length === 0 && (
-            <h2>No records available for this genre</h2>
-          )}
-          {!isLoading && !error && products.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
-              {products.map((product) => (
-                <a
-                  key={product.recordId}
-                  onClick={() =>
-                    navigate(
-                      `/products/${formatAlbumNameForUrl(product.albumName)}+${
-                        product.recordId
-                      }`
-                    )
-                  }
-                  className="flex flex-col h-full">
-                  <div className="w-full h-48">
-                    {product.images && product.images.length > 0 ? (
-                      <img
-                        src={product.images[0]}
-                        alt={product.albumName}
-                        className="w-full h-full object-cover cursor-pointer hover:opacity-75 rounded-md"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                        <span>No Image Available</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex flex-col flex-grow justify-between p-2">
-                    <h3 className="text-sm line-clamp-2 text-ellipsis">{`${product.albumName} - ${product.artist}`}</h3>
-                    <p className="text-sm">${product.price}</p>
-                  </div>
-                </a>
-              ))}
-            </div>
-          )}
+          {products.length === 0 && <h2>No records available for sale</h2>}
+
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
+            {products.map((product) => (
+              <a
+                key={product.recordId}
+                onClick={() =>
+                  navigate(
+                    `/products/${formatAlbumNameForUrl(product.albumName)}+${
+                      product.recordId
+                    }`
+                  )
+                }
+                className="flex flex-col h-full">
+                <div className="flex-shrink-0">
+                  {product.images && product.images.length > 0 ? (
+                    <img
+                      src={product.images[0]}
+                      alt={product.albumName}
+                      className="w-full h-48 object-cover cursor-pointer hover:opacity-75 rounded-md"
+                    />
+                  ) : (
+                    <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                      <span>No Image Available</span>
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-col flex-grow justify-between p-2">
+                  <h3 className="text-sm line-clamp-2 text-ellipsis">{`${product.albumName} - ${product.artist}`}</h3>{' '}
+                  <p className="text-sm">${product.price}</p>
+                </div>
+              </a>
+            ))}
+          </div>
         </div>
       </div>
     </div>

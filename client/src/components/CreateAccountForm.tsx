@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 export function CreateAccountForm() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [username, setUsername] = useState(''); // State to hold username
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -11,6 +12,7 @@ export function CreateAccountForm() {
       setIsLoading(true);
       const formData = new FormData(event.currentTarget);
       const userData = Object.fromEntries(formData.entries());
+      const { username: formUsername } = userData; // Extract username from form data
 
       const req = {
         method: 'POST',
@@ -23,24 +25,25 @@ export function CreateAccountForm() {
       }
       await res.json();
 
-      navigate('/login');
+      // Update state with the username from the form
+      setUsername(formUsername as string);
+
+      // Navigate to /login with username in state
+      navigate('/login', { state: { username: formUsername } });
     } catch (error) {
       alert(`Error creating account: ${error}`);
     } finally {
       setIsLoading(false);
     }
   }
+
   return (
-    <div className="bg-[ghostwhite] min-h-screen flex items-start pt-[4rem] justify-center p-4 text-lg">
-      <div className="bg-white rounded-2xl max-w-xl mx-auto w-full p-8">
-        <h2 className="text-center text-4xl font-bold text-gray-900 mb-6">
-          Create account
-        </h2>
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <div>
-            <label
-              htmlFor="username"
-              className="block text-sm font-medium text-gray-700">
+    <div className="min-h-screen flex flex-col items-center">
+      <div className="max-w-[620px] w-full flex flex-col gap-4 p-4 border border-black rounded-md">
+        <h1 className="text-xl font-semibold">Create account</h1>
+        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+          <div className="flex flex-col gap-2">
+            <label htmlFor="username" className="text-base font-medium">
               Username:
             </label>
             <input
@@ -49,14 +52,14 @@ export function CreateAccountForm() {
               type="text"
               autoComplete="username"
               required
-              className="w-full mt-1 p-2 border rounded-md text-gray-900 focus:ring focus:ring-indigo-300 focus:outline-none"
+              value={username} // Make it a controlled input
+              onChange={(e) => setUsername(e.target.value)} // Update state on change
+              className="border border-black rounded-md p-2 text-base focus:outline-none"
             />
           </div>
 
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700">
+          <div className="flex flex-col gap-2">
+            <label htmlFor="password" className="text-base font-medium">
               Password:
             </label>
             <input
@@ -65,23 +68,24 @@ export function CreateAccountForm() {
               type="password"
               autoComplete="new-password"
               required
-              className="w-full mt-1 p-2 border rounded-md text-gray-900 focus:ring focus:ring-indigo-300 focus:outline-none"
+              className="border border-black rounded-md p-2 text-base focus:outline-none"
             />
           </div>
 
-          <div>
+          <div className="flex justify-between gap-4">
             <button
               disabled={isLoading}
               type="submit"
-              className="w-full py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring focus:ring-indigo-300">
+              className="w-min whitespace-nowrap px-4 py-[6px] border border-black rounded-md hover:text-white bg-emerald text-base">
               Create
             </button>
           </div>
         </form>
         <Link
-          className="flex justify-between mt-6 text-center text-sm text-indigo-600 cursor-pointer"
-          to="/login">
+          to="/login"
+          className="group relative mt-6 text-base w-min whitespace-nowrap">
           Sign in
+          <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
         </Link>
       </div>
     </div>

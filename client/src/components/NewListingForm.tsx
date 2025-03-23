@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 type Genre = {
@@ -6,19 +6,121 @@ type Genre = {
   name: string;
 };
 
+type Product = {
+  recordId?: string;
+  artist?: string;
+  albumName?: string;
+  genre?: string;
+  condition?: string;
+  price?: number;
+  info?: string;
+  images?: string[];
+};
+
 export function NewListingForm() {
   const [genres, setGenres] = useState<Genre[]>([]);
-  const [selectedFile, setSelectedFile] = useState<File>();
-  const product = useLocation().state;
-  const [preview, setPreview] = useState<string>();
+  const [selectedFiles, setSelectedFiles] = useState<(File | null)[]>([
+    null,
+    null,
+    null,
+    null,
+  ]);
+  const location = useLocation();
+  const product = location.state as Product | undefined;
+  const [previews, setPreviews] = useState<(string | null)[]>([
+    null,
+    null,
+    null,
+    null,
+  ]);
+  const [genreValue, setGenreValue] = useState(product?.genre || '');
+  const [conditionValue, setConditionValue] = useState(
+    product?.condition || ''
+  );
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewURLs = useRef<string[]>([]);
+  const originalFiles = useRef<(File | null)[]>([null, null, null, null]);
 
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (product?.images && product.images.length > 0) {
+      const initialPreviews: (string | null)[] = [null, null, null, null];
+      const initialFiles: (File | null)[] = [null, null, null, null];
+
+      const fetchImages = async () => {
+        try {
+          const fetchPromises = (product.images as string[])
+            .slice(0, 4)
+            .map(async (url, index) => {
+              const response = await fetch(url);
+              if (!response.ok)
+                throw new Error(`Failed to fetch image: ${url}`);
+              const blob = await response.blob();
+              const file = new File([blob], `image-${index}.jpg`, {
+                type: blob.type,
+              });
+              initialFiles[index] = file;
+              initialPreviews[index] = url;
+            });
+
+          await Promise.all(fetchPromises);
+          originalFiles.current = initialFiles;
+          setPreviews(initialPreviews);
+        } catch (error) {
+          console.error('Failed to fetch original images:', error);
+        }
+      };
+
+      fetchImages();
+    }
+  }, [product?.images]);
+
+  useEffect(() => {
+    previewURLs.current.forEach((url) => URL.revokeObjectURL(url));
+    previewURLs.current = [];
+
+    const newPreviews: (string | null)[] = [null, null, null, null];
+    selectedFiles.forEach((file, index) => {
+      if (file) {
+        const url = URL.createObjectURL(file);
+        previewURLs.current.push(url);
+        newPreviews[index] = url;
+      } else {
+        newPreviews[index] =
+          product?.images && index < product.images.length
+            ? product.images[index]
+            : null;
+      }
+    });
+
+    setPreviews(newPreviews);
+
+    return () => {
+      previewURLs.current.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [selectedFiles, product?.images]);
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     try {
-      const formData = new FormData(event.currentTarget);
-
       event.preventDefault();
+      const formData = new FormData();
+      const form = event.currentTarget;
+      formData.append('artist', form.artist.value);
+      formData.append('album', form.album.value);
+      formData.append('genre', genreValue);
+      formData.append('condition', conditionValue);
+      formData.append('price', form.price.value);
+      formData.append('info', form.info.value);
+
+      const filesToSubmit = selectedFiles.map(
+        (file, index) => file || originalFiles.current[index]
+      );
+      filesToSubmit.forEach((file) => {
+        if (file) {
+          formData.append('images', file);
+        }
+      });
 
       if (!product) {
         const response = await fetch('/api/create-listing', {
@@ -28,7 +130,6 @@ export function NewListingForm() {
           },
           body: formData,
         });
-
         if (!response.ok) throw new Error(`Error: ${response.status}`);
         await response.json();
       } else {
@@ -40,25 +141,29 @@ export function NewListingForm() {
           body: formData,
         });
       }
-      navigate('/ProductPage');
+      navigate('/shop');
     } catch (error) {
       console.error(error);
     }
   }
 
-  useEffect(() => {
-    if (!selectedFile) {
-      setPreview(product?.imageSrc);
-      return;
-    }
-    const url = URL.createObjectURL(selectedFile);
-    setPreview(url);
-    return () => URL.revokeObjectURL(url);
-  }, [selectedFile, product?.imageSrc]);
+  function handleImageUpload(
+    event: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) {
+    if (!event.target.files || event.target.files.length === 0) return;
+    const file = event.target.files[0];
+    const newFiles = [...selectedFiles];
+    newFiles[index] = file;
+    setSelectedFiles(newFiles);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }
 
-  function handleImageUpload(event) {
-    if (!event) throw new Error('No image file');
-    setSelectedFile(event.target.files[0]);
+  function handleSquareClick(index: number) {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+      fileInputRef.current.onchange = (e) => handleImageUpload(e as any, index);
+    }
   }
 
   useEffect(() => {
@@ -76,137 +181,142 @@ export function NewListingForm() {
   }, []);
 
   function handleCancelClick() {
-    setPreview('');
-    setSelectedFile(undefined);
+    setSelectedFiles([null, null, null, null]);
+    if (product?.images) {
+      const initialPreviews: (string | null)[] = [null, null, null, null];
+      product.images.slice(0, 4).forEach((image, index) => {
+        initialPreviews[index] = image;
+      });
+      setPreviews(initialPreviews);
+    } else {
+      setPreviews([null, null, null, null]);
+    }
   }
+
   return (
-    <div className="bg-[ghostwhite] min-h-screen p-4 text-lg">
-      <h3 className="flex justify-center text-4xl underline">
-        Create New Listing
-      </h3>
-      <form onSubmit={handleSubmit} className="max-w-screen-md mx-auto mt-8">
-        <div className="flex flex-col ">
-          {/* Image Input */}
-          <div className="mb-4 ">
-            <label className="block mb-2 font-bold  ">Image:</label>
+    <div className="min-h-screen flex flex-col max-w-max mx-auto">
+      <div className="flex flex-col lg:flex-row justify-between lg:items-start gap-4 max-w-[1200px] mx-auto w-full">
+        <div className="max-w-full lg:w-[600px] w-[520px]">
+          <h1 className="pb-4">
+            {product ? 'Edit Listing' : 'Create New Listing'}
+          </h1>
+          <div className="grid grid-cols-2 gap-4">
+            {[0, 1, 2, 3].map((index) => (
+              <div
+                key={index}
+                className="w-full h-full aspect-square border border-black rounded-md flex items-center justify-center cursor-pointer bg-gray-100 hover:bg-gray-200"
+                onClick={() => handleSquareClick(index)}>
+                {previews[index] ? (
+                  <img
+                    src={previews[index]!}
+                    alt={`Preview ${index + 1}`}
+                    className="object-cover rounded-md"
+                  />
+                ) : (
+                  <span className="text-gray-500 text-sm text-center">
+                    Click to add image
+                  </span>
+                )}
+              </div>
+            ))}
             <input
               type="file"
-              id="file-upload"
-              name="image"
-              onChange={handleImageUpload}
+              ref={fileInputRef}
               accept="image/*"
-              className="mb-2 cursor-pointer"
+              className="hidden"
             />
-            {preview && (
-              <img src={preview} alt="Uploaded" className="max-w-xs" />
-            )}
           </div>
+        </div>
 
-          {/* Artist and Album Name */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-4">
-            <div>
-              <label className="block mb-2 font-bold ">Artist:</label>
+        <div className="max-w-[620px] w-full flex flex-col">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <h3>Listing Information</h3>
+            <div className="flex flex-col gap-2">
               <input
                 type="text"
                 defaultValue={product?.artist}
                 id="artist"
                 name="artist"
-                className="w-full mb-4 p-2 border rounded"
+                placeholder="Artist"
+                className="border border-black rounded-md p-2"
                 required
               />
-            </div>
-            <div>
-              <label htmlFor="album" className="block mb-2 font-bold">
-                Album:
-              </label>
               <input
                 type="text"
                 defaultValue={product?.albumName}
                 id="album"
                 name="album"
-                className="w-full mb-4 p-2 border rounded"
+                placeholder="Album"
+                className="border border-black rounded-md p-2"
                 required
               />
-            </div>
-          </div>
-
-          {/* Genre, Condition, and Price */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-4">
-            <div>
-              <label className="block mb-2 font-bold">Genre:</label>
-              <select
-                id="genre"
-                name="genre"
-                defaultValue={product?.genreId}
-                className="w-full p-2 border rounded"
-                required>
-                {genres.map((genre) => (
-                  <option key={genre.genreId} value={genre.genreId}>
-                    {genre.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block mb-2 font-bold">Condition:</label>
-              <select
-                id="condition"
-                defaultValue={product?.condition}
-                name="condition"
-                className="w-full p-2 border rounded"
-                required>
-                <option>Mint (M)</option>
-                <option>Near Mint (NM)</option>
-                <option>Excellent (E)</option>
-                <option>Very Good Plus (VG+)</option>
-                <option>Very Good (VG)</option>
-                <option>Good (G)</option>
-                <option>Poor (P)</option>
-              </select>
-            </div>
-            <div>
-              <label className="block mb-2 font-bold">Price ($):</label>
-
+              <div className="flex gap-2">
+                <select
+                  id="genre"
+                  name="genre"
+                  value={genreValue}
+                  onChange={(e) => setGenreValue(e.target.value)}
+                  className="border border-black rounded-md p-2 w-full"
+                  required>
+                  <option value="">Select a genre</option>
+                  {genres.map((genre) => (
+                    <option key={genre.genreId} value={genre.name}>
+                      {genre.name}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  id="condition"
+                  name="condition"
+                  value={conditionValue}
+                  onChange={(e) => setConditionValue(e.target.value)}
+                  className="border border-black rounded-md p-2 w-full"
+                  required>
+                  <option value="">Select condition</option>
+                  <option value="Mint">Mint (M)</option>
+                  <option value="Near Mint">Near Mint (NM)</option>
+                  <option value="Excellent">Excellent (E)</option>
+                  <option value="Very Good Plus">Very Good Plus (VG+)</option>
+                  <option value="Very Good">Very Good (VG)</option>
+                  <option value="Good">Good (G)</option>
+                  <option value="Poor">Poor (P)</option>
+                </select>
+              </div>
               <input
-                type="text"
+                type="number"
+                step="0.01"
                 defaultValue={product?.price}
                 id="price"
                 name="price"
-                className="w-full p-2 border rounded"
+                placeholder="Price ($)"
+                className="border border-black rounded-md p-2"
                 required
               />
+              <textarea
+                id="info"
+                name="info"
+                defaultValue={product?.info}
+                rows={4}
+                placeholder="Description"
+                className="border border-black rounded-md p-2"
+              />
             </div>
-          </div>
-
-          {/* Description */}
-          <div className="mb-4">
-            <label className="block mb-2 font-bold">Description:</label>
-            <textarea
-              id="info"
-              name="info"
-              defaultValue={product?.info}
-              rows={3}
-              className="w-full p-2 border rounded"
-            />
-          </div>
-
-          {/* Cancel and Submit Buttons */}
-          <div className="mb-4 flex flex-col justify-between md:flex-row">
-            <button
-              type="reset"
-              onClick={handleCancelClick}
-              className="bg-gray-500 text-white p-2 rounded mb-2 md:mb-0 md:mr-2 hover:bg-gray-700 focus:outline-none focus:shadow-outline-gray active:bg-gray-800">
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="bg-blue-500 text-white p-2 rounded hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue active:bg-blue-800">
-              Post Listing
-            </button>
-          </div>
+            <div className="flex justify-between gap-4 mt-0 md:mt-5">
+              <button
+                type="reset"
+                onClick={handleCancelClick}
+                className="w-min whitespace-nowrap text-center px-4 py-[6px] border border-black rounded-md hover:text-snow bg-gray-300">
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="w-min whitespace-nowrap text-center px-4 py-[6px] border border-black rounded-md hover:text-snow bg-emerald">
+                {product ? 'Update Listing' : 'Post Listing'}
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
     </div>
   );
 }
