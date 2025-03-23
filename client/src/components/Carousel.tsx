@@ -60,12 +60,12 @@ export function SideScrollCarousel({
   }, []);
 
   return (
-    <div className="py-8 mx-auto max-w-full w-full">
+    <div className="py-8 mx-auto max-w-7xl w-full flex flex-col items-center">
       <h2 className="text-xl font-medium text-center mb-4">{title}</h2>
-      <div className="">
+      <div className="w-full flex justify-center">
         <div
           ref={scrollContainerRef}
-          className="flex overflow-x-scroll max-w-full w-full mx-auto p-4 scrollbar-none gap-4">
+          className="flex overflow-x-scroll w-full max-w-5xl p-4 scrollbar-none gap-4 justify-start">
           {items.map((item) => (
             <div
               key={item.id}
@@ -78,7 +78,7 @@ export function SideScrollCarousel({
                 src={item.image}
                 alt={item.title || 'Item'}
               />
-              <div className="p-4 space-y-1 whitespace-wrap w-52">
+              <div className="p-4 space-y-1 whitespace-wrap w-52 text-center">
                 {item.title && <p>{item.title}</p>}
                 {item.artist && <p>{item.artist}</p>}
                 {item.price && <p>{`Price: $${item.price}`}</p>}
