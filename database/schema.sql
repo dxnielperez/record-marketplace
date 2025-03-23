@@ -73,3 +73,6 @@ ALTER TABLE "CartItems"
 
 ALTER TABLE "Images" 
   ADD FOREIGN KEY ("recordId") REFERENCES "Records" ("recordId") ON DELETE CASCADE;
+
+  ALTER TABLE "Transactions"
+DROP CONSTRAINT "Transactions_recordId_fkey";

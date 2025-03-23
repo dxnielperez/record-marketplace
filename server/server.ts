@@ -654,6 +654,77 @@ app.post('/api/sign-in-guest', async (req, res, next) => {
     next(error);
   }
 });
+
+app.post('/api/purchase', authMiddleware, async (req, res, next) => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) throw new ClientError(401, 'User ID not available');
+
+    const cartSql = `
+      SELECT "CartItems"."recordId", "Records"."sellerId", "Records"."price"
+      FROM "CartItems"
+      JOIN "Cart" USING ("cartId")
+      JOIN "Records" USING ("recordId")
+      WHERE "Cart"."userId" = $1
+    `;
+    const cartParams = [userId];
+    const cartResult = await db.query(cartSql, cartParams);
+    const cartItems = cartResult.rows;
+
+    if (cartItems.length === 0) {
+      throw new ClientError(400, 'Cart is empty');
+    }
+
+    await db.query('BEGIN');
+
+    const purchasedItems = [];
+    for (const item of cartItems) {
+      const { recordId, sellerId, price } = item;
+
+      // Delete the record from Records first
+      const deleteRecordSql = `
+        DELETE FROM "Records"
+        WHERE "recordId" = $1
+        RETURNING *
+      `;
+      const deleteRecordParams = [recordId];
+      const deleteResult = await db.query(deleteRecordSql, deleteRecordParams);
+      if (deleteResult.rowCount === 0) {
+        throw new ClientError(404, `Record ${recordId} not found`);
+      }
+
+      // Insert into Transactions after deletion
+      const transactionSql = `
+        INSERT INTO "Transactions" ("buyerId", "recordId", "totalPrice", "transactionDate")
+        VALUES ($1, $2, $3, NOW())
+        RETURNING *
+      `;
+      const transactionParams = [userId, recordId, price];
+      const transactionResult = await db.query(
+        transactionSql,
+        transactionParams
+      );
+      purchasedItems.push(transactionResult.rows[0]);
+    }
+
+    // Clear the cart
+    const clearCartSql = `
+      DELETE FROM "CartItems"
+      WHERE "cartId" IN (SELECT "cartId" FROM "Cart" WHERE "userId" = $1)
+    `;
+    await db.query(clearCartSql, [userId]);
+
+    await db.query('COMMIT');
+
+    res.status(200).json({
+      message: 'Purchase completed successfully',
+      purchasedItems,
+    });
+  } catch (error) {
+    await db.query('ROLLBACK');
+    next(error);
+  }
+});
 /**
  * Serves React's index.html if no api route matches.
  *

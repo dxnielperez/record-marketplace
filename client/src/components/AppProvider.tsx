@@ -1,4 +1,3 @@
-// AppProvider.tsx
 import { useState, useEffect } from 'react';
 import { AppContext } from './AppContext';
 import { CartItemsProps, User, Product } from '../types/types';
@@ -15,7 +14,10 @@ export function AppProvider({ children }) {
 
   useEffect(() => {
     async function loadCart() {
-      if (!token) return;
+      if (!token) {
+        setCartItems([]); // Clear cart in UI when no token
+        return;
+      }
       try {
         const res = await fetch(`/api/cart`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -25,6 +27,7 @@ export function AppProvider({ children }) {
         setCartItems(result);
       } catch (error) {
         console.error(error);
+        setCartItems([]); // Clear cart on error to avoid stale data
       }
     }
     loadCart();
@@ -64,7 +67,7 @@ export function AppProvider({ children }) {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
     setUser(user);
-    setToken(token);
+    setToken(token); // Triggers useEffect to load cart
   }
 
   async function signOut() {
@@ -72,6 +75,7 @@ export function AppProvider({ children }) {
     localStorage.removeItem('user');
     setUser(undefined);
     setToken(undefined);
+    setCartItems([]); // Reset cart in UI immediately
   }
 
   async function removeFromCart(itemId: number) {
@@ -93,7 +97,6 @@ export function AppProvider({ children }) {
     }
   }
 
-  // AppProvider.tsx
   async function deleteListing(recordId: number) {
     try {
       const response = await fetch(`/api/delete-record/${recordId}`, {
@@ -115,37 +118,26 @@ export function AppProvider({ children }) {
       }
     } catch (error) {
       console.error('Error deleting listing:', error);
-      throw error; // Re-throw to be caught by the caller
+      throw error;
     }
   }
+
   async function handleCheckout() {
     try {
-      const cartResponse = await fetch(`/api/cart/all/${user?.userId}`, {
-        method: 'DELETE',
+      const response = await fetch('/api/purchase', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
       });
-      await cartResponse.json();
-
-      for (const cartItem of cartItems) {
-        const recordResponse = await fetch(
-          `/api/delete-record/${cartItem.recordId}`,
-          {
-            method: 'DELETE',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        if (!recordResponse.ok)
-          console.error('An error occurred', recordResponse.status);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Checkout failed: ${response.status} - ${errorText}`);
       }
-      setCartItems([]);
+      setCartItems([]); // Clear the cart in the UI
     } catch (error) {
-      console.error(error);
+      console.error('Error during checkout:', error);
     }
   }
 
