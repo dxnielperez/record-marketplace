@@ -16,12 +16,12 @@ import { existsSync } from 'node:fs';
  * it sends a helpful message.
  */
 export function defaultMiddleware(reactStaticDir) {
-  function handleDefault(_req, res) {
-    if (!existsSync(reactStaticDir)) {
-      res.sendFile(new URL('./no-client.html', import.meta.url).pathname);
-      return;
+    function handleDefault(_req, res) {
+        if (!existsSync(reactStaticDir)) {
+            res.sendFile(new URL('./no-client.html', import.meta.url).pathname);
+            return;
+        }
+        res.sendFile(`${reactStaticDir}/index.html`);
     }
-    res.sendFile(`${reactStaticDir}/index.html`);
-  }
-  return handleDefault;
+    return handleDefault;
 }

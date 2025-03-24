@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 // import argon2 from 'argon2';
 // const password = process.argv[2];
 // try {
