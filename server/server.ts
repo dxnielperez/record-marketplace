@@ -24,7 +24,7 @@ const hashKey = process.env.TOKEN_SECRET;
 if (!hashKey) throw new Error('TOKEN_SECRET not found in .env');
 
 const app = express();
-app.use(cors({ origin: 'https://your-project.vercel.app' }));
+app.use(cors({ origin: 'record-marketplace.vercel.app' }));
 app.use(express.json());
 
 // Create paths for static directories
