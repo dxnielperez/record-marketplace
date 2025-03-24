@@ -11,23 +11,22 @@ import {
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import { DatabaseError } from 'pg-protocol';
-const connectionString =
-  process.env.DATABASE_URL ||
-  `postgresql://${process.env.RDS_USERNAME}:${process.env.RDS_PASSWORD}@${process.env.RDS_HOSTNAME}:${process.env.RDS_PORT}/${process.env.RDS_DB_NAME}`;
+import cors from 'cors';
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) throw new Error('DATABASE_URL not found in env');
 const db = new pg.Pool({
   connectionString,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  ssl: { rejectUnauthorized: false },
 });
 const hashKey = process.env.TOKEN_SECRET;
 if (!hashKey) throw new Error('TOKEN_SECRET not found in .env');
 const app = express();
+app.use(cors({ origin: 'https://your-project.vercel.app' }));
 app.use(express.json());
 // Create paths for static directories
-const reactStaticDir = new URL('../client/dist', import.meta.url).pathname;
+// const reactStaticDir = new URL('../client/dist', import.meta.url).pathname;
 const uploadsStaticDir = new URL('public', import.meta.url).pathname;
-app.use(express.static(reactStaticDir));
+// app.use(express.static(reactStaticDir));
 // Static directory for file uploads server/public/
 app.use(express.static(uploadsStaticDir));
 app.post('/api/register', async (req, res, next) => {
@@ -662,7 +661,7 @@ app.post('/api/purchase', authMiddleware, async (req, res, next) => {
  * Catching everything that doesn't match a route and serving index.html allows
  * React Router to manage the routing.
  */
-app.get('*', (req, res) => res.sendFile(`${reactStaticDir}/index.html`));
+// app.get('*', (req, res) => res.sendFile(`${reactStaticDir}/index.html`));
 app.use(errorMiddleware);
 app.listen(process.env.PORT, () => {
   console.log(`\n\napp listening on port ${process.env.PORT}\n\n`);

@@ -9,9 +9,7 @@ import {
   uploadsMiddleware,
 } from './lib/index.js';
 import argon2 from 'argon2';
-import jwt, { JwtPayload } from 'jsonwebtoken';
-import { nextTick } from 'node:process';
-import { useParams } from 'react-router-dom';
+import jwt from 'jsonwebtoken';
 import { DatabaseError } from 'pg-protocol';
 import cors from 'cors';
 
@@ -30,7 +28,7 @@ app.use(cors({ origin: 'https://your-project.vercel.app' }));
 app.use(express.json());
 
 // Create paths for static directories
-const reactStaticDir = new URL('../client/dist', import.meta.url).pathname;
+// const reactStaticDir = new URL('../client/dist', import.meta.url).pathname;
 const uploadsStaticDir = new URL('public', import.meta.url).pathname;
 
 // app.use(express.static(reactStaticDir));
