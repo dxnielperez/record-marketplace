@@ -21,7 +21,7 @@ const db = new pg.Pool({
 const hashKey = process.env.TOKEN_SECRET;
 if (!hashKey) throw new Error('TOKEN_SECRET not found in .env');
 const app = express();
-app.use(cors({ origin: 'record-marketplace.vercel.app' }));
+app.use(cors({ origin: 'https://record-marketplace.vercel.app' }));
 app.use(express.json());
 // Create paths for static directories
 // const reactStaticDir = new URL('../client/dist', import.meta.url).pathname;

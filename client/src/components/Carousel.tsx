@@ -23,7 +23,6 @@ export function SideScrollCarousel({
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 1086);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-
   useEffect(() => {
     const fetchProducts = async () => {
       try {
