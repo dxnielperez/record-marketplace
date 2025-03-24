@@ -27,7 +27,9 @@ export function SideScrollCarousel({
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('/api/all-products');
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/all-products`
+        );
         if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
         const products = await response.json();
         const transformedData: Item[] = products.map((product: any) => ({

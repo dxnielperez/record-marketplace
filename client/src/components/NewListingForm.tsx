@@ -123,23 +123,31 @@ export function NewListingForm() {
       });
 
       if (!product) {
-        const response = await fetch('/api/create-listing', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-          body: formData,
-        });
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/create-listing`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+            body: formData,
+          }
+        );
         if (!response.ok) throw new Error(`Error: ${response.status}`);
         await response.json();
       } else {
-        await fetch(`/api/update-listing/${product.recordId}`, {
-          method: 'PUT',
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-          body: formData,
-        });
+        await fetch(
+          `${import.meta.env.VITE_API_URL}/api/update-listing/${
+            product.recordId
+          }`,
+          {
+            method: 'PUT',
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+            body: formData,
+          }
+        );
       }
       navigate('/shop');
     } catch (error) {
@@ -169,7 +177,9 @@ export function NewListingForm() {
   useEffect(() => {
     async function getGenres() {
       try {
-        const res = await fetch('/api/get-genres');
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/get-genres`
+        );
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const result = await res.json();
         setGenres(result);

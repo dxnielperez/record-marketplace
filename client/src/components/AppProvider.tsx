@@ -19,7 +19,7 @@ export function AppProvider({ children }) {
         return;
       }
       try {
-        const res = await fetch(`/api/cart`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cart`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error(`Error: ${res.status}`);
@@ -47,14 +47,17 @@ export function AppProvider({ children }) {
       return;
     }
     try {
-      const response = await fetch('/api/cart/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ recordId: product?.recordId }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/cart/add`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ recordId: product?.recordId }),
+        }
+      );
       if (!response.ok) throw new Error(`Error: ${response.status}`);
       const result = await response.json();
       setCartItems([...cartItems, result]);
@@ -80,13 +83,16 @@ export function AppProvider({ children }) {
 
   async function removeFromCart(itemId: number) {
     try {
-      const response = await fetch(`/api/cart/remove/${itemId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/cart/remove/${itemId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       const result = await response.json();
       const newCart = cartItems.filter(
         (item) => item.itemsId !== result.itemsId
@@ -99,13 +105,16 @@ export function AppProvider({ children }) {
 
   async function deleteListing(recordId: number) {
     try {
-      const response = await fetch(`/api/delete-record/${recordId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/delete-record/${recordId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(
@@ -124,13 +133,16 @@ export function AppProvider({ children }) {
 
   async function handleCheckout() {
     try {
-      const response = await fetch('/api/purchase', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/purchase`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Checkout failed: ${response.status} - ${errorText}`);

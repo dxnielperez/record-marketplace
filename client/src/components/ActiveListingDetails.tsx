@@ -16,7 +16,9 @@ export function ActiveListingDetails() {
   useEffect(() => {
     async function loadProduct() {
       try {
-        const res = await fetch(`/api/products/${recordId}`);
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/products/${recordId}`
+        );
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const result = await res.json();
         setProduct(result);

@@ -15,11 +15,14 @@ export function ActiveListings() {
   useEffect(() => {
     async function getSellersProducts() {
       try {
-        const res = await fetch(`/api/active-listings/${user?.userId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/active-listings/${user?.userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const result = await res.json();
         setActiveListings(result);

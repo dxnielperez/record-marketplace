@@ -19,7 +19,10 @@ export function CreateAccountForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
       };
-      const res = await fetch('/api/register', req);
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/register`,
+        req
+      );
       if (!res.ok) {
         throw new Error(`Fetch error ${res.status}`);
       }

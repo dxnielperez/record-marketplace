@@ -21,7 +21,10 @@ export function LoginForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
       };
-      const res = await fetch('/api/sign-in', req);
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/sign-in`,
+        req
+      );
       if (!res.ok) throw new Error(`fetch error ${res.status}`);
       const { user, token } = await res.json();
 
@@ -44,7 +47,10 @@ export function LoginForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: 'guest', password: 'guest_password' }),
       };
-      const res = await fetch('/api/sign-in-guest', req);
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/sign-in-guest`,
+        req
+      );
       if (!res.ok) throw new Error(`fetch error ${res.status}`);
       const { user, token } = await res.json();
 

@@ -13,7 +13,9 @@ export function ProductDetails() {
   useEffect(() => {
     const loadProduct = async () => {
       try {
-        const response = await fetch(`/api/products/${recordId}`);
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/products/${recordId}`
+        );
         if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
         const result = await response.json();
         setProduct(result);

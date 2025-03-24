@@ -13,7 +13,9 @@ export default function ProductCatalog() {
   useEffect(() => {
     async function getGenres() {
       try {
-        const res = await fetch('/api/get-genre-ids');
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/get-genre-ids`
+        );
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const result = await res.json();
         setGenres(result);
@@ -30,7 +32,9 @@ export default function ProductCatalog() {
         const query = searchTerm
           ? `?search=${encodeURIComponent(searchTerm)}`
           : '';
-        const res = await fetch(`/api/all-products${query}`);
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/all-products${query}`
+        );
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const result = await res.json();
         setProducts(result);
