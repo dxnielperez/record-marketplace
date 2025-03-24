@@ -3,7 +3,6 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Product } from '../types/types';
 import { MdEdit, MdDeleteForever } from 'react-icons/md';
 import { AppContext } from './AppContext';
-
 export function ActiveListingDetails() {
   const [product, setProduct] = useState<Product>();
   const [showModal, setShowModal] = useState(false);
