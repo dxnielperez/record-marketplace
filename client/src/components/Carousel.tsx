@@ -32,9 +32,7 @@ export function SideScrollCarousel({
         const products = await response.json();
         const transformedData: Item[] = products.map((product: any) => ({
           id: product.recordId,
-          image: product.images[0].startsWith('http')
-            ? product.images[0]
-            : `${API_URL}${product.images[0]}`,
+          image: product.images[0],
           title: product.albumName,
           artist: product.artist,
           price: product.price,
