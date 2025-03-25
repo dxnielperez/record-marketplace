@@ -20,7 +20,7 @@ export function ShoppingCart() {
 
   const items = cartItems.length > 1 ? 'items' : 'item';
   const noItems = cartItems.length === 0;
-
+  console.log(cartItems);
   return (
     <div className="min-h-screen">
       <div className="flex justify-between">
