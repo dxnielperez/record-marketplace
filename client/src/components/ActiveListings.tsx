@@ -2,6 +2,7 @@ import { useCallback, useContext, useEffect, useState } from 'react';
 import { Products } from '../types/types';
 import { AppContext } from './AppContext';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from '../constants';
 
 export function ActiveListings() {
   const [activeListings, setActiveListings] = useState<Products[]>([]);
@@ -16,7 +17,7 @@ export function ActiveListings() {
     async function getSellersProducts() {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/active-listings/${user?.userId}`,
+          `${API_URL}/api/active-listings/${user?.userId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

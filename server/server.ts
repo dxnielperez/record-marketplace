@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars -- Remove when used */
 import 'dotenv/config';
-import express, { application } from 'express';
+import express from 'express';
 import pg from 'pg';
 import {
   ClientError,
@@ -12,6 +11,14 @@ import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import { DatabaseError } from 'pg-protocol';
 import cors from 'cors';
+import dotenv from 'dotenv';
+dotenv.config();
+
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://record-marketplace.onrender.com',
+  'https://record-marketplace.vercel.app',
+];
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) throw new Error('DATABASE_URL not found in env');
@@ -24,7 +31,18 @@ const hashKey = process.env.TOKEN_SECRET;
 if (!hashKey) throw new Error('TOKEN_SECRET not found in .env');
 
 const app = express();
-app.use(cors({ origin: 'https://record-marketplace.vercel.app' }));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g., server-to-server) or if origin is in allowed list
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+  })
+);
 app.use(express.json());
 
 // Create paths for static directories

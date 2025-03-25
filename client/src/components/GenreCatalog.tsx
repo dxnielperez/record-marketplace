@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Genre, Products } from '../types/types';
+import { API_URL } from '../constants';
 
 export default function GenreCatalog() {
   const [products, setProducts] = useState<Products[]>([]);
@@ -18,9 +19,7 @@ export default function GenreCatalog() {
   useEffect(() => {
     async function getGenres() {
       try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/get-genre-ids`
-        );
+        const res = await fetch(`${API_URL}/api/get-genre-ids`);
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const result = await res.json();
         setGenres(result);
@@ -44,9 +43,7 @@ export default function GenreCatalog() {
           ? `?search=${encodeURIComponent(searchTerm)}`
           : '';
         const res = await fetch(
-          `${
-            import.meta.env.VITE_API_URL
-          }/api/shop-by-genre/${genreName}${query}`
+          `${API_URL}/api/shop-by-genre/${genreName}${query}`
         );
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const result = await res.json();

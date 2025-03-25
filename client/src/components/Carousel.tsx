@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from '../constants';
 
 type Item = {
   id?: number | string;
@@ -26,14 +27,14 @@ export function SideScrollCarousel({
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/all-products`
-        );
+        const response = await fetch(`${API_URL}/api/all-products`);
         if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
         const products = await response.json();
         const transformedData: Item[] = products.map((product: any) => ({
           id: product.recordId,
-          image: product.images[0],
+          image: product.images[0].startsWith('http')
+            ? product.images[0]
+            : `${API_URL}${product.images[0]}`,
           title: product.albumName,
           artist: product.artist,
           price: product.price,

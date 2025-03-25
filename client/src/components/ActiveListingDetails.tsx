@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Product } from '../types/types';
 import { MdEdit, MdDeleteForever } from 'react-icons/md';
 import { AppContext } from './AppContext';
+import { API_URL } from '../constants';
 export function ActiveListingDetails() {
   const [product, setProduct] = useState<Product>();
   const [showModal, setShowModal] = useState(false);
@@ -15,9 +16,7 @@ export function ActiveListingDetails() {
   useEffect(() => {
     async function loadProduct() {
       try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/products/${recordId}`
-        );
+        const res = await fetch(`${API_URL}/api/products/${recordId}`);
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const result = await res.json();
         setProduct(result);
