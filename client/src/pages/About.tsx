@@ -1,27 +1,23 @@
-import { SideScrollCarousel } from '../components/Carousel';
+import { SideScrollCarouselv2 } from '../components/Carouselv2';
 
 export default function About() {
   return (
-    <div className="min-h-[80vh]">
-      <div className="bg-royal-blue text-snow w-full p-4 rounded-lg">
+    <div className="min-h-[80vh] max-w-5xl mx-auto">
+      <div className="bg-royal-blue text-snow w-full px-4 py-4 lg:py-8 rounded-lg">
         <div className="w-full max-w-[800px] mx-auto">
           <h3 className="text-xl font-medium">About Ripple Records</h3>
-          <p>
-            Ripple records formerly spin trade marketplace was my final project
-            during my time attending learningfuze coding bootcamp. After
-            completing the program and landing my first developer position i
-            have since revised my first project at learningfuze as well as
-            building various other projects to continue learning and maintain my
-            skills. Some of these projects include my portfolio website v1 and
-            v2, and various mock business websites. During this time i somehow
-            neglected my final project, so i have since dedicated my time to
-            redesign and refactor the project maintaining the original premise,
-            a marketplace for record collectors.
+          <p className="text-sm">
+            Ripple Records is a conceptual marketplace for record collectors,
+            where users can buy, sell, and trade vinyl records within a
+            community-driven environment. Originally created as my final
+            assignment at LearningFuze coding bootcamp, it has since been
+            redesigned and refactored to improve functionality and user
+            experience. Note that it is not an actual product.
           </p>
         </div>
       </div>
       <div>
-        <SideScrollCarousel
+        <SideScrollCarouselv2
           data={favoriteAlbums}
           title="Some of my favorite albums"
         />
