@@ -19,7 +19,7 @@ CREATE TABLE "Records" (
   "albumName" text,
   "genreId" integer,
   "condition" text,
-  "price" integer,
+  "price" numeric(10, 2),
   "info" text,
   "sellerId" integer
 );
@@ -33,7 +33,7 @@ CREATE TABLE "Transactions" (
   "transactionId" serial PRIMARY KEY,
   "buyerId" integer,
   "recordId" integer,
-  "totalPrice" integer,
+  "totalPrice" numeric(10, 2),
   "transactionDate" timestamptz
 );
 
