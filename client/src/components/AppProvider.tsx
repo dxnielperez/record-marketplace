@@ -12,14 +12,18 @@ export function AppProvider({ children }) {
     return storedUser ? JSON.parse(storedUser) : undefined;
   });
 
+  // Define the API base URL based on environment
+  const apiUrl =
+    import.meta.env.VITE_API_URL || 'https://record-marketplace.onrender.com';
+
   useEffect(() => {
     async function loadCart() {
       if (!token) {
-        setCartItems([]); // Clear cart in UI when no token
+        setCartItems([]);
         return;
       }
       try {
-        const res = await fetch(`/api/cart`, {
+        const res = await fetch(`${apiUrl}/api/cart`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error(`Error: ${res.status}`);
@@ -27,11 +31,11 @@ export function AppProvider({ children }) {
         setCartItems(result);
       } catch (error) {
         console.error(error);
-        setCartItems([]); // Clear cart on error to avoid stale data
+        setCartItems([]);
       }
     }
     loadCart();
-  }, [token]);
+  }, [apiUrl, token]);
 
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
@@ -47,7 +51,7 @@ export function AppProvider({ children }) {
       return;
     }
     try {
-      const response = await fetch(`/api/cart/add`, {
+      const response = await fetch(`${apiUrl}/api/cart/add`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -55,11 +59,17 @@ export function AppProvider({ children }) {
         },
         body: JSON.stringify({ recordId: product?.recordId }),
       });
-      if (!response.ok) throw new Error(`Error: ${response.status}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `Error adding to cart: ${response.status} - ${errorText}`
+        );
+      }
       const result = await response.json();
       setCartItems([...cartItems, result]);
     } catch (error) {
       console.error('Error adding to cart:', error);
+      alert('Failed to add to cart. Please try again.');
     }
   }
 
@@ -67,7 +77,7 @@ export function AppProvider({ children }) {
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
     setUser(user);
-    setToken(token); // Triggers useEffect to load cart
+    setToken(token);
   }
 
   async function signOut() {
@@ -75,18 +85,19 @@ export function AppProvider({ children }) {
     localStorage.removeItem('user');
     setUser(undefined);
     setToken(undefined);
-    setCartItems([]); // Reset cart in UI immediately
+    setCartItems([]);
   }
 
   async function removeFromCart(itemId: number) {
     try {
-      const response = await fetch(`/api/cart/remove/${itemId}`, {
+      const response = await fetch(`${apiUrl}/api/cart/remove/${itemId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
       });
+      if (!response.ok) throw new Error(`Error: ${response.status}`);
       const result = await response.json();
       const newCart = cartItems.filter(
         (item) => item.itemsId !== result.itemsId
@@ -99,7 +110,7 @@ export function AppProvider({ children }) {
 
   async function deleteListing(recordId: number) {
     try {
-      const response = await fetch(`/api/delete-record/${recordId}`, {
+      const response = await fetch(`${apiUrl}/api/delete-record/${recordId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -124,7 +135,7 @@ export function AppProvider({ children }) {
 
   async function handleCheckout() {
     try {
-      const response = await fetch(`/api/purchase`, {
+      const response = await fetch(`${apiUrl}/api/purchase`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -135,7 +146,7 @@ export function AppProvider({ children }) {
         const errorText = await response.text();
         throw new Error(`Checkout failed: ${response.status} - ${errorText}`);
       }
-      setCartItems([]); // Clear the cart in the UI
+      setCartItems([]);
     } catch (error) {
       console.error('Error during checkout:', error);
     }
