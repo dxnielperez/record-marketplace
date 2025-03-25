@@ -10,7 +10,7 @@
     "lint": "eslint . --ext ts,js --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.49.1",
+    "@supabase/supabase-js": "^2.49.3",
     "@types/cors": "^2.8.17",
     "argon2": "^0.29.1",
     "cors": "^2.8.5",

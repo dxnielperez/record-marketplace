@@ -15,6 +15,7 @@ import cors from 'cors';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import { DatabaseError } from 'pg-protocol';
+import { createClient } from '@supabase/supabase-js';
 
 dotenv.config();
 
@@ -30,6 +31,12 @@ if (!connectionString) throw new Error('DATABASE_URL not found in env');
 
 const hashKey = process.env.TOKEN_SECRET;
 if (!hashKey) throw new Error('TOKEN_SECRET not found in .env');
+
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error('Supabase URL and Key must be provided in .env');
+}
 
 // Database Setup
 const db = new pg.Pool({
@@ -133,10 +140,20 @@ app.post(
   '/api/create-listing',
   authMiddleware,
   uploadsMiddleware.array('images', 4),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       const { artist, album, genre, condition, price, info } = req.body;
       const files = req.files as Express.Multer.File[];
+
+      if (!req.user?.userId) {
+        throw new Error('Unauthorized: No user ID found');
+      }
+
+      const supabase = createClient(
+        process.env.SUPABASE_URL || 'https://lvgmwasaitkgaugklrqb.supabase.co',
+        process.env.SUPABASE_KEY || 'your-anon-key'
+      );
+
       const genreSql = `
         SELECT "genreId" 
         FROM "Genres" 
@@ -144,9 +161,10 @@ app.post(
       `;
       const genreResult = await db.query(genreSql, [genre]);
       if (!genreResult.rows[0]) {
-        throw new ClientError(400, `Genre '${genre}' not found`);
+        throw new Error(`Genre '${genre}' not found'`);
       }
       const genreId = genreResult.rows[0].genreId;
+
       const recordSql = `
         INSERT INTO "Records" ("artist", "albumName", "genreId", "condition", "price", "info", "sellerId")
         VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -157,12 +175,13 @@ app.post(
         album,
         genreId,
         condition,
-        price,
+        Number(price),
         info,
-        req.user?.userId,
+        req.user.userId,
       ];
       const recordResult = await db.query(recordSql, recordParams);
       const listing = recordResult.rows[0];
+
       if (files && files.length > 0) {
         const imageSql = `
           INSERT INTO "Images" ("imageUrl", "recordId")
@@ -170,13 +189,34 @@ app.post(
           RETURNING *;
         `;
         for (const file of files) {
-          const imageParams = [`/images/${file.filename}`, listing.recordId];
-          await db.query(imageSql, imageParams);
+          const fileName = `${Date.now()}-${file.originalname}`;
+          const { error: uploadError } = await supabase.storage
+            .from('images')
+            .upload(fileName, file.buffer, {
+              contentType: file.mimetype,
+            });
+          if (uploadError) {
+            throw new Error(`Upload failed: ${uploadError.message}`);
+          }
+          const { data } = supabase.storage
+            .from('images')
+            .getPublicUrl(fileName);
+          const publicUrl = data.publicUrl;
+
+          const imageParams = [publicUrl, listing.recordId];
+          await db.query(imageSql, imageParams); // Removed unused imageResult
         }
       }
+
       res.status(201).json(listing);
-    } catch (error) {
-      next(error);
+    } catch (error: unknown) {
+      // Changed to unknown
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      res.status(500).json({
+        error: 'an unexpected error occurred',
+        message: errorMessage,
+      });
     }
   }
 );
@@ -191,6 +231,12 @@ app.put(
       const id = Number(recordId);
       const { artist, album, genre, condition, price, info } = req.body;
       const files = req.files as Express.Multer.File[];
+
+      const supabase = createClient(
+        process.env.SUPABASE_URL || 'https://lvgmwasaitkgaugklrqb.supabase.co',
+        process.env.SUPABASE_KEY || 'your-anon-key'
+      );
+
       const genreSql = `
         SELECT "genreId" 
         FROM "Genres" 
@@ -201,6 +247,7 @@ app.put(
         throw new ClientError(400, `Genre '${genre}' not found`);
       }
       const genreId = genreResult.rows[0].genreId;
+
       const recordSql = `
         UPDATE "Records"
         SET "artist" = $1,
@@ -215,22 +262,59 @@ app.put(
       const recordParams = [artist, album, genreId, condition, price, info, id];
       const recordResult = await db.query(recordSql, recordParams);
       const listing = recordResult.rows[0];
+
       let images = [];
-      if (files && files.length > 0) {
+      if (files.length > 0) {
+        const existingImagesSql = `
+          SELECT "imageUrl"
+          FROM "Images"
+          WHERE "recordId" = $1
+        `;
+        const existingImagesResult = await db.query(existingImagesSql, [id]);
+        const oldImageUrls = existingImagesResult.rows.map(
+          (row) => row.imageUrl
+        );
+
         const deleteImagesSql = `
           DELETE FROM "Images"
           WHERE "recordId" = $1
         `;
         await db.query(deleteImagesSql, [id]);
+
         const imageSql = `
           INSERT INTO "Images" ("imageUrl", "recordId")
           VALUES ($1, $2)
           RETURNING "imageUrl";
         `;
+
         for (const file of files) {
-          const imageParams = [`/images/${file.filename}`, id];
-          const imageResult = await db.query(imageSql, imageParams);
+          const fileName = `${Date.now()}-${file.originalname}`;
+          const { error: uploadError } = await supabase.storage
+            .from('images')
+            .upload(fileName, file.buffer, {
+              contentType: file.mimetype,
+            });
+          if (uploadError) {
+            throw new Error(`Image upload failed: ${uploadError.message}`);
+          }
+          const { data } = supabase.storage
+            .from('images')
+            .getPublicUrl(fileName);
+          const publicUrl = data.publicUrl;
+          const imageResult = await db.query(imageSql, [publicUrl, id]);
           images.push(imageResult.rows[0].imageUrl);
+        }
+
+        for (const url of oldImageUrls) {
+          const fileName = url.split('/').pop();
+          if (fileName) {
+            const { error: deleteError } = await supabase.storage
+              .from('images')
+              .remove([fileName]);
+            if (deleteError) {
+              // Silently ignore delete errors for now
+            }
+          }
         }
       } else {
         const existingImagesSql = `
@@ -241,6 +325,7 @@ app.put(
         const existingImagesResult = await db.query(existingImagesSql, [id]);
         images = existingImagesResult.rows.map((row) => row.imageUrl);
       }
+
       res.status(200).json({ ...listing, images });
     } catch (error) {
       next(error);

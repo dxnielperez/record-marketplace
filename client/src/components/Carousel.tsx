@@ -21,7 +21,6 @@ export function SideScrollCarousel({
   title = 'Browse available items',
 }: SideScrollCarouselProps) {
   const [items, setItems] = useState<Item[]>([]);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 1086);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   useEffect(() => {
@@ -32,7 +31,7 @@ export function SideScrollCarousel({
         const products = await response.json();
         const transformedData: Item[] = products.map((product: any) => ({
           id: product.recordId,
-          image: product.images[0],
+          image: product.images?.[0],
           title: product.albumName,
           artist: product.artist,
           price: product.price,
@@ -53,12 +52,6 @@ export function SideScrollCarousel({
     }
   }, [data]);
 
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 1086);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
   return (
     <div className="pt-4 mx-auto max-w-7xl w-full flex flex-col items-center">
       <h2 className="text-xl font-medium text-center">{title}</h2>
@@ -72,9 +65,8 @@ export function SideScrollCarousel({
               className="flex-shrink-0 cursor-pointer"
               onClick={() => item.url && navigate(item.url)}>
               <img
-                className={`w-full ${
-                  isMobile ? 'h-36' : 'h-44'
-                } object-contain aspect-square`}
+                className={`w-full h-36 h-44'
+                object-contain aspect-square`}
                 src={item.image}
                 alt={item.title || 'Item'}
               />

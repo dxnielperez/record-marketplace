@@ -54,7 +54,7 @@ export function ShoppingCart() {
             <div className="flex pb-4" key={item.itemsId}>
               <div>
                 <img
-                  src={item.images[0]}
+                  src={item.images?.[0]}
                   className="max-w-[150px] rounded-md"
                   alt="Product"
                 />

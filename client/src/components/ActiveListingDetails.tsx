@@ -20,7 +20,7 @@ export function ActiveListingDetails() {
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const result = await res.json();
         setProduct(result);
-        setSelectedImage(result?.images[0]);
+        setSelectedImage(result?.images?.[0]);
       } catch (error) {
         console.error(error);
       }

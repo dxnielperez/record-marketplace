@@ -151,7 +151,7 @@ export function ActiveListings() {
                 <div className="w-full h-48">
                   {product.images && product.images.length > 0 ? (
                     <img
-                      src={product.images[0]}
+                      src={product.images?.[0]}
                       alt={product.albumName}
                       className="w-full h-full object-cover cursor-pointer hover:opacity-75 rounded-md"
                     />

@@ -76,7 +76,7 @@ export function Checkout() {
             <div className="flex" key={item.itemsId}>
               <div>
                 <img
-                  src={item.images[0]}
+                  src={item.images?.[0]}
                   className="max-w-[150px] rounded-md"
                   alt="Product"
                 />
