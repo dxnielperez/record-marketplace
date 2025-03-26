@@ -1,27 +1,92 @@
+import { useEffect, useState } from 'react';
 import { SideScrollCarousel } from '../components/Carousel';
 import { SlidingBar } from '../components/SlidingBar';
+import { API_URL } from '../constants';
+import { Products } from '../types/types';
 
 export function Home() {
+  const [product, setProduct] = useState<Products>();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function getProducts() {
+      try {
+        const res = await fetch(`${API_URL}/api/all-products?.[0]`);
+        if (!res.ok) throw new Error(`Error: ${res.status}`);
+        const result = await res.json();
+        setProduct(result[0]);
+      } catch (error) {
+        setError((error as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    getProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <p className="text-center text-lg min-h-[80vh] flex flex-col">
+        <img
+          src="/vinyl.webp"
+          alt=""
+          className="w-20 mx-auto animate-slow-spin"
+        />
+      </p>
+    );
+  }
+
+  if (error) {
+    return <p className="text-center text-red-500">Error: {error}</p>;
+  }
+
   return (
     <div>
-      <div className="w-full flex flex-col lg:flex-row">
+      <div className="?w-full flex flex-col lg:flex-row bg-flash-white p-4 rounded-lg">
         <img
-          src="/bob-3.jpg"
-          alt="bob marley"
+          src={product?.images?.[0]}
+          alt={`${product?.albumName} by ${product?.artist}`}
           className="w-full lg:w-2/3 order-1 lg:order-2 aspect-[14/5] lg:aspect-[16/9] object-cover"
         />
-
         <div className="w-full flex flex-col mx-auto items-center lg:items-start justify-center gap-4 p-4 order-2 lg:order-1">
-          <h3 className="">Album of the Week</h3>
-          <p className="text-xl font-medium">Exodus - Bob Marley</p>
-          <p>The All Time Classic Album by Bob Marley on Reggae Red Vinyl</p>
+          <h3 className="">Featured Listing</h3>
+          <p className="text-xl font-medium">
+            {product?.albumName} - {product?.artist}
+          </p>
+          <p>{product?.info}</p>
+          <p className="text-lg font-bold">{product?.price}</p>
           <a
-            href="/shop"
-            className="w-min whitespace-nowrap text-center px-4 py-[6px] border-1 border  border-black rounded-md hover:text-snow bg-emerald">
+            href={`/products/${product?.albumName
+              .toLowerCase()
+              .replace(/\s+/g, '-')}+${product?.recordId}`}
+            className="w-min whitespace-nowrap text-center px-4 py-[6px] border-1 border border-black rounded-md hover:text-snow bg-emerald">
             Buy Now
           </a>
         </div>
       </div>
+
+      {/* Marketplace Features */}
+      <div className="my-8">
+        <h2 className="text-2xl font-medium text-center mb-4">
+          Explore the Marketplace
+        </h2>
+        <div className="flex flex-col md:flex-row justify-around gap-4">
+          <div className="text-center">
+            <h3 className="text-lg font-medium">Buy Rare Vinyls</h3>
+            <p>Discover unique records from sellers worldwide.</p>
+          </div>
+          <div className="text-center">
+            <h3 className="text-lg font-medium">Sell Your Collection</h3>
+            <p>List your vinyls and reach passionate collectors.</p>
+          </div>
+          <div className="text-center">
+            <h3 className="text-lg font-medium">Trade with Others</h3>
+            <p>Connect and trade records with fellow enthusiasts.</p>
+          </div>
+        </div>
+      </div>
+
       <SlidingBar />
       <SideScrollCarousel />
     </div>

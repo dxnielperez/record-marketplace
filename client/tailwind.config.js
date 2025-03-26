@@ -11,6 +11,7 @@ export default {
       },
       animation: {
         slide: 'slide 60s linear infinite running',
+        'slow-spin': 'spin 1.33s linear infinite',
       },
       colors: {
         snow: '#FFFBFF',
