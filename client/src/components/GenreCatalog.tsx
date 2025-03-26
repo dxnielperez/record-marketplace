@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Genre, Products } from '../types/types';
+import { API_URL } from '../constants';
 
 export default function GenreCatalog() {
   const [products, setProducts] = useState<Products[]>([]);
@@ -18,7 +19,7 @@ export default function GenreCatalog() {
   useEffect(() => {
     async function getGenres() {
       try {
-        const res = await fetch('/api/get-genre-ids');
+        const res = await fetch(`${API_URL}/api/get-genre-ids`);
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const result = await res.json();
         setGenres(result);
@@ -41,7 +42,9 @@ export default function GenreCatalog() {
         const query = searchTerm
           ? `?search=${encodeURIComponent(searchTerm)}`
           : '';
-        const res = await fetch(`/api/shop-by-genre/${genreName}${query}`);
+        const res = await fetch(
+          `${API_URL}/api/shop-by-genre/${genreName}${query}`
+        );
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const result = await res.json();
 
@@ -206,7 +209,7 @@ export default function GenreCatalog() {
                   <div className="w-full h-48">
                     {product.images && product.images.length > 0 ? (
                       <img
-                        src={product.images[0]}
+                        src={product.images?.[0]}
                         alt={product.albumName}
                         className="w-full h-full object-cover cursor-pointer hover:opacity-75 rounded-md"
                       />

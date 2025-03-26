@@ -3,7 +3,6 @@ import 'dotenv/config';
 import express from 'express';
 import pg from 'pg';
 import dotenv from 'dotenv';
-
 // Middleware and Utilities
 import {
   ClientError,
@@ -15,38 +14,24 @@ import cors from 'cors';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import { DatabaseError } from 'pg-protocol';
-import { createClient } from '@supabase/supabase-js';
-
 dotenv.config();
-
 // Configuration
 const allowedOrigins = [
   'http://localhost:5173',
   'https://record-marketplace.onrender.com',
   'https://record-marketplace.vercel.app',
 ];
-
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) throw new Error('DATABASE_URL not found in env');
-
 const hashKey = process.env.TOKEN_SECRET;
 if (!hashKey) throw new Error('TOKEN_SECRET not found in .env');
-
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_KEY;
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Supabase URL and Key must be provided in .env');
-}
-
 // Database Setup
 const db = new pg.Pool({
   connectionString,
   ssl: { rejectUnauthorized: false },
 });
-
 // Express App Setup
 const app = express();
-
 // CORS Configuration
 app.use(
   cors({
@@ -59,12 +44,10 @@ app.use(
     },
   })
 );
-
 // Middleware
 app.use(express.json());
 const uploadsStaticDir = new URL('public', import.meta.url).pathname;
 app.use(express.static(uploadsStaticDir));
-
 // Authentication Routes
 app.post('/api/register', async (req, res, next) => {
   try {
@@ -84,7 +67,6 @@ app.post('/api/register', async (req, res, next) => {
     next(error);
   }
 });
-
 app.post('/api/sign-in', async (req, res, next) => {
   try {
     const { username, password } = req.body;
@@ -113,7 +95,6 @@ app.post('/api/sign-in', async (req, res, next) => {
     next(error);
   }
 });
-
 app.post('/api/sign-in-guest', async (req, res, next) => {
   try {
     const username = 'guest_' + Math.floor(Math.random() * 100000);
@@ -134,109 +115,15 @@ app.post('/api/sign-in-guest', async (req, res, next) => {
     next(error);
   }
 });
-
 // Listing Routes
 app.post(
   '/api/create-listing',
   authMiddleware,
   uploadsMiddleware.array('images', 4),
-  async (req, res) => {
-    try {
-      const { artist, album, genre, condition, price, info } = req.body;
-      const files = req.files as Express.Multer.File[];
-
-      if (!req.user?.userId) {
-        throw new Error('Unauthorized: No user ID found');
-      }
-
-      const supabase = createClient(
-        process.env.SUPABASE_URL || 'https://lvgmwasaitkgaugklrqb.supabase.co',
-        process.env.SUPABASE_KEY || 'your-anon-key'
-      );
-
-      const genreSql = `
-        SELECT "genreId" 
-        FROM "Genres" 
-        WHERE "name" = $1
-      `;
-      const genreResult = await db.query(genreSql, [genre]);
-      if (!genreResult.rows[0]) {
-        throw new Error(`Genre '${genre}' not found'`);
-      }
-      const genreId = genreResult.rows[0].genreId;
-
-      const recordSql = `
-        INSERT INTO "Records" ("artist", "albumName", "genreId", "condition", "price", "info", "sellerId")
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
-        RETURNING *;
-      `;
-      const recordParams = [
-        artist,
-        album,
-        genreId,
-        condition,
-        Number(price),
-        info,
-        req.user.userId,
-      ];
-      const recordResult = await db.query(recordSql, recordParams);
-      const listing = recordResult.rows[0];
-
-      if (files && files.length > 0) {
-        const imageSql = `
-          INSERT INTO "Images" ("imageUrl", "recordId")
-          VALUES ($1, $2)
-          RETURNING *;
-        `;
-        for (const file of files) {
-          const fileName = `${Date.now()}-${file.originalname}`;
-          const { error: uploadError } = await supabase.storage
-            .from('images')
-            .upload(fileName, file.buffer, {
-              contentType: file.mimetype,
-            });
-          if (uploadError) {
-            throw new Error(`Upload failed: ${uploadError.message}`);
-          }
-          const { data } = supabase.storage
-            .from('images')
-            .getPublicUrl(fileName);
-          const publicUrl = data.publicUrl;
-
-          const imageParams = [publicUrl, listing.recordId];
-          await db.query(imageSql, imageParams); // Removed unused imageResult
-        }
-      }
-
-      res.status(201).json(listing);
-    } catch (error: unknown) {
-      // Changed to unknown
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
-      res.status(500).json({
-        error: 'an unexpected error occurred',
-        message: errorMessage,
-      });
-    }
-  }
-);
-
-app.put(
-  '/api/update-listing/:recordId',
-  authMiddleware,
-  uploadsMiddleware.array('images', 4),
   async (req, res, next) => {
     try {
-      const { recordId } = req.params;
-      const id = Number(recordId);
       const { artist, album, genre, condition, price, info } = req.body;
-      const files = req.files as Express.Multer.File[];
-
-      const supabase = createClient(
-        process.env.SUPABASE_URL || 'https://lvgmwasaitkgaugklrqb.supabase.co',
-        process.env.SUPABASE_KEY || 'your-anon-key'
-      );
-
+      const files = req.files;
       const genreSql = `
         SELECT "genreId" 
         FROM "Genres" 
@@ -247,7 +134,59 @@ app.put(
         throw new ClientError(400, `Genre '${genre}' not found`);
       }
       const genreId = genreResult.rows[0].genreId;
-
+      const recordSql = `
+        INSERT INTO "Records" ("artist", "albumName", "genreId", "condition", "price", "info", "sellerId")
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING *;
+      `;
+      const recordParams = [
+        artist,
+        album,
+        genreId,
+        condition,
+        price,
+        info,
+        req.user?.userId,
+      ];
+      const recordResult = await db.query(recordSql, recordParams);
+      const listing = recordResult.rows[0];
+      if (files && files.length > 0) {
+        const imageSql = `
+          INSERT INTO "Images" ("imageUrl", "recordId")
+          VALUES ($1, $2)
+          RETURNING *;
+        `;
+        for (const file of files) {
+          const imageParams = [`/images/${file.filename}`, listing.recordId];
+          await db.query(imageSql, imageParams);
+        }
+      }
+      res.status(201).json(listing);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+app.put(
+  '/api/update-listing/:recordId',
+  authMiddleware,
+  uploadsMiddleware.array('images', 4),
+  async (req, res, next) => {
+    try {
+      const { recordId } = req.params;
+      const id = Number(recordId);
+      const { artist, album, genre, condition, price, info } = req.body;
+      const files = req.files;
+      const genreSql = `
+        SELECT "genreId" 
+        FROM "Genres" 
+        WHERE "name" = $1
+      `;
+      const genreResult = await db.query(genreSql, [genre]);
+      if (!genreResult.rows[0]) {
+        throw new ClientError(400, `Genre '${genre}' not found`);
+      }
+      const genreId = genreResult.rows[0].genreId;
       const recordSql = `
         UPDATE "Records"
         SET "artist" = $1,
@@ -262,59 +201,22 @@ app.put(
       const recordParams = [artist, album, genreId, condition, price, info, id];
       const recordResult = await db.query(recordSql, recordParams);
       const listing = recordResult.rows[0];
-
       let images = [];
-      if (files.length > 0) {
-        const existingImagesSql = `
-          SELECT "imageUrl"
-          FROM "Images"
-          WHERE "recordId" = $1
-        `;
-        const existingImagesResult = await db.query(existingImagesSql, [id]);
-        const oldImageUrls = existingImagesResult.rows.map(
-          (row) => row.imageUrl
-        );
-
+      if (files && files.length > 0) {
         const deleteImagesSql = `
           DELETE FROM "Images"
           WHERE "recordId" = $1
         `;
         await db.query(deleteImagesSql, [id]);
-
         const imageSql = `
           INSERT INTO "Images" ("imageUrl", "recordId")
           VALUES ($1, $2)
           RETURNING "imageUrl";
         `;
-
         for (const file of files) {
-          const fileName = `${Date.now()}-${file.originalname}`;
-          const { error: uploadError } = await supabase.storage
-            .from('images')
-            .upload(fileName, file.buffer, {
-              contentType: file.mimetype,
-            });
-          if (uploadError) {
-            throw new Error(`Image upload failed: ${uploadError.message}`);
-          }
-          const { data } = supabase.storage
-            .from('images')
-            .getPublicUrl(fileName);
-          const publicUrl = data.publicUrl;
-          const imageResult = await db.query(imageSql, [publicUrl, id]);
+          const imageParams = [`/images/${file.filename}`, id];
+          const imageResult = await db.query(imageSql, imageParams);
           images.push(imageResult.rows[0].imageUrl);
-        }
-
-        for (const url of oldImageUrls) {
-          const fileName = url.split('/').pop();
-          if (fileName) {
-            const { error: deleteError } = await supabase.storage
-              .from('images')
-              .remove([fileName]);
-            if (deleteError) {
-              // Silently ignore delete errors for now
-            }
-          }
         }
       } else {
         const existingImagesSql = `
@@ -325,14 +227,12 @@ app.put(
         const existingImagesResult = await db.query(existingImagesSql, [id]);
         images = existingImagesResult.rows.map((row) => row.imageUrl);
       }
-
       res.status(200).json({ ...listing, images });
     } catch (error) {
       next(error);
     }
   }
 );
-
 app.delete('/api/delete-listing/:recordId', async (req, res, next) => {
   try {
     const { recordId } = req.params;
@@ -352,7 +252,6 @@ app.delete('/api/delete-listing/:recordId', async (req, res, next) => {
     }
   }
 });
-
 app.delete(
   '/api/delete-record/:recordId',
   authMiddleware,
@@ -381,7 +280,6 @@ app.delete(
     }
   }
 );
-
 app.get(
   '/api/active-listings/:userId',
   authMiddleware,
@@ -405,7 +303,6 @@ app.get(
     }
   }
 );
-
 // Product Routes
 app.get('/api/all-products', async (req, res, next) => {
   try {
@@ -448,7 +345,6 @@ app.get('/api/all-products', async (req, res, next) => {
     next(error);
   }
 });
-
 app.get('/api/products/:record', async (req, res, next) => {
   try {
     const record = req.params.record;
@@ -488,7 +384,6 @@ WHERE "recordId" = $1
     next(error);
   }
 });
-
 app.get('/api/get-images/:recordId', async (req, res, next) => {
   try {
     const recordId = Number(req.params.recordId);
@@ -504,7 +399,6 @@ app.get('/api/get-images/:recordId', async (req, res, next) => {
     next(error);
   }
 });
-
 // Genre Routes
 app.get('/api/get-genres', async (req, res, next) => {
   try {
@@ -517,7 +411,6 @@ app.get('/api/get-genres', async (req, res, next) => {
     next(error);
   }
 });
-
 app.get('/api/genre/:genreId', async (req, res, next) => {
   try {
     const genreId = Number(req.params.genreId);
@@ -538,7 +431,6 @@ app.get('/api/genre/:genreId', async (req, res, next) => {
     next(error);
   }
 });
-
 app.get('/api/shop-by-genre/:genreName', async (req, res, next) => {
   try {
     const { search, artist, album, genre } = req.query;
@@ -583,7 +475,6 @@ app.get('/api/shop-by-genre/:genreName', async (req, res, next) => {
     next(error);
   }
 });
-
 app.get('/api/get-genre-ids', async (req, res, next) => {
   try {
     const sql = `SELECT "genreId", "name" FROM "Genres"`;
@@ -593,7 +484,6 @@ app.get('/api/get-genre-ids', async (req, res, next) => {
     next(error);
   }
 });
-
 app.get('/api/get-genre-name/:genreId', async (req, res, next) => {
   try {
     const genreId = Number(req.params.genreId);
@@ -605,7 +495,6 @@ app.get('/api/get-genre-name/:genreId', async (req, res, next) => {
     next(error);
   }
 });
-
 // Cart Routes
 app.post('/api/cart/add', authMiddleware, async (req, res, next) => {
   try {
@@ -658,7 +547,6 @@ app.post('/api/cart/add', authMiddleware, async (req, res, next) => {
     next(error);
   }
 });
-
 app.get('/api/cart', authMiddleware, async (req, res, next) => {
   try {
     const userId = req.user?.userId;
@@ -689,7 +577,6 @@ app.get('/api/cart', authMiddleware, async (req, res, next) => {
     next(error);
   }
 });
-
 app.delete(
   '/api/cart/remove/:itemsId',
   authMiddleware,
@@ -715,7 +602,6 @@ app.delete(
     }
   }
 );
-
 app.delete('/api/cart/all/:userId', authMiddleware, async (req, res, next) => {
   try {
     const sql = `
@@ -730,7 +616,6 @@ app.delete('/api/cart/all/:userId', authMiddleware, async (req, res, next) => {
     next(error);
   }
 });
-
 // Purchase Routes
 app.post('/api/purchase', authMiddleware, async (req, res, next) => {
   try {
@@ -790,10 +675,8 @@ app.post('/api/purchase', authMiddleware, async (req, res, next) => {
     next(error);
   }
 });
-
 // Error Handling and Server Start
 app.use(errorMiddleware);
-
 app.listen(process.env.PORT, () => {
   console.log(`\n\napp listening on port ${process.env.PORT}\n\n`);
 });

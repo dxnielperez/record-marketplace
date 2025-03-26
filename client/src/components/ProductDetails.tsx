@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { AppContext } from './AppContext';
 import { Product } from '../types/types';
+import { API_URL } from '../constants';
 
 export function ProductDetails() {
   const [product, setProduct] = useState<Product | undefined>();
@@ -13,7 +14,7 @@ export function ProductDetails() {
   useEffect(() => {
     const loadProduct = async () => {
       try {
-        const response = await fetch(`/api/products/${recordId}`);
+        const response = await fetch(`${API_URL}/api/products/${recordId}`);
         if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
         const result = await response.json();
         setProduct(result);

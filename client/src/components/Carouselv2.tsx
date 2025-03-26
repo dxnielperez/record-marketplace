@@ -16,7 +16,7 @@ interface SideScrollCarouselProps {
   title?: string;
 }
 
-export function SideScrollCarousel({
+export function SideScrollCarouselv2({
   data,
   title = 'Browse available items',
 }: SideScrollCarouselProps) {
@@ -42,8 +42,7 @@ export function SideScrollCarousel({
             .toLowerCase()
             .replace(/\s+/g, '-')}+${product.recordId}`,
         }));
-
-        setItems([...transformedData, ...transformedData, ...transformedData]);
+        setItems(transformedData);
       } catch (error) {
         console.error('Failed to fetch products:', error);
       }
@@ -52,33 +51,9 @@ export function SideScrollCarousel({
     if (!data) {
       fetchProducts();
     } else {
-      setItems([...data, ...data, ...data]);
+      setItems(data);
     }
   }, [data]);
-
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container || items.length === 0) return;
-
-    const totalItemsWidth = container.scrollWidth / 3;
-    container.scrollLeft = totalItemsWidth;
-
-    const handleScroll = () => {
-      const { scrollLeft, scrollWidth } = container;
-      const totalItemsWidth = scrollWidth / 3;
-
-      if (scrollLeft < totalItemsWidth / 4) {
-        container.scrollLeft += totalItemsWidth;
-      }
-
-      if (scrollLeft > totalItemsWidth * 2.5) {
-        container.scrollLeft -= totalItemsWidth;
-      }
-    };
-
-    container.addEventListener('scroll', handleScroll);
-    return () => container.removeEventListener('scroll', handleScroll);
-  }, [items]);
 
   const formatPrice = (price: number | string | undefined | null): string => {
     if (price === undefined || price === null) return 'N/A';
@@ -88,13 +63,12 @@ export function SideScrollCarousel({
 
   return (
     <div className="w-full max-w-7xl mx-auto flex flex-col items-center pt-4">
-      <h2 className="text-xl font-medium text-center mb-4">{title}</h2>
+      <h2 className="text-xl font-medium text-center py-4 lg:py-8">{title}</h2>
       <div className="w-full flex justify-center">
         <div
           ref={scrollContainerRef}
-          className="w-full max-w-5xl flex overflow-x-scroll p-4 gap-4 scrollbar-none"
-          style={{ scrollBehavior: 'auto' }}>
-          {items.map((item, index) => (
+          className="w-full max-w-5xl flex overflow-x-scroll p-4 gap-4 justify-start scrollbar-none">
+          {items.slice(0, 6).map((item, index) => (
             <div
               key={item.title + index}
               className="flex-shrink-0 w-52 cursor-pointer"

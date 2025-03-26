@@ -1,6 +1,7 @@
 import { type FormEvent, useState, useContext } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AppContext } from './AppContext';
+import { API_URL } from '../constants';
 
 export function LoginForm() {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ export function LoginForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
       };
-      const res = await fetch('/api/sign-in', req);
+      const res = await fetch(`${API_URL}/api/sign-in`, req);
       if (!res.ok) throw new Error(`fetch error ${res.status}`);
       const { user, token } = await res.json();
 
@@ -44,7 +45,7 @@ export function LoginForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: 'guest', password: 'guest_password' }),
       };
-      const res = await fetch('/api/sign-in-guest', req);
+      const res = await fetch(`${API_URL}/api/sign-in-guest`, req);
       if (!res.ok) throw new Error(`fetch error ${res.status}`);
       const { user, token } = await res.json();
 

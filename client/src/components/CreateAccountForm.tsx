@@ -1,5 +1,6 @@
 import { type FormEvent, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { API_URL } from '../constants';
 
 export function CreateAccountForm() {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ export function CreateAccountForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
       };
-      const res = await fetch('/api/register', req);
+      const res = await fetch(`${API_URL}/api/register`, req);
       if (!res.ok) {
         throw new Error(`Fetch error ${res.status}`);
       }

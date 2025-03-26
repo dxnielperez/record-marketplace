@@ -69,7 +69,7 @@ export function OrderConfirmation() {
               <div className="flex gap-4" key={item.recordId}>
                 <div className="flex-shrink-0">
                   <img
-                    src={item.images[0]}
+                    src={item.images?.[0]}
                     className="w-24 h-24 object-cover rounded-md"
                     alt={`${item.artist} - ${item.albumName}`}
                   />

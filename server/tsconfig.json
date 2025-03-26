@@ -10,13 +10,13 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
-    // "noImplicitAny": false,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "noEmit": true
+    "outDir": "dist", // Output compiled JS here
+    "noEmit": false // Enable compilation
   },
   "include": ["."]
 }

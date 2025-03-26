@@ -10,13 +10,11 @@ export function ShoppingCart() {
   const navigate = useNavigate();
   const visibleItems = showAllItems ? cartItems : cartItems.slice(0, 3);
 
-  let subtotal = 0;
-  for (let i = 0; i < cartItems.length; i++) {
-    subtotal += cartItems[i].price;
-  }
-
-  const salesTax = Number((subtotal * 0.0725).toFixed(2));
-  const totalPrice = salesTax + subtotal;
+  const subtotal = cartItems
+    .reduce((acc, item) => acc + Number(item.price), 0)
+    .toFixed(2);
+  const salesTax = Number((Number(subtotal) * 0.0725).toFixed(2));
+  const totalPrice = (Number(subtotal) + salesTax).toFixed(2);
 
   const items = cartItems.length > 1 ? 'items' : 'item';
   const noItems = cartItems.length === 0;
@@ -54,7 +52,7 @@ export function ShoppingCart() {
             <div className="flex pb-4" key={item.itemsId}>
               <div>
                 <img
-                  src={item.images[0]}
+                  src={item.images?.[0]}
                   className="max-w-[150px] rounded-md"
                   alt="Product"
                 />

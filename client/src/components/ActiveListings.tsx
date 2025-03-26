@@ -2,6 +2,7 @@ import { useCallback, useContext, useEffect, useState } from 'react';
 import { Products } from '../types/types';
 import { AppContext } from './AppContext';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from '../constants';
 
 export function ActiveListings() {
   const [activeListings, setActiveListings] = useState<Products[]>([]);
@@ -15,11 +16,14 @@ export function ActiveListings() {
   useEffect(() => {
     async function getSellersProducts() {
       try {
-        const res = await fetch(`/api/active-listings/${user?.userId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await fetch(
+          `${API_URL}/api/active-listings/${user?.userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const result = await res.json();
         setActiveListings(result);
@@ -147,7 +151,7 @@ export function ActiveListings() {
                 <div className="w-full h-48">
                   {product.images && product.images.length > 0 ? (
                     <img
-                      src={product.images[0]}
+                      src={product.images?.[0]}
                       alt={product.albumName}
                       className="w-full h-full object-cover cursor-pointer hover:opacity-75 rounded-md"
                     />
