@@ -1,8 +1,9 @@
 import { useContext, useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { AppContext } from './AppContext';
 import { Product } from '../types/types';
 import { API_URL } from '../constants';
+import { capitalizeFirstLetter } from '../utils/capitalize';
 
 export function ProductDetails() {
   const [product, setProduct] = useState<Product | undefined>();
@@ -41,15 +42,18 @@ export function ProductDetails() {
   );
 
   const handleImageSelect = (imageUrl: string) => setSelectedImage(imageUrl);
+  const location = useLocation();
+  const { genre } = location.state || {};
 
   if (!product) return null;
-
   return (
     <div className="min-h-screen">
       <div className="max-w-2xl lg:max-w-5xl mx-auto">
         <div className="mb-4">
-          <Link to="/shop" className="group relative">
-            All
+          <Link
+            to={`${!genre ? '/shop' : `/shop/${genre}`}`}
+            className="group relative">
+            {capitalizeFirstLetter(genre) ?? 'All'}
             <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
           </Link>
           <span className=""> &gt; {product.albumName}</span>

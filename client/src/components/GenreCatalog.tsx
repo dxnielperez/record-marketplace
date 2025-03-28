@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Genre, Products } from '../types/types';
 import { API_URL } from '../constants';
+import { capitalizeFirstLetter } from '../utils/capitalize';
 
 export default function GenreCatalog() {
   const [products, setProducts] = useState<Products[]>([]);
@@ -125,15 +126,15 @@ export default function GenreCatalog() {
           <Link
             to="/shop"
             className="block py-1 relative group w-min whitespace-nowrap">
-            all
+            All
             <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
           </Link>
           {genres.map((genre) => (
             <Link
               key={genre.genreId}
-              to={`/shop/genre/${genre.name}`}
+              to={`/shop/${genre.name}`}
               className="block py-1 relative group w-min">
-              {genre.name}
+              {capitalizeFirstLetter(genre.name)}
               <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
             </Link>
           ))}
@@ -143,31 +144,33 @@ export default function GenreCatalog() {
       <div className="flex-1">
         <div className="flex flex-col gap-4 pb-4 xl:flex-row xl:justify-end">
           <div className="flex flex-row xl:flex-col justify-between order-last xl:order-first w-full">
-            <h3 className="text-xl font-medium">{genreName || 'All'}</h3>
+            <h3 className="text-xl font-medium">
+              {capitalizeFirstLetter(genreName as string)}
+            </h3>
             <p>{results}</p>
           </div>
 
           <input
             id="search"
-            className="w-full xl:w-auto order-first xl:order-none border border-black rounded-md px-1 h-min"
+            className="w-full xl:w-auto order-first xl:order-none border border-black rounded-md px-4 py-2 h-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search..."
           />
           <div className="flex flex-row gap-4 justify-between xl:justify-end">
             <div className="dropdown xl:hidden">
-              <a className="text-black cursor-pointer hover:underline duration-200 border border-1 border-black px-4 py-1 rounded-md">
+              <a className="text-black cursor-pointer hover:underline duration-200 border border-black px-4 py-2 rounded-md h-10 flex items-center">
                 Genres
               </a>
               <div className="dropdown-content">
                 <Link
                   to="/shop"
                   className="block py-1 w-full whitespace-nowrap">
-                  all
+                  All
                 </Link>
                 {genres.map((genre) => (
-                  <Link key={genre.genreId} to={`/shop/genre/${genre.name}`}>
-                    {genre.name}
+                  <Link key={genre.genreId} to={`/shop/${genre.name}`}>
+                    {capitalizeFirstLetter(genre.name)}
                   </Link>
                 ))}
               </div>
@@ -176,7 +179,7 @@ export default function GenreCatalog() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="border border-black rounded-md px-1">
+                className="border border-black rounded-md px-4 py-2 h-10">
                 <option value="default">Default</option>
                 <option value="price-asc">Price: Low to High</option>
                 <option value="price-desc">Price: High to Low</option>
@@ -202,7 +205,12 @@ export default function GenreCatalog() {
                     navigate(
                       `/products/${formatAlbumNameForUrl(product.albumName)}+${
                         product.recordId
-                      }`
+                      }`,
+                      {
+                        state: {
+                          genre: genreName,
+                        },
+                      }
                     )
                   }
                   className="flex flex-col h-full">
@@ -220,8 +228,9 @@ export default function GenreCatalog() {
                     )}
                   </div>
                   <div className="flex flex-col flex-grow justify-between p-2">
-                    <h3 className="text-sm line-clamp-2 text-ellipsis">{`${product.albumName} - ${product.artist}`}</h3>
-                    <p className="text-sm">${product.price}</p>
+                    <h3 className="text-sm line-clamp-2 text-ellipsis">{`${product.albumName}`}</h3>
+                    <h3 className="text-sm line-clamp-2 text-ellipsis text-gray-600">{`${product.artist}`}</h3>
+                    <p className="text-sm text-gray-600">${product.price}</p>
                   </div>
                 </a>
               ))}

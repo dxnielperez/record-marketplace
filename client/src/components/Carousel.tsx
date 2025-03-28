@@ -108,9 +108,13 @@ export function SideScrollCarousel({
                 {item.title && (
                   <p className="text-sm font-medium">{item.title}</p>
                 )}
-                {item.artist && <p className="text-sm">{item.artist}</p>}
+                {item.artist && (
+                  <p className="text-sm text-gray-600">{item.artist}</p>
+                )}
                 {item.price && (
-                  <p className="text-sm">{formatPrice(item.price)}</p>
+                  <p className="text-sm text-gray-600">
+                    {formatPrice(item.price)}
+                  </p>
                 )}
               </div>
             </div>
