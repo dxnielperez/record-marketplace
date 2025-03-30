@@ -13,8 +13,8 @@
 
 -- Insert default data
 -- Default user with argon2 hashed password for "perez"
-insert into "Users" ("username", "hashedPassword")
-values ('admin', '$argon2id$v=19$m=4096,t=3,p=1$s3cK24PPVDRr5865umJAbA$IEsjrPZ5DG/4zVWeiHsE3ilmdtY8CPawUUu533BhxbE');
+INSERT INTO "Users" ("username", "hashedPassword", "isAdmin")
+VALUES ('admin', '$argon2id$v=19$m=4096,t=3,p=1$s3cK24PPVDRr5865umJAbA$IEsjrPZ5DG/4zVWeiHsE3ilmdtY8CPawUUu533BhxbE', true);
 
 -- Insert genres
 insert into "Genres" ("name")

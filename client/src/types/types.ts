@@ -30,6 +30,7 @@ export type CartItemsProps = {
 export type User = {
   userId: number;
   username: string;
+  isAdmin: boolean;
 };
 
 export type Products = {

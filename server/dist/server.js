@@ -3,6 +3,7 @@ import 'dotenv/config';
 import express from 'express';
 import pg from 'pg';
 import dotenv from 'dotenv';
+import stripe from 'stripe';
 // Middleware and Utilities
 import {
   ClientError,
@@ -14,17 +15,24 @@ import cors from 'cors';
 import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import { DatabaseError } from 'pg-protocol';
+import { createClient } from '@supabase/supabase-js';
 dotenv.config();
 // Configuration
 const allowedOrigins = [
   'http://localhost:5173',
   'https://record-marketplace.onrender.com',
   'https://record-marketplace.vercel.app',
+  'https://aa47-76-50-84-138.ngrok-free.app',
 ];
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) throw new Error('DATABASE_URL not found in env');
 const hashKey = process.env.TOKEN_SECRET;
 if (!hashKey) throw new Error('TOKEN_SECRET not found in .env');
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error('Supabase URL and Key must be provided in .env');
+}
 // Database Setup
 const db = new pg.Pool({
   connectionString,
@@ -48,6 +56,117 @@ app.use(
 app.use(express.json());
 const uploadsStaticDir = new URL('public', import.meta.url).pathname;
 app.use(express.static(uploadsStaticDir));
+// Stripe
+// eslint-disable-next-line new-cap
+const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY ?? '');
+const orderData = new Map(); // Temporary in-memory storage
+app.post('/api/create-checkout-session', async (req, res) => {
+  const { cartItems } = req.body;
+  // eslint-disable-next-line camelcase
+  const line_items = cartItems.map((item) => ({
+    price_data: {
+      currency: 'usd',
+      product_data: {
+        name: `${item.artist} - ${item.albumName}`,
+        images: item.images ? [item.images[0]] : [],
+      },
+      unit_amount: Math.round(item.price * 100),
+    },
+    quantity: 1,
+  }));
+  try {
+    const session = await stripeInstance.checkout.sessions.create({
+      payment_method_types: ['card'],
+      // eslint-disable-next-line camelcase
+      line_items,
+      mode: 'payment',
+      success_url: `${process.env.YOUR_DOMAIN}/confirmation?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.YOUR_DOMAIN}/checkout`,
+      shipping_address_collection: { allowed_countries: ['US', 'CA'] }, // Confirm this is present
+    });
+    orderData.set(session.id, { cartItems });
+    res.json({ id: session.id });
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    res.status(500).json({
+      error: 'Failed to create checkout session',
+      message: errorMessage,
+    });
+  }
+});
+app.get('/api/confirm-order', async (req, res) => {
+  const sessionId = req.query.session_id;
+  try {
+    const session = await stripeInstance.checkout.sessions.retrieve(sessionId);
+    if (session.payment_status === 'paid') {
+      const data = orderData.get(sessionId);
+      if (data) {
+        const customerEmail = session.customer_details?.email;
+        const shippingAddress = session.shipping_details?.address;
+        const purchasedItems = data.cartItems;
+        const subtotal = purchasedItems
+          .reduce((acc, item) => acc + Number(item.price), 0)
+          .toFixed(2);
+        const salesTax = Number((Number(subtotal) * 0.0725).toFixed(2));
+        const totalPrice = (Number(subtotal) + salesTax).toFixed(2);
+        // Start a transaction
+        await db.query('BEGIN');
+        // Delete purchased items from Records
+        for (const item of purchasedItems) {
+          const deleteSql = `
+            DELETE FROM "Records"
+            WHERE "recordId" = $1
+            RETURNING *
+          `;
+          const deleteParams = [item.recordId];
+          const deleteResult = await db.query(deleteSql, deleteParams);
+          if (deleteResult.rowCount === 0) {
+            throw new Error(`Record ${item.recordId} not found`);
+          }
+          // Optionally record the transaction
+          const transactionSql = `
+            INSERT INTO "Transactions" ("buyerId", "recordId", "totalPrice", "transactionDate")
+            VALUES ($1, $2, $3, NOW())
+            RETURNING *
+          `;
+          const buyerId = item.userId || null; // Adjust if you can get buyerId from session
+          const transactionParams = [buyerId, item.recordId, item.price];
+          await db.query(transactionSql, transactionParams);
+        }
+        // Commit the transaction
+        await db.query('COMMIT');
+        res.json({
+          success: true,
+          order: {
+            purchasedItems,
+            customerEmail,
+            shippingAddress,
+            subtotal,
+            salesTax,
+            totalPrice,
+          },
+        });
+        orderData.delete(sessionId);
+      } else {
+        res
+          .status(404)
+          .json({ success: false, message: 'Order not found in local data' });
+      }
+    } else {
+      res
+        .status(400)
+        .json({ success: false, message: 'Payment not successful' });
+    }
+  } catch (error) {
+    await db.query('ROLLBACK');
+    console.error('Error retrieving session or deleting items:', error);
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    res.status(500).json({ success: false, message: `Error: ${errorMessage}` });
+  }
+});
 // Authentication Routes
 app.post('/api/register', async (req, res, next) => {
   try {
@@ -120,10 +239,17 @@ app.post(
   '/api/create-listing',
   authMiddleware,
   uploadsMiddleware.array('images', 4),
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       const { artist, album, genre, condition, price, info } = req.body;
       const files = req.files;
+      if (!req.user?.userId) {
+        throw new Error('Unauthorized: No user ID found');
+      }
+      const supabase = createClient(
+        process.env.SUPABASE_URL || 'https://lvgmwasaitkgaugklrqb.supabase.co',
+        process.env.SUPABASE_KEY || 'your-anon-key'
+      );
       const genreSql = `
         SELECT "genreId" 
         FROM "Genres" 
@@ -131,7 +257,7 @@ app.post(
       `;
       const genreResult = await db.query(genreSql, [genre]);
       if (!genreResult.rows[0]) {
-        throw new ClientError(400, `Genre '${genre}' not found`);
+        throw new Error(`Genre '${genre}' not found'`);
       }
       const genreId = genreResult.rows[0].genreId;
       const recordSql = `
@@ -144,9 +270,9 @@ app.post(
         album,
         genreId,
         condition,
-        price,
+        Number(price),
         info,
-        req.user?.userId,
+        req.user.userId,
       ];
       const recordResult = await db.query(recordSql, recordParams);
       const listing = recordResult.rows[0];
@@ -157,13 +283,32 @@ app.post(
           RETURNING *;
         `;
         for (const file of files) {
-          const imageParams = [`/images/${file.filename}`, listing.recordId];
-          await db.query(imageSql, imageParams);
+          const fileName = `${Date.now()}-${file.originalname}`;
+          const { error: uploadError } = await supabase.storage
+            .from('images')
+            .upload(fileName, file.buffer, {
+              contentType: file.mimetype,
+            });
+          if (uploadError) {
+            throw new Error(`Upload failed: ${uploadError.message}`);
+          }
+          const { data } = supabase.storage
+            .from('images')
+            .getPublicUrl(fileName);
+          const publicUrl = data.publicUrl;
+          const imageParams = [publicUrl, listing.recordId];
+          await db.query(imageSql, imageParams); // Removed unused imageResult
         }
       }
       res.status(201).json(listing);
     } catch (error) {
-      next(error);
+      // Changed to unknown
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      res.status(500).json({
+        error: 'an unexpected error occurred',
+        message: errorMessage,
+      });
     }
   }
 );
@@ -177,6 +322,10 @@ app.put(
       const id = Number(recordId);
       const { artist, album, genre, condition, price, info } = req.body;
       const files = req.files;
+      const supabase = createClient(
+        process.env.SUPABASE_URL || 'https://lvgmwasaitkgaugklrqb.supabase.co',
+        process.env.SUPABASE_KEY || 'your-anon-key'
+      );
       const genreSql = `
         SELECT "genreId" 
         FROM "Genres" 
@@ -202,7 +351,16 @@ app.put(
       const recordResult = await db.query(recordSql, recordParams);
       const listing = recordResult.rows[0];
       let images = [];
-      if (files && files.length > 0) {
+      if (files.length > 0) {
+        const existingImagesSql = `
+          SELECT "imageUrl"
+          FROM "Images"
+          WHERE "recordId" = $1
+        `;
+        const existingImagesResult = await db.query(existingImagesSql, [id]);
+        const oldImageUrls = existingImagesResult.rows.map(
+          (row) => row.imageUrl
+        );
         const deleteImagesSql = `
           DELETE FROM "Images"
           WHERE "recordId" = $1
@@ -214,9 +372,32 @@ app.put(
           RETURNING "imageUrl";
         `;
         for (const file of files) {
-          const imageParams = [`/images/${file.filename}`, id];
-          const imageResult = await db.query(imageSql, imageParams);
+          const fileName = `${Date.now()}-${file.originalname}`;
+          const { error: uploadError } = await supabase.storage
+            .from('images')
+            .upload(fileName, file.buffer, {
+              contentType: file.mimetype,
+            });
+          if (uploadError) {
+            throw new Error(`Image upload failed: ${uploadError.message}`);
+          }
+          const { data } = supabase.storage
+            .from('images')
+            .getPublicUrl(fileName);
+          const publicUrl = data.publicUrl;
+          const imageResult = await db.query(imageSql, [publicUrl, id]);
           images.push(imageResult.rows[0].imageUrl);
+        }
+        for (const url of oldImageUrls) {
+          const fileName = url.split('/').pop();
+          if (fileName) {
+            const { error: deleteError } = await supabase.storage
+              .from('images')
+              .remove([fileName]);
+            if (deleteError) {
+              // Silently ignore delete errors for now
+            }
+          }
         }
       } else {
         const existingImagesSql = `
