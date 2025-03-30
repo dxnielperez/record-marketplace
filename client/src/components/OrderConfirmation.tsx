@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { API_URL } from '../constants';
+import { AppContext } from './AppContext';
 
 export function OrderConfirmation() {
   const [showAllItems, setShowAllItems] = useState(false);
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get('session_id');
   const [order, setOrder] = useState<any>(null);
+  const { setCartItems } = useContext(AppContext);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -33,13 +35,14 @@ export function OrderConfirmation() {
         console.log('Response data:', result);
         if (result.success) {
           setOrder(result.order);
+          setCartItems([]);
         }
       } catch (err) {
         console.error('Fetch error:', err);
       }
     };
     fetchOrder();
-  }, [sessionId, order]);
+  }, [sessionId, order, setCartItems]);
 
   return (
     <div className="min-h-screen flex flex-col">

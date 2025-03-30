@@ -3,6 +3,7 @@ import { CartItemsProps, Product, User } from '../types/types';
 
 type AppContextValues = {
   cartItems: CartItemsProps[];
+  setCartItems: (items: CartItemsProps[]) => void;
   addToCart: (product: Product) => Promise<void>;
   removeFromCart: (itemsId: number) => Promise<void>;
   user: User | undefined;
@@ -15,6 +16,7 @@ type AppContextValues = {
 
 export const AppContext = createContext<AppContextValues>({
   cartItems: [],
+  setCartItems: () => {},
   addToCart: async () => undefined,
   removeFromCart: async () => undefined,
   user: undefined,

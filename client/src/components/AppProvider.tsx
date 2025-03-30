@@ -154,6 +154,7 @@ export function AppProvider({ children }) {
 
   const contextValue = {
     cartItems,
+    setCartItems,
     addToCart,
     removeFromCart,
     signIn,
