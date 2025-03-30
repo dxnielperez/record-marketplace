@@ -10,6 +10,7 @@ CREATE TABLE "Users" (
   "userId" serial PRIMARY KEY,
   "username" text unique,
   "hashedPassword" text,
+  "isAdmin" boolean DEFAULT false,
   "createdAt" timestamptz default now()
 );
 

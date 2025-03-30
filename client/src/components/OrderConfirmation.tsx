@@ -1,130 +1,114 @@
-import { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { API_URL } from '../constants';
 
 export function OrderConfirmation() {
   const [showAllItems, setShowAllItems] = useState(false);
+  const [searchParams] = useSearchParams();
+  const sessionId = searchParams.get('session_id');
+  const [order, setOrder] = useState<any>(null);
 
-  const location = useLocation();
-  const { state } = location;
-  const {
-    firstName,
-    lastName,
-    purchasedItems,
-    email,
-    streetAddress,
-    city,
-    stateLive,
-    postalCode,
-    totalPrice,
-    subtotal,
-    salesTax,
-    unit,
-  } = state || {};
-
-  const visibleItems = showAllItems
-    ? purchasedItems
-    : purchasedItems?.slice(0, 2);
-
-  function getOrCreateConfirmationNumber() {
-    const storageKey = 'confirmationNumber';
-    const storedNumber = localStorage.getItem(storageKey);
-
-    if (storedNumber) {
-      return storedNumber;
-    } else {
-      const randomPart = Math.floor(100 + Math.random() * 900);
-      const confirmationNumber = `${randomPart}420`;
-      localStorage.setItem(storageKey, confirmationNumber);
-      return confirmationNumber;
-    }
-  }
-
-  const confirmationNumber = getOrCreateConfirmationNumber();
-
-  if (!state || !purchasedItems)
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        No order data available
-      </div>
-    );
+  useEffect(() => {
+    const fetchOrder = async () => {
+      if (!sessionId) {
+        console.log('No sessionId, aborting fetch');
+        return;
+      }
+      if (order) {
+        console.log('Order already fetched, skipping');
+        return; // Prevent refetching in Strict Mode
+      }
+      try {
+        const url = `${API_URL}/api/confirm-order?session_id=${sessionId}`;
+        console.log('Fetching from:', url);
+        const response = await fetch(url);
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(
+            `HTTP error! Status: ${response.status}, Response: ${text}`
+          );
+        }
+        const result = await response.json();
+        console.log('Response data:', result);
+        if (result.success) {
+          setOrder(result.order);
+        }
+      } catch (err) {
+        console.error('Fetch error:', err);
+      }
+    };
+    fetchOrder();
+  }, [sessionId, order]);
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-2xl lg:max-w-5xl mx-auto">
-        <div className="bg-white rounded-md shadow-sm p-4">
-          <h1 className="text-xl font-medium text-center">
-            Thank you {firstName} {lastName} for your order!
-          </h1>
-          <div className="flex justify-center gap-2 mt-2 text-gray-600">
-            <span>Order number:</span>
-            <span className="underline">{confirmationNumber}</span>
+    <div className="min-h-screen flex flex-col">
+      {!order && <div className="text-center p-4">Loading...</div>}
+      {order && (
+        <div className="max-w-5xl mx-auto p-4 flex-grow">
+          <h1 className="text-xl text-center">Thank you for your order!</h1>
+          <div className="text-center mt-2">
+            Order number: <span className="underline">{sessionId}</span>
           </div>
-          <div className="text-base text-gray-600 text-center mt-1">
+          <div className="text-center mt-1">
             Your order has been confirmed and you will receive an email at{' '}
-            {email}
+            {order.customerEmail}
           </div>
-
           <div className="mt-6 space-y-4">
-            {visibleItems.map((item) => (
-              <div className="flex gap-4" key={item.recordId}>
-                <div className="flex-shrink-0">
+            {order.purchasedItems
+              .slice(0, showAllItems ? undefined : 2)
+              .map((item: any, index: number) => (
+                <div className="flex gap-4" key={index}>
                   <img
                     src={item.images?.[0]}
-                    className="w-24 h-24 object-cover rounded-md"
+                    className="w-24 h-24 rounded-md"
                     alt={`${item.artist} - ${item.albumName}`}
                   />
+                  <div>
+                    <h3>{`${item.artist} - ${item.albumName}`}</h3>
+                    <p>${item.price}</p>
+                  </div>
                 </div>
-                <div className="flex flex-col justify-between">
-                  <h3 className="text-base font-medium">{`${item.artist} - ${item.albumName}`}</h3>
-                  <p>${item.price}</p>
-                </div>
-              </div>
-            ))}
-            {purchasedItems.length > 2 && (
+              ))}
+            {order.purchasedItems.length > 2 && (
               <div className="text-center">
-                <button
-                  onClick={() => setShowAllItems(!showAllItems)}
-                  className="group relative">
-                  {showAllItems ? 'View Less' : 'View More'}{' '}
-                  <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
+                <button onClick={() => setShowAllItems(!showAllItems)}>
+                  {showAllItems ? 'View Less' : 'View More'}
                 </button>
               </div>
             )}
           </div>
-
-          <div className="mt-6 flex flex-col lg:flex-row justify-between gap-6 text-xl">
-            {/* Left Column - Shipping To */}
-            <div className="space-y-2">
-              <h3 className="font-medium">Shipping To:</h3>
-              <div className="text-base text-gray-600">
-                <p>{`${firstName} ${lastName}`}</p>
-                <p>{`${streetAddress}${unit ? ` ${unit}` : ''}`}</p>
-                <p>{`${city}, ${stateLive} ${postalCode}`}</p>
-              </div>
+          <div className="mt-6 flex flex-col lg:flex-row justify-between gap-6">
+            <div>
+              <h3>Shipping To:</h3>
+              <p>
+                {order.shippingAddress.line1}
+                {order.shippingAddress.line2
+                  ? ` ${order.shippingAddress.line2}`
+                  : ''}
+              </p>
+              <p>{`${order.shippingAddress.city}, ${order.shippingAddress.state} ${order.shippingAddress.postal_code}`}</p>
+              <p>{order.shippingAddress.country}</p>
             </div>
-
-            {/* Right Column - Order Total */}
-            <div className="space-y-2">
-              <h3 className="font-medium">Order Total:</h3>
-              <div className="text-base text-gray-600">
-                <div className="flex justify-between gap-8">
-                  <span>Subtotal</span>
-                  <span>${subtotal}</span>
-                </div>
-                <div className="flex justify-between gap-8">
-                  <span>Taxes</span>
-                  <span>${salesTax}</span>
-                </div>
-                <hr className="my-2 border-gray-300" />
-                <div className="flex justify-between gap-8 font-medium">
-                  <span>Total</span>
-                  <span>${totalPrice}</span>
-                </div>
+            <div>
+              <h3>Order Total:</h3>
+              <div className="flex justify-between gap-8">
+                <span>Subtotal</span>
+                <span>${order.subtotal}</span>
+              </div>
+              <div className="flex justify-between gap-8">
+                <span>Taxes</span>
+                <span>${order.salesTax}</span>
+              </div>
+              <hr className="my-2" />
+              <div className="flex justify-between gap-8">
+                <span>Total</span>
+                <span>${order.totalPrice}</span>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

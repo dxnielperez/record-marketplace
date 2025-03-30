@@ -3,6 +3,7 @@ import 'dotenv/config';
 import express from 'express';
 import pg from 'pg';
 import dotenv from 'dotenv';
+import stripe from 'stripe';
 
 // Middleware and Utilities
 import {
@@ -24,6 +25,7 @@ const allowedOrigins = [
   'http://localhost:5173',
   'https://record-marketplace.onrender.com',
   'https://record-marketplace.vercel.app',
+  'https://aa47-76-50-84-138.ngrok-free.app',
 ];
 
 const connectionString = process.env.DATABASE_URL;
@@ -65,6 +67,129 @@ app.use(express.json());
 const uploadsStaticDir = new URL('public', import.meta.url).pathname;
 app.use(express.static(uploadsStaticDir));
 
+// Stripe
+// eslint-disable-next-line new-cap
+const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY ?? '');
+
+const orderData = new Map(); // Temporary in-memory storage
+
+app.post('/api/create-checkout-session', async (req, res) => {
+  const { cartItems } = req.body;
+  // eslint-disable-next-line camelcase
+  const line_items = cartItems.map((item: any) => ({
+    price_data: {
+      currency: 'usd',
+      product_data: {
+        name: `${item.artist} - ${item.albumName}`,
+        images: item.images ? [item.images[0]] : [],
+      },
+      unit_amount: Math.round(item.price * 100),
+    },
+    quantity: 1,
+  }));
+
+  try {
+    const session = await stripeInstance.checkout.sessions.create({
+      payment_method_types: ['card'],
+      // eslint-disable-next-line camelcase
+      line_items,
+      mode: 'payment',
+      success_url: `${process.env.YOUR_DOMAIN}/confirmation?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.YOUR_DOMAIN}/checkout`,
+      shipping_address_collection: { allowed_countries: ['US', 'CA'] }, // Confirm this is present
+    });
+
+    orderData.set(session.id, { cartItems });
+    res.json({ id: session.id });
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    res.status(500).json({
+      error: 'Failed to create checkout session',
+      message: errorMessage,
+    });
+  }
+});
+
+app.get('/api/confirm-order', async (req, res) => {
+  const sessionId = req.query.session_id as string;
+
+  try {
+    const session = await stripeInstance.checkout.sessions.retrieve(sessionId);
+    if (session.payment_status === 'paid') {
+      const data = orderData.get(sessionId);
+      if (data) {
+        const customerEmail = session.customer_details?.email;
+        const shippingAddress = session.shipping_details?.address;
+        const purchasedItems = data.cartItems;
+        const subtotal = purchasedItems
+          .reduce((acc: number, item: any) => acc + Number(item.price), 0)
+          .toFixed(2);
+        const salesTax = Number((Number(subtotal) * 0.0725).toFixed(2));
+        const totalPrice = (Number(subtotal) + salesTax).toFixed(2);
+
+        // Start a transaction
+        await db.query('BEGIN');
+
+        // Delete purchased items from Records
+        for (const item of purchasedItems) {
+          const deleteSql = `
+            DELETE FROM "Records"
+            WHERE "recordId" = $1
+            RETURNING *
+          `;
+          const deleteParams = [item.recordId];
+          const deleteResult = await db.query(deleteSql, deleteParams);
+          if (deleteResult.rowCount === 0) {
+            throw new Error(`Record ${item.recordId} not found`);
+          }
+
+          // Optionally record the transaction
+          const transactionSql = `
+            INSERT INTO "Transactions" ("buyerId", "recordId", "totalPrice", "transactionDate")
+            VALUES ($1, $2, $3, NOW())
+            RETURNING *
+          `;
+          const buyerId = item.userId || null; // Adjust if you can get buyerId from session
+          const transactionParams = [buyerId, item.recordId, item.price];
+          await db.query(transactionSql, transactionParams);
+        }
+
+        // Commit the transaction
+        await db.query('COMMIT');
+
+        res.json({
+          success: true,
+          order: {
+            purchasedItems,
+            customerEmail,
+            shippingAddress,
+            subtotal,
+            salesTax,
+            totalPrice,
+          },
+        });
+        orderData.delete(sessionId);
+      } else {
+        res
+          .status(404)
+          .json({ success: false, message: 'Order not found in local data' });
+      }
+    } else {
+      res
+        .status(400)
+        .json({ success: false, message: 'Payment not successful' });
+    }
+  } catch (error) {
+    await db.query('ROLLBACK');
+    console.error('Error retrieving session or deleting items:', error);
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+    res.status(500).json({ success: false, message: `Error: ${errorMessage}` });
+  }
+});
+
 // Authentication Routes
 app.post('/api/register', async (req, res, next) => {
   try {
@@ -92,9 +217,9 @@ app.post('/api/sign-in', async (req, res, next) => {
       throw new ClientError(401, 'invalid login');
     }
     const sql = `
-      select "userId", "hashedPassword"
-      from "Users"
-      where "username" = $1
+      SELECT "userId", "hashedPassword", "isAdmin"
+      FROM "Users"
+      WHERE "username" = $1
     `;
     const params = [username];
     const result = await db.query(sql, params);
@@ -102,13 +227,13 @@ app.post('/api/sign-in', async (req, res, next) => {
     if (!user) {
       throw new ClientError(401, `User: ${username} does not exist`);
     }
-    const { userId, hashedPassword } = user;
+    const { userId, hashedPassword, isAdmin } = user; // Include isAdmin
     if (!(await argon2.verify(hashedPassword, password))) {
       throw new ClientError(401, 'invalid login');
     }
-    const payload = { userId, username };
+    const payload = { userId, username, isAdmin }; // Include isAdmin in payload
     const token = jwt.sign(payload, hashKey);
-    res.json({ token, user: payload });
+    res.json({ token, user: payload }); // payload now has isAdmin
   } catch (error) {
     next(error);
   }
