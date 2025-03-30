@@ -3,6 +3,7 @@ node_modules
 .vscode
 *.log
 .env
+Icon*
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
