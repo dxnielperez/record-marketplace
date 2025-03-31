@@ -2,11 +2,13 @@ import { useContext, useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AppContext } from './AppContext';
 import { IoCart, IoMenuSharp, IoPersonCircleSharp } from 'react-icons/io5';
+import { useAdmin } from '../constants';
 
 export default function Nav() {
   const { user, signOut, cartItems } = useContext(AppContext);
   const navigate = useNavigate();
   const itemsAmount = cartItems.length === 0 ? '' : cartItems.length;
+  const isAdmin = useAdmin();
 
   const handleSignOutClick = () => {
     signOut();
@@ -39,23 +41,65 @@ export default function Nav() {
         </Link>
 
         <div className="flex gap-2 items-end">
-          {user && (
+          {/* {user && (
             <button
               onClick={handleSignOutClick}
               className="mr-2 relative group">
               Sign Out
               <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
             </button>
+          )} */}
+
+          {isAdmin && (
+            <Link
+              className="w-min whitespace-nowrap text-center px-4 py-1 border-1 border border-black rounded-md hover:text-snow bg-emerald"
+              to={`${user ? '/create' : '/login'}`}>
+              Sell Now
+            </Link>
           )}
 
-          <Link
-            className="w-min whitespace-nowrap text-center px-4 py-1 border-1 border border-black rounded-md hover:text-snow bg-emerald"
-            to={`${user ? '/create' : '/login'}`}>
-            Sell Now
-          </Link>
-          <Link to={`${user ? '/account' : '/login'}`}>
-            <IoPersonCircleSharp size={30} />
-          </Link>
+          {isAdmin ? (
+            <div className="dropdown">
+              <Link to="/account">
+                <IoPersonCircleSharp size={30} />
+              </Link>
+              <div className="dropdown-content right-[-2px]">
+                <Link to="/account">Account</Link>
+                {user && (
+                  <button
+                    onClick={handleSignOutClick}
+                    className="text-start w-full px-4 py-2 text-black hover:bg-[#dae0e7] cursor-pointer rounded-md">
+                    Sign Out
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="dropdown">
+                <Link
+                  to={`${user?.isAdmin ? '/account' : '/login'}`}
+                  className="text-black cursor-pointer">
+                  <IoPersonCircleSharp size={30} />
+                </Link>
+                <div className="dropdown-content right-[-2px]">
+                  {!user && (
+                    <Link to="/login" className="text-black cursor-pointer">
+                      Log In
+                    </Link>
+                  )}
+                  {user && (
+                    <button
+                      onClick={handleSignOutClick}
+                      className="text-start w-full px-4 py-2 text-black hover:bg-[#dae0e7] cursor-pointer rounded-md">
+                      Sign Out
+                    </button>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+
           <Link to="/cart" className="flex gap-2">
             <IoCart size={30} />
             <span className="text-xl mt-auto">{itemsAmount}</span>
@@ -75,6 +119,7 @@ export default function Nav() {
 const MobileNav = ({ user, onSignOut, cartItems }) => {
   const [showMenu, setShowMenu] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   function handleMenuClick() {
     setShowMenu((prev) => !prev);
@@ -96,9 +141,9 @@ const MobileNav = ({ user, onSignOut, cartItems }) => {
         </div>
 
         <div className="flex gap-2 items-center">
-          <Link to={`${user ? '/account' : '/login'}`}>
+          {/* <Link to={`${user?.isAdmin ? '/account' : '/login'}`}>
             <IoPersonCircleSharp size={30} />
-          </Link>
+          </Link> */}
           <Link to="/cart" className="flex gap-2">
             <IoCart size={30} />
             <span className="text-xl mt-auto">{cartItems}</span>
@@ -115,14 +160,17 @@ const MobileNav = ({ user, onSignOut, cartItems }) => {
           <Link to="/about">About</Link>
           <Link to="/shop">Shop</Link>
 
-          <Link
-            className="bg-emerald px-4 py-1 rounded-md h-min w-min mx-auto whitespace-nowrap"
-            to={`${user ? '/create' : '/login'}`}>
-            Sell Now
-          </Link>
-          {user && (
+          {user ? (
             <button onClick={onSignOut} className="pr-2">
               Sign Out
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                handleMenuClick();
+                navigate('login');
+              }}>
+              Log In
             </button>
           )}
         </div>
