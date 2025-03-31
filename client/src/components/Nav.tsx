@@ -41,15 +41,6 @@ export default function Nav() {
         </Link>
 
         <div className="flex gap-2 items-end">
-          {/* {user && (
-            <button
-              onClick={handleSignOutClick}
-              className="mr-2 relative group">
-              Sign Out
-              <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
-            </button>
-          )} */}
-
           {isAdmin && (
             <Link
               className="w-min whitespace-nowrap text-center px-4 py-1 border-1 border border-black rounded-md hover:text-snow bg-emerald"
@@ -141,9 +132,6 @@ const MobileNav = ({ user, onSignOut, cartItems }) => {
         </div>
 
         <div className="flex gap-2 items-center">
-          {/* <Link to={`${user?.isAdmin ? '/account' : '/login'}`}>
-            <IoPersonCircleSharp size={30} />
-          </Link> */}
           <Link to="/cart" className="flex gap-2">
             <IoCart size={30} />
             <span className="text-xl mt-auto">{cartItems}</span>

@@ -66,7 +66,6 @@ export function Home() {
         </div>
       </div>
 
-      {/* Marketplace Features */}
       <div className="my-8">
         <h2 className="text-2xl font-medium text-center mb-4">
           Shop Our Collection

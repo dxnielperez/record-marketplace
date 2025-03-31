@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-// import { CreateNewListing } from '../components/CreateNewListing';
 import { useNavigate } from 'react-router-dom';
 import { NewListingForm } from '../components/NewListingForm';
 import { useAdmin } from '../constants';
