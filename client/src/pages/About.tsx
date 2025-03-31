@@ -7,10 +7,9 @@ export default function About() {
         <div className="w-full max-w-[800px] mx-auto">
           <h3 className="text-xl font-medium">About Ripple Records</h3>
           <p className="text-sm">
-            Ripple Records is a conceptual marketplace for record collectors,
-            where users can buy, sell, and trade vinyl records within a
-            community-driven environment. Originally created as my final
-            assignment at LearningFuze coding bootcamp, it has since been
+            Ripple Records is a conceptual online market for record collectors,
+            where users can buy vinyl records. Originally created as my final
+            project at LearningFuze coding bootcamp, it has since been
             redesigned and refactored to improve functionality and user
             experience. Note that it is not an actual product.
           </p>

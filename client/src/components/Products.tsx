@@ -165,7 +165,6 @@ export default function ProductCatalog() {
             </div>
           </div>
         </div>
-        {/* Rest of the code remains unchanged */}
         <div>
           {products.length === 0 && <h2>No records available for sale</h2>}
 

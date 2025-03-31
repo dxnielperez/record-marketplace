@@ -66,23 +66,16 @@ export function Home() {
         </div>
       </div>
 
-      {/* Marketplace Features */}
       <div className="my-8">
         <h2 className="text-2xl font-medium text-center mb-4">
-          Explore the Marketplace
+          Shop Our Collection
         </h2>
         <div className="flex flex-col md:flex-row justify-around gap-4">
           <div className="text-center">
-            <h3 className="text-lg font-medium">Buy Rare Vinyls</h3>
-            <p>Discover unique records from sellers worldwide.</p>
-          </div>
-          <div className="text-center">
-            <h3 className="text-lg font-medium">Sell Your Collection</h3>
-            <p>List your vinyls and reach passionate collectors.</p>
-          </div>
-          <div className="text-center">
-            <h3 className="text-lg font-medium">Trade with Others</h3>
-            <p>Connect and trade records with fellow enthusiasts.</p>
+            <p>
+              Discover a hand-picked selection of classic and rare vinyl
+              records. Shop now and bring home your next favorite album.
+            </p>
           </div>
         </div>
       </div>
