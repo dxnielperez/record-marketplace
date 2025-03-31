@@ -88,7 +88,7 @@ export function Checkout() {
           )}
         </div>
         <div className="max-w-[620px] w-full flex flex-col">
-          <div className="border max-w-[420px] w-full flex-col gap-1 border-black h-min p-4 rounded-md">
+          <div className="border max-w-[620px] w-full flex-col gap-1 border-black h-min p-4 rounded-md">
             <h3>Order Summary</h3>
             <div className="flex justify-between">
               <h3>Subtotal ({`${cartItems.length} ${items}`})</h3>

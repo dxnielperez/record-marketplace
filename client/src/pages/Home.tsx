@@ -12,7 +12,7 @@ export function Home() {
   useEffect(() => {
     async function getProducts() {
       try {
-        const res = await fetch(`${API_URL}/api/all-products?.[0]`);
+        const res = await fetch(`${API_URL}/api/all-products`);
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const result = await res.json();
         setProduct(result[0]);

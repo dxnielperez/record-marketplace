@@ -18,7 +18,7 @@ export function OrderConfirmation() {
       }
       if (order) {
         console.log('Order already fetched, skipping');
-        return; // Prevent refetching in Strict Mode
+        return;
       }
       try {
         const url = `${API_URL}/api/confirm-order?session_id=${sessionId}`;
@@ -48,11 +48,10 @@ export function OrderConfirmation() {
     <div className="min-h-screen flex flex-col">
       {!order && <div className="text-center p-4">Loading...</div>}
       {order && (
-        <div className="max-w-5xl mx-auto p-4 flex-grow">
+        <div className="w-full mx-auto p-4 flex-col items-center justify-center">
           <h1 className="text-xl text-center">Thank you for your order!</h1>
-          <div className="text-center mt-2">
-            Order number: <span className="underline">{sessionId}</span>
-          </div>
+          <div className="text-center mt-2">Order number:</div>
+          <p className="underline">{sessionId}</p>
           <div className="text-center mt-1">
             Your order has been confirmed and you will receive an email at{' '}
             {order.customerEmail}

@@ -111,6 +111,7 @@ const MobileNav = ({ user, onSignOut, cartItems }) => {
   const [showMenu, setShowMenu] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const isAdmin = useAdmin();
 
   function handleMenuClick() {
     setShowMenu((prev) => !prev);
@@ -147,13 +148,22 @@ const MobileNav = ({ user, onSignOut, cartItems }) => {
           <Link to="/">Home</Link>
           <Link to="/about">About</Link>
           <Link to="/shop">Shop</Link>
-
+          <hr className="border-t border-black/20" />
+          {isAdmin && <Link to="/account">Account</Link>}
+          {/* <button
+            onClick={() => {
+              handleMenuClick();
+              navigate('account');
+            }}>
+            Account{' '}
+          </button> */}
           {user ? (
-            <button onClick={onSignOut} className="pr-2">
+            <button onClick={onSignOut} className="pr-2 text-start">
               Sign Out
             </button>
           ) : (
             <button
+              className="text-start"
               onClick={() => {
                 handleMenuClick();
                 navigate('login');
