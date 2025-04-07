@@ -1,18 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Genre, Products } from '../types/types';
-import { API_URL } from '../constants';
+import { API_URL, GENRE_WHITELIST } from '../constants';
 import { capitalizeFirstLetter } from '../utils/capitalize';
-import { ProductSkeletonLoader, GenreSkeletonLoader } from './SkeletonLoader';
+import { ProductSkeletonLoader } from './SkeletonLoader';
 
 export default function GenreCatalog() {
   const [products, setProducts] = useState<Products[]>([]);
   const [sortBy, setSortBy] = useState<string>('');
-  const [genres, setGenres] = useState<Genre[]>([]);
+  const [genres, setGenres] = useState<Genre[]>(GENRE_WHITELIST);
   const [searchTerm, setSearchTerm] = useState('');
   const [originalProducts, setOriginalProducts] = useState<Products[]>([]);
   const [productsLoading, setProductsLoading] = useState<boolean>(true);
-  const [genresLoading, setGenresLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   const { genreName } = useParams();
@@ -21,15 +20,12 @@ export default function GenreCatalog() {
   useEffect(() => {
     async function getGenres() {
       try {
-        setGenresLoading(true);
         const res = await fetch(`${API_URL}/api/get-genre-ids`);
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const result = await res.json();
         setGenres(result);
       } catch (error) {
         console.error('Failed to fetch genres:', error);
-      } finally {
-        setGenresLoading(false);
       }
     }
     getGenres();
@@ -126,27 +122,22 @@ export default function GenreCatalog() {
       <div className="hidden xl:block w-64 flex-shrink-0">
         <div className="bg-flash-white p-4 h-full rounded-md">
           <h3 className="mb-2">Genres</h3>
-          {genresLoading ? (
-            <GenreSkeletonLoader amount={11} />
-          ) : (
-            <>
-              <Link
-                to="/shop"
-                className="block py-1 relative group w-min whitespace-nowrap">
-                All
-                <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
-              </Link>
-              {genres.map((genre) => (
-                <Link
-                  key={genre.genreId}
-                  to={`/shop/${genre.name}`}
-                  className="block py-1 relative group w-min">
-                  {capitalizeFirstLetter(genre.name)}
-                  <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
-                </Link>
-              ))}
-            </>
-          )}
+
+          <Link
+            to="/shop"
+            className="block py-1 relative group w-min whitespace-nowrap">
+            All
+            <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
+          </Link>
+          {genres.map((genre) => (
+            <Link
+              key={genre.genreId}
+              to={`/shop/${genre.name}`}
+              className="block py-1 relative group w-min">
+              {capitalizeFirstLetter(genre.name)}
+              <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
+            </Link>
+          ))}
         </div>
       </div>
 
