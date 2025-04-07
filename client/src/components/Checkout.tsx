@@ -55,8 +55,9 @@ export function Checkout() {
       {errorMessage && (
         <div className="text-red-500 text-center">{errorMessage}</div>
       )}
-      <div className="relative group w-min whitespace-nowrap mb-4">
-        <Link to="/cart">
+      <div className="pb-4 flex justify-between w-full">
+        <h1>Checkout</h1>
+        <Link to="/cart" className="group relative">
           Back to Cart
           <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
         </Link>
@@ -64,9 +65,6 @@ export function Checkout() {
 
       <div className="flex flex-col lg:flex-row justify-between items-center lg:items-start gap-4">
         <div className="max-w-[620px] w-full flex flex-col gap-2">
-          <div className="w-full flex justify-between">
-            <h1>Checkout</h1>
-          </div>
           {visibleItems.map((item: any) => (
             <div className="flex" key={item.itemsId}>
               <img
@@ -77,6 +75,7 @@ export function Checkout() {
               <div className="flex flex-col justify-around px-4">
                 <h3>{`${item.artist} - ${item.albumName}`}</h3>
                 <h3>{`$${item.price}`}</h3>
+                <h3 className="invisible h-4">{`$${item.price}`}</h3>
               </div>
             </div>
           ))}
@@ -87,28 +86,28 @@ export function Checkout() {
             <button onClick={() => setShowAllItems(false)}>View Less</button>
           )}
         </div>
-        <div className="max-w-[620px] w-full flex flex-col">
-          <div className="border max-w-[620px] w-full flex-col gap-1 border-black h-min p-4 rounded-md">
-            <h3>Order Summary</h3>
-            <div className="flex justify-between">
-              <h3>Subtotal ({`${cartItems.length} ${items}`})</h3>
-              <h3>{`$${subtotal}`}</h3>
-            </div>
-            <div className="flex justify-between">
-              <h3>Taxes</h3>
-              <h3>{`$${salesTax}`}</h3>
-            </div>
-            <hr className="border-black" />
-            <div className="flex justify-between">
-              <h3>Total</h3>
-              <h3>{`$${totalPrice}`}</h3>
-            </div>
+        <div className="border flex flex-col gap-1 border-black max-w-[400px] w-full h-min p-4 rounded-md">
+          <h3>Order Summary</h3>
+          <div className="flex justify-between">
+            <h3>Subtotal ({`${cartItems.length} ${items}`})</h3>
+            <h3>{`$${subtotal}`}</h3>
           </div>
-          <button
-            onClick={handleCheckoutClick}
-            className="mt-4 px-4 py-2 border border-black rounded-md">
-            Proceed to Payment
-          </button>
+          <div className="flex justify-between">
+            <h3>Taxes</h3>
+            <h3>{`$${salesTax}`}</h3>
+          </div>
+          <hr className="border-black" />
+          <div className="flex justify-between">
+            <h3>Total</h3>
+            <h3>{`$${totalPrice}`}</h3>
+          </div>
+          <div className="flex justify-end">
+            <button
+              onClick={handleCheckoutClick}
+              className="mt-4 px-4 py-2 border border-black rounded-md">
+              Proceed to Payment
+            </button>
+          </div>
         </div>
       </div>
     </div>

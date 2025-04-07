@@ -24,7 +24,7 @@ export function ShoppingCart() {
       <div className="flex justify-between">
         {!noItems && (
           <div className="pb-4 flex justify-between w-full">
-            <h1>Your Cart</h1>
+            <h1>Cart</h1>
             <Link to="/shop" className="group relative">
               Continue shopping
               <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
@@ -46,10 +46,10 @@ export function ShoppingCart() {
           </div>
         )}
       </div>
-      <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
+      <div className="flex flex-col lg:flex-row justify-between gap-4">
         <div className="max-w-[420px] lg:max-w-full">
           {visibleItems.map((item) => (
-            <div className="flex pb-4" key={item.itemsId}>
+            <div className="flex" key={item.itemsId}>
               <div>
                 <img
                   src={item.images?.[0]}
@@ -86,7 +86,7 @@ export function ShoppingCart() {
         </div>
 
         {!noItems && (
-          <div className="border flex flex-col gap-1 border-black max-w-[420px] lg:max-w-[400px] w-full h-min p-4 rounded-md">
+          <div className="border flex flex-col gap-1 border-black max-w-[400px] w-full h-min p-4 rounded-md">
             <h3>Order Summary</h3>
             <div className="flex justify-between">
               <h3>Subtotal ({`${cartItems.length} ${items}`}) </h3>
@@ -104,7 +104,7 @@ export function ShoppingCart() {
             <div className="flex justify-end">
               <button
                 onClick={() => navigate('/checkout')}
-                className="w-min whitespace-nowrap text-center px-4 py-[6px] border-2 border-black rounded-md hover:text-snow bg-emerald">
+                className="mt-4 px-4 py-2 border border-black rounded-md">
                 Checkout
               </button>
             </div>

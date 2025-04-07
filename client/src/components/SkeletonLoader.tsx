@@ -28,11 +28,12 @@ interface GenreSkeletonLoaderProps {
 export const GenreSkeletonLoader: React.FC<GenreSkeletonLoaderProps> = ({
   amount = 11,
 }) => (
-  <div>
+  <div className="flex flex-col gap-3 pt-1">
     {Array.from({ length: amount }).map((_, index) => (
       <div
         key={index}
-        className="h-4 bg-gray-300 rounded w-1/2 mb-3 animate-pulse"></div>
+        className="h-5 bg-gray-300 rounded w-1/2 animate-pulse"
+      />
     ))}
   </div>
 );
@@ -43,7 +44,7 @@ export const FeaturedProductSkeletonLoader: React.FC<
   FeaturedProductSkeletonLoaderProps
 > = () => (
   <div className="w-full flex flex-col lg:flex-row bg-flash-white p-4 rounded-lg animate-pulse">
-    <div className="w-full  order-1 lg:order-2 aspect-[14/5] lg:aspect-[16/9] bg-gray-300 rounded-md"></div>
+    <div className="w-full order-1 lg:order-2 aspect-[14/5] lg:aspect-[16/9] bg-gray-300 rounded-lg"></div>
     <div className="w-full flex flex-col mx-auto items-center lg:items-start justify-center gap-6 p-4 order-2 lg:order-1">
       <div className="h-6 bg-gray-300 rounded w-1/2 md:w-1/4"></div>
       <div className="h-6 bg-gray-300 rounded w-2/3 md:w-1/2"></div>

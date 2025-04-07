@@ -39,7 +39,7 @@ export function Home() {
           <img
             src={product?.images?.[0]}
             alt={`${product?.albumName} by ${product?.artist}`}
-            className="w-full lg:w-2/3 order-1 lg:order-2 aspect-[14/5] lg:aspect-[16/9] object-cover"
+            className="w-full lg:w-2/3 order-1 lg:order-2 aspect-[14/5] lg:aspect-[16/9] object-cover rounded-lg"
           />
           <div className="w-full flex flex-col mx-auto items-center lg:items-start justify-center gap-4 p-4 order-2 lg:order-1">
             <h3 className="">Featured Listing</h3>
