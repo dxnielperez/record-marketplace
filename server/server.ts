@@ -71,7 +71,7 @@ app.use(express.static(uploadsStaticDir));
 // eslint-disable-next-line new-cap
 const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY ?? '');
 
-const orderData = new Map(); // Temporary in-memory storage
+const orderData = new Map();
 
 app.post('/api/create-checkout-session', async (req, res) => {
   const { cartItems } = req.body;
@@ -96,7 +96,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
       mode: 'payment',
       success_url: `${process.env.YOUR_DOMAIN}/confirmation?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.YOUR_DOMAIN}/checkout`,
-      shipping_address_collection: { allowed_countries: ['US', 'CA'] }, // Confirm this is present
+      shipping_address_collection: { allowed_countries: ['US', 'CA'] },
     });
 
     orderData.set(session.id, { cartItems });
@@ -129,10 +129,8 @@ app.get('/api/confirm-order', async (req, res) => {
         const salesTax = Number((Number(subtotal) * 0.0725).toFixed(2));
         const totalPrice = (Number(subtotal) + salesTax).toFixed(2);
 
-        // Start a transaction
         await db.query('BEGIN');
 
-        // Delete purchased items from Records
         for (const item of purchasedItems) {
           const deleteSql = `
             DELETE FROM "Records"
@@ -145,18 +143,16 @@ app.get('/api/confirm-order', async (req, res) => {
             throw new Error(`Record ${item.recordId} not found`);
           }
 
-          // Optionally record the transaction
           const transactionSql = `
             INSERT INTO "Transactions" ("buyerId", "recordId", "totalPrice", "transactionDate")
             VALUES ($1, $2, $3, NOW())
             RETURNING *
           `;
-          const buyerId = item.userId || null; // Adjust if you can get buyerId from session
+          const buyerId = item.userId || null;
           const transactionParams = [buyerId, item.recordId, item.price];
           await db.query(transactionSql, transactionParams);
         }
 
-        // Commit the transaction
         await db.query('COMMIT');
 
         res.json({
@@ -227,13 +223,13 @@ app.post('/api/sign-in', async (req, res, next) => {
     if (!user) {
       throw new ClientError(401, `User: ${username} does not exist`);
     }
-    const { userId, hashedPassword, isAdmin } = user; // Include isAdmin
+    const { userId, hashedPassword, isAdmin } = user;
     if (!(await argon2.verify(hashedPassword, password))) {
       throw new ClientError(401, 'invalid login');
     }
-    const payload = { userId, username, isAdmin }; // Include isAdmin in payload
+    const payload = { userId, username, isAdmin };
     const token = jwt.sign(payload, hashKey);
-    res.json({ token, user: payload }); // payload now has isAdmin
+    res.json({ token, user: payload });
   } catch (error) {
     next(error);
   }
@@ -242,7 +238,7 @@ app.post('/api/sign-in', async (req, res, next) => {
 app.post('/api/sign-in-guest', async (req, res, next) => {
   try {
     const username = 'guest_' + Math.floor(Math.random() * 100000);
-    const password = 'guest_password';
+    const password = 'password';
     const hashedPassword = await argon2.hash(password);
     const sql = `
     insert into "Users" ("username", "hashedPassword")
@@ -329,13 +325,12 @@ app.post(
           const publicUrl = data.publicUrl;
 
           const imageParams = [publicUrl, listing.recordId];
-          await db.query(imageSql, imageParams); // Removed unused imageResult
+          await db.query(imageSql, imageParams);
         }
       }
 
       res.status(201).json(listing);
     } catch (error: unknown) {
-      // Changed to unknown
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       res.status(500).json({
