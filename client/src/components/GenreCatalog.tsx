@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Genre, Products } from '../types/types';
 import { API_URL } from '../constants';
 import { capitalizeFirstLetter } from '../utils/capitalize';
+import { ProductSkeletonLoader, GenreSkeletonLoader } from './SkeletonLoader';
 
 export default function GenreCatalog() {
   const [products, setProducts] = useState<Products[]>([]);
@@ -10,22 +11,25 @@ export default function GenreCatalog() {
   const [genres, setGenres] = useState<Genre[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [originalProducts, setOriginalProducts] = useState<Products[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [productsLoading, setProductsLoading] = useState<boolean>(true);
+  const [genresLoading, setGenresLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   const { genreName } = useParams();
   const navigate = useNavigate();
 
-  // Fetch genres
   useEffect(() => {
     async function getGenres() {
       try {
+        setGenresLoading(true);
         const res = await fetch(`${API_URL}/api/get-genre-ids`);
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const result = await res.json();
         setGenres(result);
       } catch (error) {
         console.error('Failed to fetch genres:', error);
+      } finally {
+        setGenresLoading(false);
       }
     }
     getGenres();
@@ -35,7 +39,7 @@ export default function GenreCatalog() {
     async function getProductsByGenre() {
       if (!genreName) return;
 
-      setIsLoading(true);
+      setProductsLoading(true);
       setError(null);
       setProducts([]);
 
@@ -62,13 +66,12 @@ export default function GenreCatalog() {
         setProducts([]);
         setError('Failed to load products. Please try again later.');
       } finally {
-        setIsLoading(false);
+        setProductsLoading(false);
       }
     }
     getProductsByGenre();
   }, [genreName, searchTerm]);
 
-  // Sorting logic
   const handleSort = useCallback(
     (sortOption) => {
       setSortBy(sortOption);
@@ -123,21 +126,27 @@ export default function GenreCatalog() {
       <div className="hidden xl:block w-64 flex-shrink-0">
         <div className="bg-flash-white p-4 h-full rounded-md">
           <h3 className="mb-2">Genres</h3>
-          <Link
-            to="/shop"
-            className="block py-1 relative group w-min whitespace-nowrap">
-            All
-            <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
-          </Link>
-          {genres.map((genre) => (
-            <Link
-              key={genre.genreId}
-              to={`/shop/${genre.name}`}
-              className="block py-1 relative group w-min">
-              {capitalizeFirstLetter(genre.name)}
-              <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
-            </Link>
-          ))}
+          {genresLoading ? (
+            <GenreSkeletonLoader amount={11} />
+          ) : (
+            <>
+              <Link
+                to="/shop"
+                className="block py-1 relative group w-min whitespace-nowrap">
+                All
+                <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
+              </Link>
+              {genres.map((genre) => (
+                <Link
+                  key={genre.genreId}
+                  to={`/shop/${genre.name}`}
+                  className="block py-1 relative group w-min">
+                  {capitalizeFirstLetter(genre.name)}
+                  <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
+                </Link>
+              ))}
+            </>
+          )}
         </div>
       </div>
 
@@ -191,12 +200,13 @@ export default function GenreCatalog() {
         </div>
 
         <div>
-          {isLoading && <p>Loading products...</p>}
-          {error && <p className="text-red-500">{error}</p>}
-          {!isLoading && !error && products.length === 0 && (
+          {productsLoading ? (
+            <ProductSkeletonLoader amount={4} />
+          ) : error ? (
+            <p className="text-red-500">{error}</p>
+          ) : products.length === 0 ? (
             <h2>No records available for this genre</h2>
-          )}
-          {!isLoading && !error && products.length > 0 && (
+          ) : (
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
               {products.map((product) => (
                 <a

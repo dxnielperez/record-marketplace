@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Genre, Products } from '../types/types';
 import { API_URL } from '../constants';
 import { capitalizeFirstLetter } from '../utils/capitalize';
+import { GenreSkeletonLoader, ProductSkeletonLoader } from './SkeletonLoader';
 
 export default function ProductCatalog() {
   const [products, setProducts] = useState<Products[]>([]);
@@ -10,17 +11,22 @@ export default function ProductCatalog() {
   const [sortBy, setSortBy] = useState<string>('');
   const [genres, setGenres] = useState<Genre[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [productsLoading, setProductsLoading] = useState<boolean>(true);
+  const [genresLoading, setGenresLoading] = useState<boolean>(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     async function getGenres() {
       try {
+        setGenresLoading(true);
         const res = await fetch(`${API_URL}/api/get-genre-ids`);
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const result = await res.json();
         setGenres(result);
       } catch (error) {
         console.error(error);
+      } finally {
+        setGenresLoading(false);
       }
     }
     getGenres();
@@ -29,6 +35,7 @@ export default function ProductCatalog() {
   useEffect(() => {
     async function getProducts() {
       try {
+        setProductsLoading(true);
         const query = searchTerm
           ? `?search=${encodeURIComponent(searchTerm)}`
           : '';
@@ -39,6 +46,8 @@ export default function ProductCatalog() {
         setOriginalProducts(result);
       } catch (error) {
         console.error(error);
+      } finally {
+        setProductsLoading(false);
       }
     }
     getProducts();
@@ -49,7 +58,6 @@ export default function ProductCatalog() {
       setSortBy(sortOption);
       setProducts((prevProducts) => {
         const sortedProductsCopy = [...prevProducts];
-
         switch (sortOption) {
           case 'price-asc':
             sortedProductsCopy.sort((a, b) => a.price - b.price);
@@ -101,21 +109,27 @@ export default function ProductCatalog() {
       <div className="hidden xl:block w-64 flex-shrink-0">
         <div className="bg-flash-white p-4 h-full rounded-md">
           <h3 className="mb-2">Genres</h3>
-          <Link
-            to="/shop"
-            className="block py-1 relative group w-min whitespace-nowrap">
-            All
-            <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
-          </Link>
-          {genres.map((genre) => (
-            <Link
-              key={genre.genreId}
-              to={`/shop/${genre.name}`}
-              className="block py-1 relative group w-min">
-              {capitalizeFirstLetter(genre.name)}
-              <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
-            </Link>
-          ))}
+          {genresLoading ? (
+            <GenreSkeletonLoader amount={11} />
+          ) : (
+            <>
+              <Link
+                to="/shop"
+                className="block py-1 relative group w-min whitespace-nowrap">
+                All
+                <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
+              </Link>
+              {genres.map((genre) => (
+                <Link
+                  key={genre.genreId}
+                  to={`/shop/${genre.name}`}
+                  className="block py-1 relative group w-min">
+                  {capitalizeFirstLetter(genre.name)}
+                  <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
+                </Link>
+              ))}
+            </>
+          )}
         </div>
       </div>
 
@@ -125,7 +139,6 @@ export default function ProductCatalog() {
             <h3 className="text-xl font-medium">All</h3>
             <p>{results}</p>
           </div>
-
           <input
             id="search"
             className="w-full xl:w-auto order-first xl:order-none border border-black rounded-md px-4 py-2 h-10"
@@ -166,41 +179,45 @@ export default function ProductCatalog() {
           </div>
         </div>
         <div>
-          {products.length === 0 && <h2>No records available for sale</h2>}
-
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
-            {products.map((product) => (
-              <a
-                key={product.recordId}
-                onClick={() =>
-                  navigate(
-                    `/products/${formatAlbumNameForUrl(product.albumName)}+${
-                      product.recordId
-                    }`
-                  )
-                }
-                className="flex flex-col h-full">
-                <div className="flex-shrink-0">
-                  {product.images && product.images.length > 0 ? (
-                    <img
-                      src={product.images?.[0]}
-                      alt={product.albumName}
-                      className="w-full h-48 object-cover cursor-pointer hover:opacity-75 rounded-md"
-                    />
-                  ) : (
-                    <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                      <span>No Image Available</span>
-                    </div>
-                  )}
-                </div>
-                <div className="flex flex-col flex-grow justify-between p-2">
-                  <h3 className="text-sm line-clamp-2 text-ellipsis">{`${product.albumName}`}</h3>
-                  <h3 className="text-sm line-clamp-2 text-ellipsis text-gray-600">{`${product.artist}`}</h3>
-                  <p className="text-sm text-gray-600">${product.price}</p>
-                </div>
-              </a>
-            ))}
-          </div>
+          {productsLoading ? (
+            <ProductSkeletonLoader amount={12} />
+          ) : products.length === 0 ? (
+            <h2>No records available for sale</h2>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
+              {products.map((product) => (
+                <a
+                  key={product.recordId}
+                  onClick={() =>
+                    navigate(
+                      `/products/${formatAlbumNameForUrl(product.albumName)}+${
+                        product.recordId
+                      }`
+                    )
+                  }
+                  className="flex flex-col h-full">
+                  <div className="flex-shrink-0">
+                    {product.images && product.images.length > 0 ? (
+                      <img
+                        src={product.images?.[0]}
+                        alt={product.albumName}
+                        className="w-full h-48 object-cover cursor-pointer hover:opacity-75 rounded-md"
+                      />
+                    ) : (
+                      <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                        <span>No Image Available</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-col flex-grow justify-between p-2">
+                    <h3 className="text-sm line-clamp-2 text-ellipsis">{`${product.albumName}`}</h3>
+                    <h3 className="text-sm line-clamp-2 text-ellipsis text-gray-600">{`${product.artist}`}</h3>
+                    <p className="text-sm text-gray-600">${product.price}</p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
