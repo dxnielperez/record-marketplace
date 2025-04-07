@@ -68,12 +68,17 @@ export default function Nav() {
           ) : (
             <>
               <div className="dropdown">
-                <Link
-                  to={`${user?.isAdmin ? '/account' : '/login'}`}
-                  className="text-black cursor-pointer">
-                  <IoPersonCircleSharp size={30} />
-                </Link>
-                <div className="dropdown-content right-[-2px]">
+                {user ? (
+                  <span className="text-black cursor-pointer">
+                    <IoPersonCircleSharp size={30} />
+                  </span>
+                ) : (
+                  <Link to="/login" className="text-black cursor-pointer">
+                    <IoPersonCircleSharp size={30} />
+                  </Link>
+                )}
+
+                <div className="dropdown-content right-[-2px]  cursor-pointer">
                   {!user && (
                     <Link to="/login" className="text-black cursor-pointer">
                       Log In
