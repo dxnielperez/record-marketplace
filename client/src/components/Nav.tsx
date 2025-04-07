@@ -78,7 +78,7 @@ export default function Nav() {
                   </Link>
                 )}
 
-                <div className="dropdown-content right-[-2px]  cursor-pointer">
+                <div className="dropdown-content right-[-2px] cursor-pointer">
                   {!user && (
                     <Link to="/login" className="text-black cursor-pointer">
                       Log In

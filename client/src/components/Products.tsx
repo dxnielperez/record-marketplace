@@ -201,7 +201,7 @@ export default function ProductCatalog() {
                       <img
                         src={product.images?.[0]}
                         alt={product.albumName}
-                        className="w-full h-48 object-cover cursor-pointer hover:opacity-75 rounded-md"
+                        className="w-full h-48 object-cover cursor-pointer hover:opacity-90 rounded-md"
                       />
                     ) : (
                       <div className="w-full h-48 bg-gray-200 flex items-center justify-center">

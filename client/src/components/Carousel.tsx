@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../constants';
 import { CarouselSkeletonLoader } from './SkeletonLoader';
+
 interface Item {
   id?: number | string;
   image: string;
