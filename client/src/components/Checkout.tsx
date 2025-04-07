@@ -2,6 +2,7 @@ import { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AppContext } from './AppContext';
 import { loadStripe } from '@stripe/stripe-js';
+import { FaCopy, FaCheck } from 'react-icons/fa'; // Added FaCheck for feedback
 import { API_URL } from '../constants';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
@@ -11,6 +12,7 @@ export function Checkout() {
   const { cartItems } = useContext(AppContext);
   const visibleItems = showAllItems ? cartItems : cartItems.slice(0, 3);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const subtotal = cartItems
     .reduce((acc, item) => acc + Number(item.price), 0)
     .toFixed(2);
@@ -50,6 +52,12 @@ export function Checkout() {
     }
   }
 
+  const handleCopyCardNumber = () => {
+    navigator.clipboard.writeText('4242424242424242');
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       {errorMessage && (
@@ -62,7 +70,6 @@ export function Checkout() {
           <span className="absolute bottom-0 left-0 w-0 h-[2px] bg-black transition-all duration-300 group-hover:w-full" />
         </Link>
       </div>
-
       <div className="flex flex-col lg:flex-row justify-between items-center lg:items-start gap-4">
         <div className="max-w-[620px] w-full flex flex-col gap-2">
           {visibleItems.map((item: any) => (
@@ -109,6 +116,30 @@ export function Checkout() {
             </button>
           </div>
         </div>
+      </div>
+      <div className="flex w-full justify-end pt-4">
+        <p className="w-[400px] p-2 text-xs text-gray-800 bg-gray-100 border border-gray-400 rounded-md leading-relaxed">
+          Note: Stripe is in test mode. To simulate a purchase, use the test
+          card{' '}
+          <span className="relative inline-flex items-center gap-1">
+            <code
+              className="font-mono font-medium text-black bg-gray-200 px-1 py-[2px] rounded cursor-pointer"
+              onClick={handleCopyCardNumber}>
+              4242 4242 4242 4242
+            </code>
+            <button
+              onClick={handleCopyCardNumber}
+              className="text-gray-600 hover:text-black transition-all duration-300 ease-in-out focus:outline-none"
+              title={copied ? 'Copied!' : 'Copy to clipboard'}>
+              {copied ? (
+                <FaCheck className="w-3 h-3 text-emerald" />
+              ) : (
+                <FaCopy className="w-3 h-3" />
+              )}
+            </button>
+          </span>{' '}
+          with any future expiration date and any 3-digit CVC.
+        </p>
       </div>
     </div>
   );
