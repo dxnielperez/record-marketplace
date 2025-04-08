@@ -4,6 +4,8 @@ import { Genre, Products } from '../types/types';
 import { API_URL, GENRE_WHITELIST } from '../constants';
 import { capitalizeFirstLetter } from '../utils/capitalize';
 import { ProductSkeletonLoader } from './SkeletonLoader';
+import { LoadingModal } from './LoadingModal';
+import { useDelayedLoading } from '../utils/useDelayedLoading';
 
 export default function ProductCatalog() {
   const [products, setProducts] = useState<Products[]>([]);
@@ -11,8 +13,15 @@ export default function ProductCatalog() {
   const [sortBy, setSortBy] = useState<string>('');
   const [genres, setGenres] = useState<Genre[]>(GENRE_WHITELIST);
   const [searchTerm, setSearchTerm] = useState('');
-  const [productsLoading, setProductsLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [modalDismissed, setModalDismissed] = useState(false);
+  const showModalBase = useDelayedLoading(loading, 5000);
+  const modalVisible = showModalBase && !modalDismissed;
   const navigate = useNavigate();
+
+  const handleCloseModal = () => {
+    setModalDismissed(true);
+  };
 
   useEffect(() => {
     async function getGenres() {
@@ -20,13 +29,12 @@ export default function ProductCatalog() {
         const res = await fetch(`${API_URL}/api/get-genre-ids`);
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const result = await res.json();
-        setGenres(result); // Update with fetched genres if successful
+        setGenres(result);
       } catch (error) {
         console.error(
           'Failed to fetch genres, using fallback whitelist:',
           error
         );
-        // Keep whitelist as fallback (already set as initial state)
       }
     }
     getGenres();
@@ -35,7 +43,7 @@ export default function ProductCatalog() {
   useEffect(() => {
     async function getProducts() {
       try {
-        setProductsLoading(true);
+        setLoading(true);
         const query = searchTerm
           ? `?search=${encodeURIComponent(searchTerm)}`
           : '';
@@ -47,7 +55,7 @@ export default function ProductCatalog() {
       } catch (error) {
         console.error(error);
       } finally {
-        setProductsLoading(false);
+        setLoading(false);
       }
     }
     getProducts();
@@ -173,7 +181,7 @@ export default function ProductCatalog() {
           </div>
         </div>
         <div>
-          {productsLoading ? (
+          {loading ? (
             <ProductSkeletonLoader amount={12} />
           ) : products.length === 0 ? (
             <h2>No records available for sale</h2>
@@ -214,6 +222,9 @@ export default function ProductCatalog() {
           )}
         </div>
       </div>
+      {modalVisible && (
+        <LoadingModal isVisible={modalVisible} onClose={handleCloseModal} />
+      )}
     </div>
   );
 }

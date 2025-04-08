@@ -4,13 +4,23 @@ import { AppContext } from './AppContext';
 import { Product } from '../types/types';
 import { API_URL } from '../constants';
 import { capitalizeFirstLetter } from '../utils/capitalize';
+import { LoadingModal } from './LoadingModal';
+import { useDelayedLoading } from '../utils/useDelayedLoading';
 
 export function ProductDetails() {
   const [product, setProduct] = useState<Product | undefined>();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [modalDismissed, setModalDismissed] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const showModalBase = useDelayedLoading(loading, 5000);
+  const modalVisible = showModalBase && !modalDismissed;
   const { addToCart, cartItems } = useContext(AppContext);
   const { recordId } = useParams();
   const navigate = useNavigate();
+
+  const handleCloseModal = () => {
+    setModalDismissed(true);
+  };
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -22,6 +32,8 @@ export function ProductDetails() {
         setSelectedImage(result.images?.[0] || null);
       } catch (error) {
         console.error('Failed to load product:', error);
+      } finally {
+        setLoading(false);
       }
     };
     loadProduct();
@@ -129,6 +141,9 @@ export function ProductDetails() {
           </div>
         </div>
       </div>
+      {modalVisible && (
+        <LoadingModal isVisible={modalVisible} onClose={handleCloseModal} />
+      )}
     </div>
   );
 }

@@ -4,6 +4,8 @@ import { Genre, Products } from '../types/types';
 import { API_URL, GENRE_WHITELIST } from '../constants';
 import { capitalizeFirstLetter } from '../utils/capitalize';
 import { ProductSkeletonLoader } from './SkeletonLoader';
+import { LoadingModal } from './LoadingModal';
+import { useDelayedLoading } from '../utils/useDelayedLoading';
 
 export default function GenreCatalog() {
   const [products, setProducts] = useState<Products[]>([]);
@@ -11,11 +13,17 @@ export default function GenreCatalog() {
   const [genres, setGenres] = useState<Genre[]>(GENRE_WHITELIST);
   const [searchTerm, setSearchTerm] = useState('');
   const [originalProducts, setOriginalProducts] = useState<Products[]>([]);
-  const [productsLoading, setProductsLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
+  const [modalDismissed, setModalDismissed] = useState(false);
+  const showModalBase = useDelayedLoading(loading, 5000);
+  const modalVisible = showModalBase && !modalDismissed;
   const { genreName } = useParams();
   const navigate = useNavigate();
+
+  const handleCloseModal = () => {
+    setModalDismissed(true);
+  };
 
   useEffect(() => {
     async function getGenres() {
@@ -35,7 +43,7 @@ export default function GenreCatalog() {
     async function getProductsByGenre() {
       if (!genreName) return;
 
-      setProductsLoading(true);
+      setLoading(true);
       setError(null);
       setProducts([]);
 
@@ -62,7 +70,7 @@ export default function GenreCatalog() {
         setProducts([]);
         setError('Failed to load products. Please try again later.');
       } finally {
-        setProductsLoading(false);
+        setLoading(false);
       }
     }
     getProductsByGenre();
@@ -191,7 +199,7 @@ export default function GenreCatalog() {
         </div>
 
         <div>
-          {productsLoading ? (
+          {loading ? (
             <ProductSkeletonLoader amount={4} />
           ) : error ? (
             <p className="text-red-500">{error}</p>
@@ -239,6 +247,9 @@ export default function GenreCatalog() {
           )}
         </div>
       </div>
+      {modalVisible && (
+        <LoadingModal isVisible={modalVisible} onClose={handleCloseModal} />
+      )}
     </div>
   );
 }
