@@ -13,9 +13,10 @@ export default function ProductCatalog() {
   const [sortBy, setSortBy] = useState<string>('');
   const [genres, setGenres] = useState<Genre[]>(GENRE_WHITELIST);
   const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState<boolean>(true);
+  const [initialLoading, setInitialLoading] = useState<boolean>(true);
+  const [fetching, setFetching] = useState<boolean>(false);
   const [modalDismissed, setModalDismissed] = useState(false);
-  const showModalBase = useDelayedLoading(loading, 5000);
+  const showModalBase = useDelayedLoading(initialLoading || fetching, 5000);
   const modalVisible = showModalBase && !modalDismissed;
   const navigate = useNavigate();
 
@@ -43,7 +44,8 @@ export default function ProductCatalog() {
   useEffect(() => {
     async function getProducts() {
       try {
-        setLoading(true);
+        if (!searchTerm && products.length === 0) setInitialLoading(true);
+        else setFetching(true);
         const query = searchTerm
           ? `?search=${encodeURIComponent(searchTerm)}`
           : '';
@@ -54,12 +56,14 @@ export default function ProductCatalog() {
         setOriginalProducts(result);
       } catch (error) {
         console.error(error);
+        setProducts([]);
       } finally {
-        setLoading(false);
+        setInitialLoading(false);
+        setFetching(false);
       }
     }
     getProducts();
-  }, [searchTerm]);
+  }, [searchTerm, products.length]);
 
   const handleSort = useCallback(
     (sortOption) => {
@@ -181,7 +185,7 @@ export default function ProductCatalog() {
           </div>
         </div>
         <div>
-          {loading ? (
+          {initialLoading ? (
             <ProductSkeletonLoader amount={12} />
           ) : products.length === 0 ? (
             <h2>No records available for sale</h2>

@@ -13,10 +13,11 @@ export default function GenreCatalog() {
   const [genres, setGenres] = useState<Genre[]>(GENRE_WHITELIST);
   const [searchTerm, setSearchTerm] = useState('');
   const [originalProducts, setOriginalProducts] = useState<Products[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [initialLoading, setInitialLoading] = useState<boolean>(true);
+  const [fetching, setFetching] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [modalDismissed, setModalDismissed] = useState(false);
-  const showModalBase = useDelayedLoading(loading, 5000);
+  const showModalBase = useDelayedLoading(initialLoading || fetching, 5000);
   const modalVisible = showModalBase && !modalDismissed;
   const { genreName } = useParams();
   const navigate = useNavigate();
@@ -43,9 +44,9 @@ export default function GenreCatalog() {
     async function getProductsByGenre() {
       if (!genreName) return;
 
-      setLoading(true);
       setError(null);
-      setProducts([]);
+      if (!searchTerm && products.length === 0) setInitialLoading(true);
+      else setFetching(true);
 
       try {
         const query = searchTerm
@@ -62,19 +63,20 @@ export default function GenreCatalog() {
           setOriginalProducts(result);
         } else {
           console.error('Invalid result is not an array:', result);
-          setProducts([]);
           setError('No valid products found for this genre.');
+          setProducts([]);
         }
       } catch (error) {
         console.error('Failed to fetch products:', error);
-        setProducts([]);
         setError('Failed to load products. Please try again later.');
+        setProducts([]);
       } finally {
-        setLoading(false);
+        setInitialLoading(false);
+        setFetching(false);
       }
     }
     getProductsByGenre();
-  }, [genreName, searchTerm]);
+  }, [genreName, searchTerm, products.length]);
 
   const handleSort = useCallback(
     (sortOption) => {
@@ -130,7 +132,6 @@ export default function GenreCatalog() {
       <div className="hidden xl:block w-64 flex-shrink-0">
         <div className="bg-flash-white p-4 h-full rounded-md">
           <h3 className="mb-2">Genres</h3>
-
           <Link
             to="/shop"
             className="block py-1 relative group w-min whitespace-nowrap">
@@ -157,7 +158,6 @@ export default function GenreCatalog() {
             </h3>
             <p>{results}</p>
           </div>
-
           <input
             id="search"
             className="w-full xl:w-auto order-first xl:order-none border border-black rounded-md px-4 py-2 h-10"
@@ -199,7 +199,7 @@ export default function GenreCatalog() {
         </div>
 
         <div>
-          {loading ? (
+          {initialLoading ? (
             <ProductSkeletonLoader amount={4} />
           ) : error ? (
             <p className="text-red-500">{error}</p>
