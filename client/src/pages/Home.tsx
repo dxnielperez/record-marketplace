@@ -1,18 +1,25 @@
+// src/pages/Home.js
 import { useEffect, useState } from 'react';
 import { SideScrollCarousel } from '../components/Carousel';
 import { SlidingBar } from '../components/SlidingBar';
 import { API_URL } from '../constants';
 import { Products } from '../types/types';
 import { FeaturedProductSkeletonLoader } from '../components/SkeletonLoader';
+import { LoadingModal } from '../components/LoadingModal';
+import { useDelayedLoading } from '../utils/useDelayedLoading';
 
 export function Home() {
   const [product, setProduct] = useState<Products>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [modalDismissed, setModalDismissed] = useState(false);
+  const showModalBase = useDelayedLoading(loading, 5000);
+  const modalVisible = showModalBase && !modalDismissed;
 
   useEffect(() => {
     async function getProducts() {
       try {
+        setLoading(true);
         const res = await fetch(`${API_URL}/api/all-products`);
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const result = await res.json();
@@ -25,6 +32,16 @@ export function Home() {
     }
     getProducts();
   }, []);
+
+  useEffect(() => {
+    if (loading) {
+      setModalDismissed(false);
+    }
+  }, [loading]);
+
+  const handleCloseModal = () => {
+    setModalDismissed(true);
+  };
 
   if (error) {
     return <p className="text-center text-red-500">Error: {error}</p>;
@@ -75,6 +92,9 @@ export function Home() {
 
       <SlidingBar />
       <SideScrollCarousel />
+      {modalVisible && (
+        <LoadingModal isVisible={modalVisible} onClose={handleCloseModal} />
+      )}
     </div>
   );
 }
