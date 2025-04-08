@@ -75,3 +75,55 @@ export const CarouselSkeletonLoader: React.FC<CarouselSkeletonLoaderProps> = ({
     ))}
   </div>
 );
+
+export const ProductDetailSkeletonLoader: React.FC = () => (
+  <div className="min-h-screen">
+    <div className="max-w-2xl lg:max-w-5xl mx-auto animate-pulse">
+      {/* Breadcrumb placeholder */}
+      <div className="mb-4 flex items-center gap-2">
+        <div className="h-5 bg-gray-300 rounded w-16"></div>
+        <span></span>
+        <div className="h-5 bg-gray-300 rounded w-24"></div>
+      </div>
+
+      {/* Main content */}
+      <div className="flex flex-col lg:flex-row lg:space-x-8">
+        {/* Left side: image and thumbnails */}
+        <div className="lg:w-1/2">
+          <div className="mb-4">
+            <div className="w-full h-[380px] bg-gray-300 rounded-md"></div>
+          </div>
+          <div className="flex gap-2">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div
+                key={index}
+                className="h-24 w-24 bg-gray-300 rounded-md"></div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right side: product info */}
+        <div className="lg:w-1/2 space-y-4 mt-4 lg:mt-0">
+          <div className="h-6 bg-gray-300 rounded w-3/4"></div>{' '}
+          {/* Album & Artist */}
+          <div className="h-6 bg-gray-300 rounded w-1/4"></div> {/* Price */}
+          <div className="space-y-2">
+            <div className="h-5 bg-gray-300 rounded w-1/2"></div> {/* Genre */}
+            <div className="h-5 bg-gray-300 rounded w-1/3"></div>{' '}
+            {/* Condition */}
+          </div>
+          <div className="h-8 bg-gray-300 rounded w-24"></div>{' '}
+          {/* Add to cart button */}
+          <div>
+            <div className="h-5 bg-gray-300 rounded w-1/6 mb-2"></div>{' '}
+            {/* Description label */}
+            <div className="h-5 bg-gray-300 rounded w-full mb-2"></div>{' '}
+            {/* Description line 1 */}
+            <div className="h-5 bg-gray-300 rounded w-5/6"></div>{' '}
+            {/* Description line 2 */}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
