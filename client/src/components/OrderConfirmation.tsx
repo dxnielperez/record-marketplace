@@ -54,11 +54,13 @@ export function OrderConfirmation() {
           </h1>
 
           <div className="text-center text-gray-600 mb-6">
-            <p>
+            <p className="break-words">
               Order number:{' '}
-              <span className="underline font-medium">{sessionId}</span>
+              <span className="underline font-medium inline-block max-w-full">
+                {sessionId}
+              </span>
             </p>
-            <p className="mt-1">
+            <p className="mt-1 break-words">
               Confirmation sent to:{' '}
               <span className="font-medium">{order.customerEmail}</span>
             </p>
