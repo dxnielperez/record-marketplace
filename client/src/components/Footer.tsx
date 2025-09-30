@@ -9,7 +9,7 @@ export function Footer() {
           Github
         </a>
         <a
-          href="https://linkedin.com/in/daniel-f-perez/"
+          href="https://www.linkedin.com/in/daniel-perez-f/"
           target="_blank"
           rel="noopener noreferrer">
           LinkedIn
