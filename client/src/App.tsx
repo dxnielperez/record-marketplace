@@ -17,10 +17,12 @@ import { OrderConfirmationPage } from './pages/OrderConfirmationPage';
 import { GenreCatalogPage } from './pages/GenreCatalogPage';
 import { AppProvider } from './components/AppProvider';
 import About from './pages/About';
+import { Analytics } from '@vercel/analytics/next';
 
 export default function App() {
   return (
     <AppProvider>
+      <Analytics />
       <div className="w-full max-w-[2000px] min-w-[330px] mx-auto px-4 bg-snow">
         <Nav />
         <Routes>
